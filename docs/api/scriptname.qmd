@@ -1,6 +1,0 @@
-# scriptname { #turtle_widget.modulename.scriptname }
-
-```python
-turtle_widget.modulename.scriptname()
-```
-

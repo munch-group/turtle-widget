@@ -1,58 +1,67 @@
+# turtle-widget
 
-# Template repository for a library project
+An animated, [`turtle`](https://docs.python.org/3/library/turtle.html)-compatible drawing
+widget for Jupyter notebooks, built on [anywidget](https://anywidget.dev).
 
-## Initial set up
+You write ordinary turtle code in Python; the widget records each command and replays it as
+a smooth canvas animation right below the cell. Because it is built on `anywidget`, it
+behaves identically in **VS Code**, **JupyterLab**, **Notebook 7**, and **Colab**, and works
+offline. Optionally it shows the cell source beside the canvas and highlights the active
+line in sync with the animation (`show_code=True`).
 
-```bash
-pixi run init
-```
-
-## Get updates to upstream fork
-
-Add upstream if not already added
-
-```bash
-git remote add upstream https://github.com/munch-group/turtle-widget.git
-```
-
-Fetch upstream changes
+## Installation
 
 ```bash
-git fetch upstream
+# pixi
+pixi workspace channel add munch-group
+pixi add turtle-widget
+
+# conda
+conda install -c munch-group turtle-widget
+
+# pip
+pip install turtle-widget
 ```
 
-Either rebase your changes on top of upstream (cleaner history)
+## Quick start
+
+```python
+from turtle_widget import Turtle
+
+t = Turtle()
+t.speed(6)
+for _ in range(4):     # a square
+    t.forward(120)
+    t.left(90)
+```
+
+The widget appears automatically at the end of the cell — no need to put `t` on the last
+line. You can also display it explicitly with `t.show()`, or evaluate `t`. Pass
+`autoshow=False` to build a turtle without displaying it (useful for headless geometry
+checks).
+
+Most of the common `turtle` API is supported: `forward`/`backward`, `left`/`right`,
+`goto`/`setheading`/`home`, `circle`, pen control (`penup`/`pendown`/`pensize`), colours
+and fills (`pencolor`/`fillcolor`/`begin_fill`/`end_fill`), and markers/text
+(`dot`/`stamp`/`write`). Note that the pen-width method is `pensize()` (the name `width` is
+the canvas-size trait).
+
+## Documentation
+
+Full docs and a guided showcase live at
+[munch-group.org/turtle-widget](https://munch-group.org/turtle-widget).
+
+## Development
+
+This repo is managed with [pixi](https://pixi.sh):
 
 ```bash
-git rebase upstream/main
+pixi run install-dev   # editable install into the pixi environment
+pixi run test          # run the pytest suite
+pixi run docs          # execute the documentation notebooks
+pixi run api           # build the quartodoc API reference
 ```
 
-Or, merge upstream into your fork (preserves history)
+## License
 
-```bash
-git merge upstream/main
-```
-
-If you want to see what's changed upstream before applying:
-
-```bash
-git log HEAD..upstream/main
-```
-
-See the actual diff
-
-```bash
-git diff HEAD...upstream/main
-```
-
-Then push your updated fork:
-
-```bash
-git push origin main
-```
-
-If you rebased and need to force push
-    
-```bash
-git push origin main --force-with-lease
-```
+MIT

@@ -57,7 +57,7 @@ website:
         - pages/overview.ipynb
         - section: "Examples"
           contents:
-            - pages/example.ipynb                   
+            - pages/demo.ipynb                   
 
 lightbox: true
 
@@ -76,7 +76,7 @@ format:
       theme: neutral 
 
 quartodoc:
-  package: turtle-widget
+  package: turtle_widget
   style: pkgdown
   dir: api
   render_interlinks: true
@@ -89,15 +89,8 @@ quartodoc:
   css: "api/_styles-quartodoc.css"
 
   sections:
-    - title: Some section
-      package: turtle_widget.modulename
+    - title: Widget
       desc: |
-        Some description...
+        The animated turtle-graphics drawing widget.
       contents:
-        - functionname
-    - title: Some other section
-      package: turtle_widget.modulename
-      desc: |
-        Some description...
-      contents:
-        - scriptname
+        - Turtle

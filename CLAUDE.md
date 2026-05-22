@@ -16,10 +16,10 @@ The design priority is **cross-platform robustness**: it must behave identically
 Code notebooks, JupyterLab, Notebook 7, and Colab, and must work offline.
 
 The repo was scaffolded from the `munch-group` Python-library template (pixi environment,
-quartodoc docs, conda/PyPI release automation). That skeleton is **still being converted**
-to the turtle widget — see *Migration status* below.
+quartodoc docs, conda/PyPI release automation), now fully converted to the turtle widget —
+see *Template conversion* below.
 
-## Canonical layout (target)
+## Package layout
 
 The widget is the `turtle_widget` package under `src/`:
 
@@ -27,8 +27,8 @@ The widget is the `turtle_widget` package under `src/`:
   embedded `_ESM`/`_CSS` frontend strings. (`_esm`/`_css` on the class just alias those
   module-level strings, which is why the JS check below reads `m._ESM` off the module.)
 - `src/turtle_widget/__init__.py` — re-exports the public API (`from .widget import Turtle`).
-- `turtle_demo.ipynb` — showcase + tests; each cell draws something, the last cell is a
-  headless self-test.
+- `docs/pages/demo.ipynb` — showcase + tests (formerly `turtle_demo.ipynb`); each cell
+  draws something, the last cell is a headless self-test.
 - `test/` — pytest suite (`test/test_*.py`).
 - `docs/` — Quarto + quartodoc site (`docs/pages/*.ipynb` prose, `docs/api/*.qmd` API ref).
 - `pyproject.toml` — packaging metadata **and** the pixi workspace (deps + task runner).
@@ -36,26 +36,28 @@ The widget is the `turtle_widget` package under `src/`:
 - `scripts/` — version-bump / docs-build / release helpers invoked by the pixi tasks.
 - `CLAUDE.md` — this file.
 
-### Migration status (read this)
+### Template conversion: complete
 
-The turtle code currently lives in **`turtle_anywidget.py` at the repo root** (untracked),
-and `turtle_demo.ipynb` imports `from turtle_anywidget import Turtle`. It has **not yet
-moved into the package**. Until it does, read `turtle_anywidget` for `turtle_widget.widget`
-in the commands below.
+The `munch-group` template has been fully converted to the turtle widget:
 
-Outstanding template-stub conversions:
+- The widget lives in `src/turtle_widget/widget.py`; `__init__.py` re-exports `Turtle`.
+- `pyproject.toml` has real metadata, runtime deps (`anywidget`, `traitlets`, `ipython`),
+  no stray console-script, and `[tool.pytest.ini_options]` with `testpaths = ["test"]`
+  (this anchor matters — without it pytest walks above the repo and can hang on synced
+  home dirs).
+- Tests are in `test/` (`test_widget.py` + a `conftest.py` that puts `src/` on `sys.path`,
+  so `pytest test/` runs without an install). `pixi run test` runs `pytest test/`.
+- The docs document `Turtle`: `docs/pages/overview.ipynb` (intro + runnable example),
+  `docs/pages/demo.ipynb` (showcase, wired into `docs/_quarto.yml`), and the
+  quartodoc-generated `docs/api/Turtle.qmd`.
 
-- Move `turtle_anywidget.py` → `src/turtle_widget/widget.py`; have `__init__.py` do
-  `from .widget import Turtle`; update the demo to `from turtle_widget import Turtle`.
-- Replace `src/turtle_widget/modulename.py` (template `functionname`/`scriptname`) and the
-  placeholder `test/test_modulename.py`.
-- `pyproject.toml`: fill in real metadata (`description`, `authors`), add the runtime deps
-  (`anywidget`, `traitlets`, `ipython`) to the empty `[project.dependencies]`, and drop/fix
-  the `[project.scripts]` `turtle-widget` console-script (this is a library, not a CLI).
-- Point `pixi run test` at the real suite — it currently targets `docs/pages/tutorial/*.ipynb`
-  and `tests/pytest/`, neither of which exists; the real tests live in `test/`.
-- Convert the docs (`docs/pages/overview.ipynb`, `docs/api/*.qmd`) and `README.md` away from
-  the template `functionname`/`scriptname` placeholders to document `Turtle`.
+Run `pixi run install-dev` once after a fresh clone so `import turtle_widget` resolves for
+the notebooks and the docs build (the editable `[tool.pixi.pypi-dependencies]` entry in
+`pyproject.toml` is left commented out; tests don't need it thanks to the conftest).
+
+The public `Turtle` methods carry numpy-style docstrings, so `pixi run api` (quartodoc)
+renders a full method reference at `docs/api/Turtle.qmd`. Keep this up: give any new command
+a numpy-style docstring (summary + Parameters/Returns) so it appears there too.
 
 ## Environment & commands
 
@@ -65,8 +67,9 @@ deps: `anywidget` (0.11.x), `nodejs` (20–22), `jupyter`/`ipython`, `quarto`, `
 `pytest`. `pixi run init` is the one-time template bootstrap (already run — don't re-run).
 
 - Dev install: `pixi run install-dev` (editable, no build isolation).
-- Run the showcase: open `turtle_demo.ipynb` in VS Code / Jupyter and run all; or
-  `pixi run notebook turtle_demo.ipynb` to execute it headless, in place.
+- Run the showcase: `pixi run install-dev` once, then open `docs/pages/demo.ipynb` in VS
+  Code / Jupyter and run all; or `pixi run notebook docs/pages/demo.ipynb` to execute it
+  headless, in place.
 - Run tests: `pixi run pytest test/` (the named `pixi run test` task is mis-pointed — see
   the migration note); or run the demo's final self-test cell.
 - Build docs: `pixi run api` (quartodoc API pages), then `pixi run docs` (execute the doc
@@ -78,7 +81,6 @@ deps: `anywidget` (0.11.x), `nodejs` (20–22), `jupyter`/`ipython`, `quarto`, `
   python -c "from turtle_widget import widget as m; open('/tmp/e.mjs','w').write(m._ESM)"
   node --check /tmp/e.mjs
   ```
-  (Pre-migration: `python -c "import turtle_anywidget as m; open('/tmp/e.mjs','w').write(m._ESM)"`.)
 
 ## Architecture (read before editing)
 
@@ -181,7 +183,8 @@ Three paths, all idempotent via the `_rendered` flag and `_unhook()`:
 
 ## Adding a new turtle command (recipe)
 
-1. Add a method decorated with `@_records`; update internal turtle state.
+1. Add a method decorated with `@_records` and give it a numpy-style docstring; update
+   internal turtle state.
 2. `self._emit(op="...", ...)` with **absolute** coordinates. Do not duplicate `line`/
    `speed` — `_emit` adds them.
 3. If the command should call another recorded method internally, factor the logic into a
@@ -197,4 +200,4 @@ Three paths, all idempotent via the `_rendered` flag and `_unhook()`:
   assert `pos()/heading()`, and `json.dumps(t._events)` to confirm serializability. These
   assertions belong in `test/` (port the demo's final self-test cell there).
 - Validate the frontend parses with `node --check` on the extracted `_ESM`.
-- Visual smoke test: run `turtle_demo.ipynb`.
+- Visual smoke test: run `docs/pages/demo.ipynb`.

@@ -1,19 +1,10 @@
 # Function reference {.doc .doc-index}
 
-## Some section
+## Widget
 
-Some description...
-
-
-| | |
-| --- | --- |
-| [functionname](functionname.qmd#turtle_widget.modulename.functionname) | The sum of two numbers. |
-
-## Some other section
-
-Some description...
+The animated turtle-graphics drawing widget.
 
 
 | | |
 | --- | --- |
-| [scriptname](scriptname.qmd#turtle_widget.modulename.scriptname) |  |
+| [Turtle](Turtle.qmd#turtle_widget.Turtle) | An animated, turtle-compatible drawing widget for Jupyter notebooks. |

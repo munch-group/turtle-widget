@@ -3,10 +3,7 @@ website:
   - contents:
     - api/index.qmd
     - contents:
-      - api/functionname.qmd
-      section: Some section
-    - contents:
-      - api/scriptname.qmd
-      section: Some other section
+      - api/Turtle.qmd
+      section: Widget
     id: api
   - id: dummy-sidebar

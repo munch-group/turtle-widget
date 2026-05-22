@@ -5,9 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "turtle-widget"
 version = "0.1.16"
-description = "Project description"
+description = "An animated, turtle-compatible drawing widget for Jupyter notebooks"
 authors = [
-    {name = "Your Name", email = "your@email.com"}
+    {name = "Kasper Munch", email = "kaspermunch@birc.au.dk"}
 ]
 readme = "README.md"
 license = {text = "MIT"}
@@ -17,16 +17,15 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-
+    "anywidget>=0.11,<0.12",
+    "traitlets>=5.0",
+    "ipython",
 ]
 
 [project.urls]
 Homepage = "https://github.com/munch-group/turtle-widget"
 Repository = "https://github.com/munch-group/turtle-widget"
 Documentation = "https://munch-group.org/turtle-widget"
-
-[project.scripts]
-turtle-widget = "turtle_widget:turtle_widget"
 
 [tool.setuptools]
 include-package-data = true
@@ -92,8 +91,8 @@ cmd = "git clean -id"
 description = "Removes untracked files and directories but respects your .gitignores"
 
 [tool.pixi.tasks.test]
-cmd = "mkdir -p tests/pytest/tmp && jupyter nbconvert docs/pages/tutorial/*.ipynb --to script --TagRemovePreprocessor.enabled=True --TagRemovePreprocessor.remove_cell_tags='{\"skip-execution\"}' --output-dir tests/pytest/tmp && pytest tests/pytest/"
-description = "Run tests"
+cmd = "pytest test/"
+description = "Run the pytest suite"
 
 [tool.pixi.tasks.commit]
 cmd = "./scripts/git-commit.sh"
@@ -122,3 +121,6 @@ cmd = "./scripts/bump_version.py --{{ kind }} {{ flag }} && git add pyproject.to
 depends-on = ["test", "api", "docs", "commit"]
 description = "Bump version patch and push tag to build/upload conda/pypi packages"
 
+
+[tool.pytest.ini_options]
+testpaths = ["test"]

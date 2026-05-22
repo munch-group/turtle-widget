@@ -438,6 +438,30 @@ _SPEEDS = {"fastest": 0, "fast": 10, "normal": 6, "slow": 3, "slowest": 1}
 # --------------------------------------------------------------------------- #
 
 class Turtle(anywidget.AnyWidget):
+    """An animated, turtle-compatible drawing widget for Jupyter notebooks.
+
+    Turtle commands are recorded in Python as a stream of events and replayed as a
+    canvas animation below the cell. The widget displays itself automatically at the
+    end of the cell; you can also call ``show()`` or evaluate the turtle to display it.
+
+    Parameters
+    ----------
+    width : int, optional
+        Canvas width in pixels. Default 500.
+    height : int, optional
+        Canvas height in pixels. Default 500.
+    show_code : bool, optional
+        If True, show the cell source beside the canvas and highlight the active line
+        in sync with the animation. Default False.
+    code : str, optional
+        Source to display instead of the captured cell source.
+    autoshow : bool, optional
+        If True (default), display the widget automatically at the end of the cell.
+        Set False for headless use such as tests.
+    bg : str, optional
+        Canvas background colour. Default ``"white"``.
+    """
+
     _esm = _ESM
     _css = _CSS
 
@@ -499,6 +523,18 @@ class Turtle(anywidget.AnyWidget):
     # -- movement ----------------------------------------------------------- #
     @_records
     def forward(self, distance):
+        """Move the turtle forward by ``distance``, drawing if the pen is down.
+
+        Parameters
+        ----------
+        distance : float
+            Distance to move along the current heading.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
         rad = math.radians(self._heading)
         self._goto(self._x + distance * math.cos(rad),
                    self._y + distance * math.sin(rad))
@@ -507,6 +543,18 @@ class Turtle(anywidget.AnyWidget):
 
     @_records
     def backward(self, distance):
+        """Move the turtle backward by ``distance`` (opposite its heading).
+
+        Parameters
+        ----------
+        distance : float
+            Distance to move opposite the current heading.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
         rad = math.radians(self._heading)
         self._goto(self._x - distance * math.cos(rad),
                    self._y - distance * math.sin(rad))
@@ -515,6 +563,21 @@ class Turtle(anywidget.AnyWidget):
 
     @_records
     def right(self, angle):
+        """Turn the turtle clockwise by ``angle`` degrees.
+
+        The animation spins exactly ``angle`` degrees, so multi-turn values such as
+        ``right(720)`` are preserved as two full rotations.
+
+        Parameters
+        ----------
+        angle : float
+            Degrees to turn clockwise.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
         frm = self._heading
         to = frm - angle                      # spin exactly `angle` (sign matters)
         self._emit(op="turn", x=self._x, y=self._y, **{"from": frm, "to": to})
@@ -524,6 +587,21 @@ class Turtle(anywidget.AnyWidget):
 
     @_records
     def left(self, angle):
+        """Turn the turtle counter-clockwise by ``angle`` degrees.
+
+        The animation spins exactly ``angle`` degrees, so multi-turn values such as
+        ``left(720)`` are preserved as two full rotations.
+
+        Parameters
+        ----------
+        angle : float
+            Degrees to turn counter-clockwise.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
         frm = self._heading
         to = frm + angle
         self._emit(op="turn", x=self._x, y=self._y, **{"from": frm, "to": to})
@@ -533,6 +611,21 @@ class Turtle(anywidget.AnyWidget):
 
     @_records
     def setheading(self, to_angle):
+        """Turn the turtle to face an absolute heading.
+
+        Rotates along the shortest path, so turning from 0 to 270 spins -90 degrees
+        rather than +270. Headings are in degrees with 0 = east, counter-clockwise positive.
+
+        Parameters
+        ----------
+        to_angle : float
+            Absolute heading in degrees.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
         self._turn_to(float(to_angle))
         return self
     seth = setheading
@@ -546,6 +639,20 @@ class Turtle(anywidget.AnyWidget):
 
     @_records
     def goto(self, x, y=None):
+        """Move the turtle to an absolute position, drawing if the pen is down.
+
+        Parameters
+        ----------
+        x : float or tuple of float
+            Target x-coordinate, or an ``(x, y)`` pair (then ``y`` must be omitted).
+        y : float, optional
+            Target y-coordinate.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
         if y is None:
             x, y = x
         self._goto(float(x), float(y))
@@ -554,22 +661,73 @@ class Turtle(anywidget.AnyWidget):
 
     @_records
     def setx(self, x):
+        """Set the x-coordinate, keeping y unchanged.
+
+        Parameters
+        ----------
+        x : float
+            New x-coordinate.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
         self._goto(float(x), self._y)
         return self
 
     @_records
     def sety(self, y):
+        """Set the y-coordinate, keeping x unchanged.
+
+        Parameters
+        ----------
+        y : float
+            New y-coordinate.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
         self._goto(self._x, float(y))
         return self
 
     @_records
     def home(self):
+        """Move the turtle to the origin ``(0, 0)`` and set its heading to 0.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
         self._goto(0.0, 0.0)
         self._turn_to(0.0)
         return self
 
     @_records
     def circle(self, radius, extent=None, steps=None):
+        """Draw a circle or arc, approximated by a series of straight chords.
+
+        A positive ``radius`` curves to the left of the turtle, a negative ``radius``
+        to the right.
+
+        Parameters
+        ----------
+        radius : float
+            Radius of the circle. Positive curves left, negative curves right.
+        extent : float, optional
+            Angle of the arc to draw, in degrees. Defaults to 360 (a full circle).
+        steps : int, optional
+            Number of chords approximating the arc. Defaults to a value scaled to the
+            radius and extent.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
         if extent is None:
             extent = 360.0
         if steps is None:
@@ -594,6 +752,13 @@ class Turtle(anywidget.AnyWidget):
     # -- pen ---------------------------------------------------------------- #
     @_records
     def penup(self):
+        """Lift the pen so subsequent moves do not draw.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
         self._pendown = False
         self._emit(op="pen", down=False)
         return self
@@ -601,6 +766,13 @@ class Turtle(anywidget.AnyWidget):
 
     @_records
     def pendown(self):
+        """Lower the pen so subsequent moves draw.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
         self._pendown = True
         self._emit(op="pen", down=True)
         return self
@@ -608,6 +780,23 @@ class Turtle(anywidget.AnyWidget):
 
     @_records
     def pensize(self, width=None):
+        """Get or set the pen width.
+
+        Parameters
+        ----------
+        width : float, optional
+            New pen width in pixels. If omitted, the current width is returned.
+
+        Returns
+        -------
+        Turtle or float
+            This turtle when setting (to allow chaining), or the current pen width when
+            called with no argument.
+
+        Notes
+        -----
+        Named ``pensize`` (alias ``width_``) because ``width`` is the canvas-size trait.
+        """
         if width is None:
             return self._pensize
         self._pensize = width
@@ -617,6 +806,21 @@ class Turtle(anywidget.AnyWidget):
 
     @_records
     def pencolor(self, *args):
+        """Get or set the pen (outline) colour.
+
+        Parameters
+        ----------
+        *args
+            A CSS colour name or hex string (``"red"``, ``"#ff8800"``), or an ``(r, g, b)``
+            triple given as three arguments or one tuple. Float components in ``[0, 1]``
+            use the 0-1 scale, otherwise 0-255.
+
+        Returns
+        -------
+        Turtle or str
+            This turtle when setting (to allow chaining), or the current pen colour when
+            called with no arguments.
+        """
         if not args:
             return self._pencolor
         col = _as_color(args[0] if len(args) == 1 else tuple(args))
@@ -626,6 +830,20 @@ class Turtle(anywidget.AnyWidget):
 
     @_records
     def fillcolor(self, *args):
+        """Get or set the fill colour used by ``begin_fill`` / ``end_fill``.
+
+        Parameters
+        ----------
+        *args
+            A CSS colour name or hex string, or an ``(r, g, b)`` triple; see ``pencolor``
+            for the accepted forms.
+
+        Returns
+        -------
+        Turtle or str
+            This turtle when setting (to allow chaining), or the current fill colour when
+            called with no arguments.
+        """
         if not args:
             return self._fillcolor
         self._fillcolor = _as_color(args[0] if len(args) == 1 else tuple(args))
@@ -633,6 +851,21 @@ class Turtle(anywidget.AnyWidget):
 
     @_records
     def color(self, *args):
+        """Get or set the pen colour, the fill colour, or both at once.
+
+        Parameters
+        ----------
+        *args
+            With no arguments, returns ``(pencolor, fillcolor)``. With one argument, sets
+            both pen and fill to that colour. With two, sets the pen and fill colours
+            respectively. Each colour may be a CSS name/hex string or an ``(r, g, b)`` triple.
+
+        Returns
+        -------
+        Turtle or tuple of str
+            This turtle when setting (to allow chaining), or the ``(pencolor, fillcolor)``
+            pair when called with no arguments.
+        """
         if not args:
             return (self._pencolor, self._fillcolor)
         if len(args) == 1:
@@ -647,12 +880,31 @@ class Turtle(anywidget.AnyWidget):
 
     @_records
     def begin_fill(self):
+        """Start recording a filled shape.
+
+        Call before the commands that trace the outline, then call ``end_fill`` to fill it.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
         self._filling = True
         self._fillpath = [(self._x, self._y)]
         return self
 
     @_records
     def end_fill(self):
+        """Fill the shape traced since the last ``begin_fill``.
+
+        The fill is drawn behind the outline in the current fill colour. Does nothing if
+        fewer than two points were recorded.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
         if self._filling and len(self._fillpath) > 1:
             self._emit(op="fill", points=[list(p) for p in self._fillpath],
                        color=self._fillcolor)
@@ -663,6 +915,21 @@ class Turtle(anywidget.AnyWidget):
     # -- markers / text ----------------------------------------------------- #
     @_records
     def dot(self, size=None, *color):
+        """Draw a filled dot at the current position.
+
+        Parameters
+        ----------
+        size : float, optional
+            Diameter of the dot in pixels. Defaults to a small multiple of the pen size.
+        *color
+            Optional dot colour as a CSS name/hex string or an ``(r, g, b)`` triple.
+            Defaults to the current pen colour.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
         if size is None:
             size = max(self._pensize + 4, 2 * self._pensize)
         col = _as_color(color[0] if len(color) == 1 else (tuple(color) if color else self._pencolor))
@@ -671,12 +938,36 @@ class Turtle(anywidget.AnyWidget):
 
     @_records
     def stamp(self):
+        """Stamp a copy of the turtle shape at the current position and heading.
+
+        Returns
+        -------
+        int
+            The number of recorded events after stamping (a stamp id).
+        """
         self._emit(op="stamp", x=self._x, y=self._y,
                    heading=self._heading, color=self._pencolor)
         return len(self._events)
 
     @_records
     def write(self, text, align="left", font=("sans-serif", 14, "normal")):
+        """Write text at the current position.
+
+        Parameters
+        ----------
+        text : str
+            The text to write.
+        align : {"left", "center", "right"}, optional
+            Horizontal alignment relative to the turtle. Default ``"left"``.
+        font : tuple, optional
+            A ``(family, size, style)`` triple; only family and size are used. Default
+            ``("sans-serif", 14, "normal")``.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
         family, size = font[0], font[1]
         self._emit(op="write", x=self._x, y=self._y, text=str(text),
                    color=self._pencolor, align=align, font=f"{size}px {family}")
@@ -685,6 +976,13 @@ class Turtle(anywidget.AnyWidget):
     # -- visibility / screen ------------------------------------------------ #
     @_records
     def showturtle(self):
+        """Make the turtle marker visible.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
         self._visible = True
         self._emit(op="show")
         return self
@@ -692,6 +990,13 @@ class Turtle(anywidget.AnyWidget):
 
     @_records
     def hideturtle(self):
+        """Hide the turtle marker.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
         self._visible = False
         self._emit(op="hide")
         return self
@@ -699,6 +1004,20 @@ class Turtle(anywidget.AnyWidget):
 
     @_records
     def bgcolor(self, *args):
+        """Get or set the canvas background colour.
+
+        Parameters
+        ----------
+        *args
+            A CSS colour name/hex string or an ``(r, g, b)`` triple. With no arguments,
+            the current background colour is returned.
+
+        Returns
+        -------
+        Turtle or str
+            This turtle when setting (to allow chaining), or the current background colour
+            when called with no arguments.
+        """
         if not args:
             return self.bg
         self.bg = _as_color(args[0] if len(args) == 1 else tuple(args))
@@ -707,11 +1026,25 @@ class Turtle(anywidget.AnyWidget):
 
     @_records
     def clear(self):
+        """Clear all drawing from the canvas, keeping the turtle state.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
         self._emit(op="clear")
         return self
 
     @_records
     def reset(self):
+        """Clear the drawing and reset the turtle to its initial state.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
         self._events = []
         self._x = self._y = self._heading = 0.0
         self._pendown = True
@@ -724,6 +1057,21 @@ class Turtle(anywidget.AnyWidget):
 
     @_records
     def speed(self, s=None):
+        """Get or set the drawing speed.
+
+        Parameters
+        ----------
+        s : int or str, optional
+            Speed from 0 to 10, or a name: ``"fastest"`` (0), ``"fast"`` (10),
+            ``"normal"`` (6), ``"slow"`` (3), ``"slowest"`` (1). ``0`` disables animation
+            (the drawing appears at once). If omitted, the current speed is returned.
+
+        Returns
+        -------
+        Turtle or int
+            This turtle when setting (to allow chaining), or the current speed when called
+            with no argument.
+        """
         if s is None:
             return self._speed
         if isinstance(s, str):
@@ -733,22 +1081,64 @@ class Turtle(anywidget.AnyWidget):
 
     # -- getters (no events) ------------------------------------------------ #
     def position(self):
+        """Return the current position.
+
+        Returns
+        -------
+        tuple of float
+            The ``(x, y)`` coordinates, with the origin at the canvas centre.
+        """
         return (self._x, self._y)
     pos = position
 
     def xcor(self):
+        """Return the current x-coordinate.
+
+        Returns
+        -------
+        float
+            The current x-coordinate.
+        """
         return self._x
 
     def ycor(self):
+        """Return the current y-coordinate.
+
+        Returns
+        -------
+        float
+            The current y-coordinate.
+        """
         return self._y
 
     def heading(self):
+        """Return the current heading in degrees.
+
+        Returns
+        -------
+        float
+            Heading in ``[0, 360)`` degrees, with 0 = east and counter-clockwise positive.
+        """
         return self._heading
 
     def isdown(self):
+        """Return whether the pen is down.
+
+        Returns
+        -------
+        bool
+            True if the pen is down (drawing), False otherwise.
+        """
         return self._pendown
 
     def isvisible(self):
+        """Return whether the turtle marker is visible.
+
+        Returns
+        -------
+        bool
+            True if the turtle marker is shown, False otherwise.
+        """
         return self._visible
 
     # -- display / source --------------------------------------------------- #
@@ -767,7 +1157,13 @@ class Turtle(anywidget.AnyWidget):
         self.events = list(self._events)
 
     def show(self):
-        """Flush recorded commands and display the widget now."""
+        """Flush the recorded commands and display the widget now.
+
+        Returns
+        -------
+        Turtle
+            This turtle.
+        """
         self._unhook()
         self._flush()
         self._rendered = True

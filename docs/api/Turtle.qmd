@@ -1,0 +1,710 @@
+# Turtle { #turtle_widget.Turtle }
+
+```python
+turtle_widget.Turtle(
+    width=500,
+    height=500,
+    show_code=False,
+    code=None,
+    autoshow=True,
+    bg='white',
+)
+```
+
+An animated, turtle-compatible drawing widget for Jupyter notebooks.
+
+Turtle commands are recorded in Python as a stream of events and replayed as a
+canvas animation below the cell. The widget displays itself automatically at the
+end of the cell; you can also call ``show()`` or evaluate the turtle to display it.
+
+## Parameters {.doc-section .doc-section-parameters}
+
+<code>[**width**]{.parameter-name} [:]{.parameter-annotation-sep} [[int](`int`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [500]{.parameter-default}</code>
+
+:   Canvas width in pixels. Default 500.
+
+<code>[**height**]{.parameter-name} [:]{.parameter-annotation-sep} [[int](`int`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [500]{.parameter-default}</code>
+
+:   Canvas height in pixels. Default 500.
+
+<code>[**show_code**]{.parameter-name} [:]{.parameter-annotation-sep} [[bool](`bool`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [False]{.parameter-default}</code>
+
+:   If True, show the cell source beside the canvas and highlight the active line in sync with the animation. Default False.
+
+<code>[**code**]{.parameter-name} [:]{.parameter-annotation-sep} [[str](`str`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [None]{.parameter-default}</code>
+
+:   Source to display instead of the captured cell source.
+
+<code>[**autoshow**]{.parameter-name} [:]{.parameter-annotation-sep} [[bool](`bool`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [True]{.parameter-default}</code>
+
+:   If True (default), display the widget automatically at the end of the cell. Set False for headless use such as tests.
+
+<code>[**bg**]{.parameter-name} [:]{.parameter-annotation-sep} [[str](`str`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [\'white\']{.parameter-default}</code>
+
+:   Canvas background colour. Default ``"white"``.
+
+## Methods
+
+| Name | Description |
+| --- | --- |
+| [backward](#turtle_widget.Turtle.backward) | Move the turtle backward by ``distance`` (opposite its heading). |
+| [begin_fill](#turtle_widget.Turtle.begin_fill) | Start recording a filled shape. |
+| [bgcolor](#turtle_widget.Turtle.bgcolor) | Get or set the canvas background colour. |
+| [circle](#turtle_widget.Turtle.circle) | Draw a circle or arc, approximated by a series of straight chords. |
+| [clear](#turtle_widget.Turtle.clear) | Clear all drawing from the canvas, keeping the turtle state. |
+| [color](#turtle_widget.Turtle.color) | Get or set the pen colour, the fill colour, or both at once. |
+| [dot](#turtle_widget.Turtle.dot) | Draw a filled dot at the current position. |
+| [end_fill](#turtle_widget.Turtle.end_fill) | Fill the shape traced since the last ``begin_fill``. |
+| [fillcolor](#turtle_widget.Turtle.fillcolor) | Get or set the fill colour used by ``begin_fill`` / ``end_fill``. |
+| [forward](#turtle_widget.Turtle.forward) | Move the turtle forward by ``distance``, drawing if the pen is down. |
+| [goto](#turtle_widget.Turtle.goto) | Move the turtle to an absolute position, drawing if the pen is down. |
+| [heading](#turtle_widget.Turtle.heading) | Return the current heading in degrees. |
+| [hideturtle](#turtle_widget.Turtle.hideturtle) | Hide the turtle marker. |
+| [home](#turtle_widget.Turtle.home) | Move the turtle to the origin ``(0, 0)`` and set its heading to 0. |
+| [isdown](#turtle_widget.Turtle.isdown) | Return whether the pen is down. |
+| [isvisible](#turtle_widget.Turtle.isvisible) | Return whether the turtle marker is visible. |
+| [left](#turtle_widget.Turtle.left) | Turn the turtle counter-clockwise by ``angle`` degrees. |
+| [pencolor](#turtle_widget.Turtle.pencolor) | Get or set the pen (outline) colour. |
+| [pendown](#turtle_widget.Turtle.pendown) | Lower the pen so subsequent moves draw. |
+| [pensize](#turtle_widget.Turtle.pensize) | Get or set the pen width. |
+| [penup](#turtle_widget.Turtle.penup) | Lift the pen so subsequent moves do not draw. |
+| [position](#turtle_widget.Turtle.position) | Return the current position. |
+| [reset](#turtle_widget.Turtle.reset) | Clear the drawing and reset the turtle to its initial state. |
+| [right](#turtle_widget.Turtle.right) | Turn the turtle clockwise by ``angle`` degrees. |
+| [setheading](#turtle_widget.Turtle.setheading) | Turn the turtle to face an absolute heading. |
+| [setx](#turtle_widget.Turtle.setx) | Set the x-coordinate, keeping y unchanged. |
+| [sety](#turtle_widget.Turtle.sety) | Set the y-coordinate, keeping x unchanged. |
+| [show](#turtle_widget.Turtle.show) | Flush the recorded commands and display the widget now. |
+| [showturtle](#turtle_widget.Turtle.showturtle) | Make the turtle marker visible. |
+| [speed](#turtle_widget.Turtle.speed) | Get or set the drawing speed. |
+| [stamp](#turtle_widget.Turtle.stamp) | Stamp a copy of the turtle shape at the current position and heading. |
+| [write](#turtle_widget.Turtle.write) | Write text at the current position. |
+| [xcor](#turtle_widget.Turtle.xcor) | Return the current x-coordinate. |
+| [ycor](#turtle_widget.Turtle.ycor) | Return the current y-coordinate. |
+
+### backward { #turtle_widget.Turtle.backward }
+
+```python
+turtle_widget.Turtle.backward(distance)
+```
+
+Move the turtle backward by ``distance`` (opposite its heading).
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+<code>[**distance**]{.parameter-name} [:]{.parameter-annotation-sep} [[float](`float`)]{.parameter-annotation}</code>
+
+:   Distance to move opposite the current heading.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+
+:   This turtle, to allow method chaining.
+
+### begin_fill { #turtle_widget.Turtle.begin_fill }
+
+```python
+turtle_widget.Turtle.begin_fill()
+```
+
+Start recording a filled shape.
+
+Call before the commands that trace the outline, then call ``end_fill`` to fill it.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+
+:   This turtle, to allow method chaining.
+
+### bgcolor { #turtle_widget.Turtle.bgcolor }
+
+```python
+turtle_widget.Turtle.bgcolor(*args)
+```
+
+Get or set the canvas background colour.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+<code>[***args**]{.parameter-name} [:]{.parameter-annotation-sep} []{.parameter-annotation} [ = ]{.parameter-default-sep} [()]{.parameter-default}</code>
+
+:   A CSS colour name/hex string or an ``(r, g, b)`` triple. With no arguments, the current background colour is returned.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`) or [str](`str`)]{.parameter-annotation}</code>
+
+:   This turtle when setting (to allow chaining), or the current background colour when called with no arguments.
+
+### circle { #turtle_widget.Turtle.circle }
+
+```python
+turtle_widget.Turtle.circle(radius, extent=None, steps=None)
+```
+
+Draw a circle or arc, approximated by a series of straight chords.
+
+A positive ``radius`` curves to the left of the turtle, a negative ``radius``
+to the right.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+<code>[**radius**]{.parameter-name} [:]{.parameter-annotation-sep} [[float](`float`)]{.parameter-annotation}</code>
+
+:   Radius of the circle. Positive curves left, negative curves right.
+
+<code>[**extent**]{.parameter-name} [:]{.parameter-annotation-sep} [[float](`float`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [None]{.parameter-default}</code>
+
+:   Angle of the arc to draw, in degrees. Defaults to 360 (a full circle).
+
+<code>[**steps**]{.parameter-name} [:]{.parameter-annotation-sep} [[int](`int`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [None]{.parameter-default}</code>
+
+:   Number of chords approximating the arc. Defaults to a value scaled to the radius and extent.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+
+:   This turtle, to allow method chaining.
+
+### clear { #turtle_widget.Turtle.clear }
+
+```python
+turtle_widget.Turtle.clear()
+```
+
+Clear all drawing from the canvas, keeping the turtle state.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+
+:   This turtle, to allow method chaining.
+
+### color { #turtle_widget.Turtle.color }
+
+```python
+turtle_widget.Turtle.color(*args)
+```
+
+Get or set the pen colour, the fill colour, or both at once.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+<code>[***args**]{.parameter-name} [:]{.parameter-annotation-sep} []{.parameter-annotation} [ = ]{.parameter-default-sep} [()]{.parameter-default}</code>
+
+:   With no arguments, returns ``(pencolor, fillcolor)``. With one argument, sets both pen and fill to that colour. With two, sets the pen and fill colours respectively. Each colour may be a CSS name/hex string or an ``(r, g, b)`` triple.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [Turtle or tuple of str]{.parameter-annotation}</code>
+
+:   This turtle when setting (to allow chaining), or the ``(pencolor, fillcolor)`` pair when called with no arguments.
+
+### dot { #turtle_widget.Turtle.dot }
+
+```python
+turtle_widget.Turtle.dot(size=None, *color)
+```
+
+Draw a filled dot at the current position.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+<code>[**size**]{.parameter-name} [:]{.parameter-annotation-sep} [[float](`float`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [None]{.parameter-default}</code>
+
+:   Diameter of the dot in pixels. Defaults to a small multiple of the pen size.
+
+<code>[***color**]{.parameter-name} [:]{.parameter-annotation-sep} []{.parameter-annotation} [ = ]{.parameter-default-sep} [()]{.parameter-default}</code>
+
+:   Optional dot colour as a CSS name/hex string or an ``(r, g, b)`` triple. Defaults to the current pen colour.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+
+:   This turtle, to allow method chaining.
+
+### end_fill { #turtle_widget.Turtle.end_fill }
+
+```python
+turtle_widget.Turtle.end_fill()
+```
+
+Fill the shape traced since the last ``begin_fill``.
+
+The fill is drawn behind the outline in the current fill colour. Does nothing if
+fewer than two points were recorded.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+
+:   This turtle, to allow method chaining.
+
+### fillcolor { #turtle_widget.Turtle.fillcolor }
+
+```python
+turtle_widget.Turtle.fillcolor(*args)
+```
+
+Get or set the fill colour used by ``begin_fill`` / ``end_fill``.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+<code>[***args**]{.parameter-name} [:]{.parameter-annotation-sep} []{.parameter-annotation} [ = ]{.parameter-default-sep} [()]{.parameter-default}</code>
+
+:   A CSS colour name or hex string, or an ``(r, g, b)`` triple; see ``pencolor`` for the accepted forms.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`) or [str](`str`)]{.parameter-annotation}</code>
+
+:   This turtle when setting (to allow chaining), or the current fill colour when called with no arguments.
+
+### forward { #turtle_widget.Turtle.forward }
+
+```python
+turtle_widget.Turtle.forward(distance)
+```
+
+Move the turtle forward by ``distance``, drawing if the pen is down.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+<code>[**distance**]{.parameter-name} [:]{.parameter-annotation-sep} [[float](`float`)]{.parameter-annotation}</code>
+
+:   Distance to move along the current heading.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+
+:   This turtle, to allow method chaining.
+
+### goto { #turtle_widget.Turtle.goto }
+
+```python
+turtle_widget.Turtle.goto(x, y=None)
+```
+
+Move the turtle to an absolute position, drawing if the pen is down.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+<code>[**x**]{.parameter-name} [:]{.parameter-annotation-sep} [float or tuple of float]{.parameter-annotation}</code>
+
+:   Target x-coordinate, or an ``(x, y)`` pair (then ``y`` must be omitted).
+
+<code>[**y**]{.parameter-name} [:]{.parameter-annotation-sep} [[float](`float`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [None]{.parameter-default}</code>
+
+:   Target y-coordinate.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+
+:   This turtle, to allow method chaining.
+
+### heading { #turtle_widget.Turtle.heading }
+
+```python
+turtle_widget.Turtle.heading()
+```
+
+Return the current heading in degrees.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[float](`float`)]{.parameter-annotation}</code>
+
+:   Heading in ``[0, 360)`` degrees, with 0 = east and counter-clockwise positive.
+
+### hideturtle { #turtle_widget.Turtle.hideturtle }
+
+```python
+turtle_widget.Turtle.hideturtle()
+```
+
+Hide the turtle marker.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+
+:   This turtle, to allow method chaining.
+
+### home { #turtle_widget.Turtle.home }
+
+```python
+turtle_widget.Turtle.home()
+```
+
+Move the turtle to the origin ``(0, 0)`` and set its heading to 0.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+
+:   This turtle, to allow method chaining.
+
+### isdown { #turtle_widget.Turtle.isdown }
+
+```python
+turtle_widget.Turtle.isdown()
+```
+
+Return whether the pen is down.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[bool](`bool`)]{.parameter-annotation}</code>
+
+:   True if the pen is down (drawing), False otherwise.
+
+### isvisible { #turtle_widget.Turtle.isvisible }
+
+```python
+turtle_widget.Turtle.isvisible()
+```
+
+Return whether the turtle marker is visible.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[bool](`bool`)]{.parameter-annotation}</code>
+
+:   True if the turtle marker is shown, False otherwise.
+
+### left { #turtle_widget.Turtle.left }
+
+```python
+turtle_widget.Turtle.left(angle)
+```
+
+Turn the turtle counter-clockwise by ``angle`` degrees.
+
+The animation spins exactly ``angle`` degrees, so multi-turn values such as
+``left(720)`` are preserved as two full rotations.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+<code>[**angle**]{.parameter-name} [:]{.parameter-annotation-sep} [[float](`float`)]{.parameter-annotation}</code>
+
+:   Degrees to turn counter-clockwise.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+
+:   This turtle, to allow method chaining.
+
+### pencolor { #turtle_widget.Turtle.pencolor }
+
+```python
+turtle_widget.Turtle.pencolor(*args)
+```
+
+Get or set the pen (outline) colour.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+<code>[***args**]{.parameter-name} [:]{.parameter-annotation-sep} []{.parameter-annotation} [ = ]{.parameter-default-sep} [()]{.parameter-default}</code>
+
+:   A CSS colour name or hex string (``"red"``, ``"#ff8800"``), or an ``(r, g, b)`` triple given as three arguments or one tuple. Float components in ``[0, 1]`` use the 0-1 scale, otherwise 0-255.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`) or [str](`str`)]{.parameter-annotation}</code>
+
+:   This turtle when setting (to allow chaining), or the current pen colour when called with no arguments.
+
+### pendown { #turtle_widget.Turtle.pendown }
+
+```python
+turtle_widget.Turtle.pendown()
+```
+
+Lower the pen so subsequent moves draw.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+
+:   This turtle, to allow method chaining.
+
+### pensize { #turtle_widget.Turtle.pensize }
+
+```python
+turtle_widget.Turtle.pensize(width=None)
+```
+
+Get or set the pen width.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+<code>[**width**]{.parameter-name} [:]{.parameter-annotation-sep} [[float](`float`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [None]{.parameter-default}</code>
+
+:   New pen width in pixels. If omitted, the current width is returned.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`) or [float](`float`)]{.parameter-annotation}</code>
+
+:   This turtle when setting (to allow chaining), or the current pen width when called with no argument.
+
+#### Notes {.doc-section .doc-section-notes}
+
+Named ``pensize`` (alias ``width_``) because ``width`` is the canvas-size trait.
+
+### penup { #turtle_widget.Turtle.penup }
+
+```python
+turtle_widget.Turtle.penup()
+```
+
+Lift the pen so subsequent moves do not draw.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+
+:   This turtle, to allow method chaining.
+
+### position { #turtle_widget.Turtle.position }
+
+```python
+turtle_widget.Turtle.position()
+```
+
+Return the current position.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [tuple of float]{.parameter-annotation}</code>
+
+:   The ``(x, y)`` coordinates, with the origin at the canvas centre.
+
+### reset { #turtle_widget.Turtle.reset }
+
+```python
+turtle_widget.Turtle.reset()
+```
+
+Clear the drawing and reset the turtle to its initial state.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+
+:   This turtle, to allow method chaining.
+
+### right { #turtle_widget.Turtle.right }
+
+```python
+turtle_widget.Turtle.right(angle)
+```
+
+Turn the turtle clockwise by ``angle`` degrees.
+
+The animation spins exactly ``angle`` degrees, so multi-turn values such as
+``right(720)`` are preserved as two full rotations.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+<code>[**angle**]{.parameter-name} [:]{.parameter-annotation-sep} [[float](`float`)]{.parameter-annotation}</code>
+
+:   Degrees to turn clockwise.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+
+:   This turtle, to allow method chaining.
+
+### setheading { #turtle_widget.Turtle.setheading }
+
+```python
+turtle_widget.Turtle.setheading(to_angle)
+```
+
+Turn the turtle to face an absolute heading.
+
+Rotates along the shortest path, so turning from 0 to 270 spins -90 degrees
+rather than +270. Headings are in degrees with 0 = east, counter-clockwise positive.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+<code>[**to_angle**]{.parameter-name} [:]{.parameter-annotation-sep} [[float](`float`)]{.parameter-annotation}</code>
+
+:   Absolute heading in degrees.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+
+:   This turtle, to allow method chaining.
+
+### setx { #turtle_widget.Turtle.setx }
+
+```python
+turtle_widget.Turtle.setx(x)
+```
+
+Set the x-coordinate, keeping y unchanged.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+<code>[**x**]{.parameter-name} [:]{.parameter-annotation-sep} [[float](`float`)]{.parameter-annotation}</code>
+
+:   New x-coordinate.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+
+:   This turtle, to allow method chaining.
+
+### sety { #turtle_widget.Turtle.sety }
+
+```python
+turtle_widget.Turtle.sety(y)
+```
+
+Set the y-coordinate, keeping x unchanged.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+<code>[**y**]{.parameter-name} [:]{.parameter-annotation-sep} [[float](`float`)]{.parameter-annotation}</code>
+
+:   New y-coordinate.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+
+:   This turtle, to allow method chaining.
+
+### show { #turtle_widget.Turtle.show }
+
+```python
+turtle_widget.Turtle.show()
+```
+
+Flush the recorded commands and display the widget now.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+
+:   This turtle.
+
+### showturtle { #turtle_widget.Turtle.showturtle }
+
+```python
+turtle_widget.Turtle.showturtle()
+```
+
+Make the turtle marker visible.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+
+:   This turtle, to allow method chaining.
+
+### speed { #turtle_widget.Turtle.speed }
+
+```python
+turtle_widget.Turtle.speed(s=None)
+```
+
+Get or set the drawing speed.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+<code>[**s**]{.parameter-name} [:]{.parameter-annotation-sep} [[int](`int`) or [str](`str`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [None]{.parameter-default}</code>
+
+:   Speed from 0 to 10, or a name: ``"fastest"`` (0), ``"fast"`` (10), ``"normal"`` (6), ``"slow"`` (3), ``"slowest"`` (1). ``0`` disables animation (the drawing appears at once). If omitted, the current speed is returned.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`) or [int](`int`)]{.parameter-annotation}</code>
+
+:   This turtle when setting (to allow chaining), or the current speed when called with no argument.
+
+### stamp { #turtle_widget.Turtle.stamp }
+
+```python
+turtle_widget.Turtle.stamp()
+```
+
+Stamp a copy of the turtle shape at the current position and heading.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[int](`int`)]{.parameter-annotation}</code>
+
+:   The number of recorded events after stamping (a stamp id).
+
+### write { #turtle_widget.Turtle.write }
+
+```python
+turtle_widget.Turtle.write(
+    text,
+    align='left',
+    font=('sans-serif', 14, 'normal'),
+)
+```
+
+Write text at the current position.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+<code>[**text**]{.parameter-name} [:]{.parameter-annotation-sep} [[str](`str`)]{.parameter-annotation}</code>
+
+:   The text to write.
+
+<code>[**align**]{.parameter-name} [:]{.parameter-annotation-sep} [(\'left\', \'center\', \'right\')]{.parameter-annotation} [ = ]{.parameter-default-sep} [\"left\"]{.parameter-default}</code>
+
+:   Horizontal alignment relative to the turtle. Default ``"left"``.
+
+<code>[**font**]{.parameter-name} [:]{.parameter-annotation-sep} [[tuple](`tuple`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [(\'sans-serif\', 14, \'normal\')]{.parameter-default}</code>
+
+:   A ``(family, size, style)`` triple; only family and size are used. Default ``("sans-serif", 14, "normal")``.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+
+:   This turtle, to allow method chaining.
+
+### xcor { #turtle_widget.Turtle.xcor }
+
+```python
+turtle_widget.Turtle.xcor()
+```
+
+Return the current x-coordinate.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[float](`float`)]{.parameter-annotation}</code>
+
+:   The current x-coordinate.
+
+### ycor { #turtle_widget.Turtle.ycor }
+
+```python
+turtle_widget.Turtle.ycor()
+```
+
+Return the current y-coordinate.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[float](`float`)]{.parameter-annotation}</code>
+
+:   The current y-coordinate.
