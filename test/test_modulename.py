@@ -1,6 +1,6 @@
 import unittest
 
-# from munch_group_library.modulename import functionname
+# from turtle_widget.modulename import functionname
 
 # class TestModulename(unittest.TestCase):
 

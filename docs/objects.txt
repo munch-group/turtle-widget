@@ -1,6 +1,6 @@
 # Sphinx inventory version 2
-# Project: munch-group-library
+# Project: turtle-widget
 # Version: 0.0.9999
 # The remainder of this file is compressed using zlib.
-munch_group_library.modulename.functionname py:function 1 api/functionname.html#munch_group_library.modulename.functionname -
-munch_group_library.modulename.scriptname py:function 1 api/scriptname.html#munch_group_library.modulename.scriptname -
+turtle_widget.modulename.functionname py:function 1 api/functionname.html#turtle_widget.modulename.functionname -
+turtle_widget.modulename.scriptname py:function 1 api/scriptname.html#turtle_widget.modulename.scriptname -

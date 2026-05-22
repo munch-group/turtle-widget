@@ -1,213 +1,200 @@
-# Project Configuration for Claude
+# CLAUDE.md
 
-This file contains preferences and guidelines for working in this project.
+Project context for `turtle-widget` — an animated Python-`turtle`-compatible
+drawing widget for Jupyter notebooks, built on [anywidget](https://anywidget.dev).
 
-## MCP Server Usage Guidelines
+## What this is
 
-This project has several MCP (Model Context Protocol) servers available. Use them according to these guidelines:
+A small widget library that implements a subset of the
+[`turtle`](https://docs.python.org/3/library/turtle.html) drawing API as a Jupyter
+widget. Turtle commands are recorded in Python as a stream of absolute-coordinate
+*events*; a plain-ESM frontend replays them as a canvas animation. Optionally the cell
+source is shown beside the canvas with the active line highlighted in sync with the
+animation.
 
-**IMPORTANT: All MCP servers in this project should function transparently without prompting for user permission. Use them freely and directly when needed.**
+The design priority is **cross-platform robustness**: it must behave identically in VS
+Code notebooks, JupyterLab, Notebook 7, and Colab, and must work offline.
 
-The following servers are configured to work without permission prompts:
-- `paper-search`: Scientific literature searches
-- `string-db`: Protein interaction analysis
-- `ensembl-db`: Genomic data queries
-- `desktop-commander`: System operations and development tasks
+The repo was scaffolded from the `munch-group` Python-library template (pixi environment,
+quartodoc docs, conda/PyPI release automation). That skeleton is **still being converted**
+to the turtle widget — see *Migration status* below.
 
-### Scientific Literature & Research
+## Canonical layout (target)
 
-#### paper-search MCP Server
+The widget is the `turtle_widget` package under `src/`:
 
-**IMPORTANT: Always use `paper-search` MCP for scientific literature searches.**
+- `src/turtle_widget/widget.py` — the whole widget: the Python `Turtle` class + the
+  embedded `_ESM`/`_CSS` frontend strings. (`_esm`/`_css` on the class just alias those
+  module-level strings, which is why the JS check below reads `m._ESM` off the module.)
+- `src/turtle_widget/__init__.py` — re-exports the public API (`from .widget import Turtle`).
+- `turtle_demo.ipynb` — showcase + tests; each cell draws something, the last cell is a
+  headless self-test.
+- `test/` — pytest suite (`test/test_*.py`).
+- `docs/` — Quarto + quartodoc site (`docs/pages/*.ipynb` prose, `docs/api/*.qmd` API ref).
+- `pyproject.toml` — packaging metadata **and** the pixi workspace (deps + task runner).
+- `conda-build/`, `.github/workflows/` — conda/PyPI release on tag push.
+- `scripts/` — version-bump / docs-build / release helpers invoked by the pixi tasks.
+- `CLAUDE.md` — this file.
 
-**Use paper-search for searching and downloading academic papers from multiple scientific databases.**
+### Migration status (read this)
 
-Supported databases:
-- **arXiv**: Preprints in physics, mathematics, computer science
-- **PubMed**: Biomedical and life sciences literature
-- **bioRxiv**: Biology preprints
-- **medRxiv**: Medical preprints
-- **Google Scholar**: Broad academic search
-- **IACR ePrint**: Cryptography research
-- **Semantic Scholar**: AI-powered academic search
+The turtle code currently lives in **`turtle_anywidget.py` at the repo root** (untracked),
+and `turtle_demo.ipynb` imports `from turtle_anywidget import Turtle`. It has **not yet
+moved into the package**. Until it does, read `turtle_anywidget` for `turtle_widget.widget`
+in the commands below.
 
-Available functions:
-- `search_arxiv()`: Search papers on arXiv
-- `download_arxiv()`: Download PDFs from arXiv
-- Similar search/download functions for other platforms
+Outstanding template-stub conversions:
 
-Features:
-- Returns papers in standardized format
-- Asynchronous requests for efficiency
-- Supports API keys for enhanced access (e.g., Semantic Scholar)
+- Move `turtle_anywidget.py` → `src/turtle_widget/widget.py`; have `__init__.py` do
+  `from .widget import Turtle`; update the demo to `from turtle_widget import Turtle`.
+- Replace `src/turtle_widget/modulename.py` (template `functionname`/`scriptname`) and the
+  placeholder `test/test_modulename.py`.
+- `pyproject.toml`: fill in real metadata (`description`, `authors`), add the runtime deps
+  (`anywidget`, `traitlets`, `ipython`) to the empty `[project.dependencies]`, and drop/fix
+  the `[project.scripts]` `turtle-widget` console-script (this is a library, not a CLI).
+- Point `pixi run test` at the real suite — it currently targets `docs/pages/tutorial/*.ipynb`
+  and `tests/pytest/`, neither of which exists; the real tests live in `test/`.
+- Convert the docs (`docs/pages/overview.ipynb`, `docs/api/*.qmd`) and `README.md` away from
+  the template `functionname`/`scriptname` placeholders to document `Turtle`.
 
-**Use paper-search when:**
-- Finding scientific papers, articles, and publications
-- Searching by author names, keywords, or topics
-- Academic research queries
-- Citation lookups
-- Literature reviews
-- Downloading research papers
+## Environment & commands
 
-**Never use web search or other tools for scientific literature - always use paper-search.**
+The repo is **pixi-managed** (config in `pyproject.toml` under `[tool.pixi.*]`; channels
+`conda-forge` + `munch-group`; platforms `osx-arm64`, `linux-64`). Python 3.9–3.13. Key
+deps: `anywidget` (0.11.x), `nodejs` (20–22), `jupyter`/`ipython`, `quarto`, `quartodoc`,
+`pytest`. `pixi run init` is the one-time template bootstrap (already run — don't re-run).
 
-### Bioinformatics & Genomics
+- Dev install: `pixi run install-dev` (editable, no build isolation).
+- Run the showcase: open `turtle_demo.ipynb` in VS Code / Jupyter and run all; or
+  `pixi run notebook turtle_demo.ipynb` to execute it headless, in place.
+- Run tests: `pixi run pytest test/` (the named `pixi run test` task is mis-pointed — see
+  the migration note); or run the demo's final self-test cell.
+- Build docs: `pixi run api` (quartodoc API pages), then `pixi run docs` (execute the doc
+  notebooks in place).
+- Release: `pixi run bump` / `release` / `version` drive `scripts/bump_version.py` + a tag
+  push, which triggers the conda/PyPI workflows.
+- JS syntax check after editing the embedded frontend string:
+  ```bash
+  python -c "from turtle_widget import widget as m; open('/tmp/e.mjs','w').write(m._ESM)"
+  node --check /tmp/e.mjs
+  ```
+  (Pre-migration: `python -c "import turtle_anywidget as m; open('/tmp/e.mjs','w').write(m._ESM)"`.)
 
-#### string-db MCP Server
+## Architecture (read before editing)
 
-**Use string-db for protein-protein interaction analysis and functional enrichment.**
+Two layers with a thin, explicit contract between them:
 
-Available tools:
+1. **Python (`Turtle`)** owns all geometry and turtle state. Each public method updates
+   internal state and appends one or more JSON-serializable *events* to `self._events`.
+   No drawing logic lives in Python.
+2. **Frontend (`_ESM`)** is a dumb playback engine. It never computes turtle geometry; it
+   only interpolates and renders the events it receives. This is why the animation can
+   never drift from real `turtle` behaviour.
 
-- **Identifier Mapping:**
-  - `get_string_ids`: Map protein names/IDs to STRING identifiers across species
-  - `resolve_proteins`: Standardize protein names to canonical STRING names
+State crosses the boundary via synced traitlets: `events`, `source_lines`, `show_code`,
+`width`, `height`, `bg`. They are flushed once (see *Display lifecycle*), not streamed
+per-command.
 
-- **Network Analysis:**
-  - `get_network`: Retrieve protein-protein interaction networks with confidence filtering
-  - `get_interaction_partners`: Find interaction partners for given proteins (with confidence thresholds)
+### Coordinate system
 
-- **Functional Enrichment:**
-  - `get_enrichment`: Perform functional enrichment analysis (GO terms, KEGG pathways, domains)
-  - `get_ppi_enrichment`: Test if protein sets have statistically significant interactions
+Turtle coordinates: origin at canvas centre, `+x` right, `+y` **up**, heading in degrees
+with `0` = east and counter-clockwise positive. The frontend converts to canvas pixels
+with `TX(x) = cx + x` and `TY(y) = cy - y` (canvas `y` is flipped). HiDPI is handled by
+scaling both the visible and offscreen canvases by `devicePixelRatio`.
 
-- **Cross-Species Analysis:**
-  - `get_homology`: Retrieve protein homology information across species
-  - `get_homology_best`: Find best homology matches in target species
+### Event protocol
 
-- **Utility:**
-  - `get_version`: Get current STRING database version
+Every event is a dict with an `op` plus op-specific fields. `_emit()` injects `line`
+(1-based source line for highlighting) and `speed` (0–10) into *every* event.
 
-**Supported species (common):**
-- Human (9606), Mouse (10090), Rat (10116)
-- Fruit fly (7227), C. elegans (6239), Yeast (4932)
+| `op`      | fields                                   | animated? | notes |
+|-----------|------------------------------------------|-----------|-------|
+| `line`    | `x1,y1,x2,y2,color,width`                | yes       | pen-down move; animated stroke |
+| `move`    | `x1,y1,x2,y2`                            | yes       | pen-up travel; marker only |
+| `turn`    | `x,y,from,to`                            | yes       | rotation; spins exactly `to-from` |
+| `dot`     | `x,y,size,color`                         | no        | filled dot |
+| `stamp`   | `x,y,heading,color`                      | no        | turtle-shaped mark |
+| `write`   | `x,y,text,color,align,font`              | no        | `font` is a CSS font string |
+| `fill`    | `points:[[x,y],...],color`               | no        | drawn with `destination-over` (behind outline) |
+| `color`   | `color`                                  | no        | sets current pen colour |
+| `width`   | `width`                                  | no        | sets pen width |
+| `pen`     | `down:bool`                              | no        | pen up/down (state only) |
+| `show`/`hide` | —                                    | no        | marker visibility |
+| `bgcolor` | `color`                                  | no        | repaints background behind art |
+| `clear`   | —                                        | no        | clears committed art |
 
-**Use string-db when:**
-- Analyzing protein interactions and networks
-- Performing functional enrichment analysis
-- Mapping proteins across species
-- Finding interaction partners or homologs
-- Testing for PPI enrichment in protein sets
+Curves (`circle`) are decomposed in Python into many small `line` chords, so the frontend
+needs no arc logic.
 
-#### ensembl-db MCP Server
+### Animation engine (`render` in `_ESM`)
 
-**Use ensembl-db for genomic data retrieval and analysis via the Ensembl REST API.**
+- An offscreen `base` canvas holds committed art; the visible canvas is redrawn each frame
+  as `drawImage(base)` + the in-progress segment + the turtle marker.
+- `step(ts)` is a `requestAnimationFrame` loop. Per event: `durationOf()` gives a duration
+  (0 ⇒ instant; `speed:0` ⇒ instant). Animated events interpolate via `renderProgress()`;
+  on completion `commit()` writes to `base` and `endState()` advances the tracked
+  `{x,y,heading,visible,pencolor}`. Instant events `commit()` immediately and the loop
+  continues within the same frame.
+- `setActiveLine(ev.line)` drives the synced code highlight + autoscroll.
+- `render` returns a cleanup function that cancels the RAF (anywidget calls it on teardown).
 
-Available tools (31 endpoints across 11 categories):
+### Heading semantics (subtle — matches CPython turtle)
 
-- **Gene Lookup:**
-  - `lookup_gene_by_symbol`: Find genes by symbol (e.g., BRCA2)
-  - `lookup_gene_by_id`: Find genes by Ensembl stable ID
+`self._heading` is kept normalized to `[0, 360)`. `right`/`left` emit a `turn` whose
+`to = from ∓ angle` (raw, so the animation spins exactly the requested amount, including
+multi-turn spins like `right(720)`). `setheading`/`home` use `_turn_to()`, which rotates
+through the **shortest signed path** (`((to-from+180) % 360) - 180`). Do not "simplify"
+this to absolute from→to or the turtle will over-spin (e.g. `home()` would spin 540°).
 
-- **Sequence Retrieval:**
-  - `get_sequence`: Retrieve DNA/RNA/protein sequences
+### Source capture for code-sync
 
-- **Variant Analysis:**
-  - `get_variants_for_region`: Find genetic variants in genomic regions
-  - `vep_region`: Predict variant consequences (Variant Effect Predictor)
+The `@_records` decorator on every public method grabs `sys._getframe(1).f_lineno` (and
+the caller's filename once). Full cell source comes from `linecache.getlines(filename)` —
+ipykernel registers each cell there, so line numbers are **cell-relative** and highlight
+the correct line. `code="..."` overrides the captured source.
 
-- **Cross-Species Homology:**
-  - `get_homology`: Find homologous genes/proteins across species
+### Display lifecycle
 
-- **Phenotype Data:**
-  - `get_phenotype_by_gene`: Retrieve phenotype annotations for genes
+Three paths, all idempotent via the `_rendered` flag and `_unhook()`:
 
-- **Regulatory Features:**
-  - `get_regulatory_features`: Find regulatory elements in genomic regions
+- **Auto** (default): `_register_autoshow()` installs a one-shot `post_run_cell` IPython
+  hook that flushes traitlets and `display()`s the widget at end of cell — so the bare
+  example works without putting `t` on the last line.
+- **Explicit expression**: `_repr_mimebundle_` flushes, marks rendered, unhooks, then
+  defers to `anywidget`.
+- **`t.show()`**: same flush + `display`, also unhooks.
 
-- **Overlap Analysis:**
-  - `overlap_region`, `overlap_id`, `overlap_translation`: Find overlapping genomic features
+`autoshow=False` skips the hook (use for headless inspection/tests).
 
-- **Cross-References:**
-  - `get_xrefs_by_gene`, `get_xrefs_by_symbol`, `get_xrefs_by_name`: External database references
+## Conventions & gotchas
 
-- **Coordinate Mapping:**
-  - Tools for mapping between assemblies and genomic/protein coordinates
+- **`width` is the canvas-size trait**, so the pen-width method is `pensize()` (alias
+  `width_`), *not* `width()`. Don't rename the trait.
+- Canvas is **fixed size** (default 500×500, origin centred). Out-of-bounds drawing is
+  clipped, like real turtle — there is no autoscale.
+- The frontend has **no external/CDN dependencies** (offline-safe). Keep it that way; the
+  Python syntax highlighter and everything else is hand-rolled in `_ESM`.
+- Colours pass straight through to CSS. Tuples are converted by `_as_color` (floats in
+  `[0,1]` are treated as the 0–1 RGB scale, otherwise 0–255).
+- The per-line highlighter tokenizes one line at a time, so triple-quoted strings spanning
+  lines won't be perfectly coloured — acceptable for turtle scripts.
 
-- **Ontology & Taxonomy:**
-  - Search and retrieve ontology terms and taxonomy information
+## Adding a new turtle command (recipe)
 
-**Use ensembl-db when:**
-- Looking up genes by symbol or ID
-- Retrieving genomic sequences
-- Analyzing genetic variants and their effects
-- Finding gene homologs across species
-- Exploring phenotype associations
-- Identifying regulatory features
-- Mapping between genome assemblies
+1. Add a method decorated with `@_records`; update internal turtle state.
+2. `self._emit(op="...", ...)` with **absolute** coordinates. Do not duplicate `line`/
+   `speed` — `_emit` adds them.
+3. If the command should call another recorded method internally, factor the logic into a
+   private helper (like `_turn_to` / `_goto`) and call that — calling the decorated method
+   would overwrite `_cur_line` with the wrong frame and break highlighting.
+4. Handle the new `op` in `_ESM`: add to `durationOf`/`renderProgress` if animated, and to
+   `commit`/`endState`/`applyConfig` as needed.
+5. Update the event-protocol table above.
 
-### System Operations
+## Testing approach
 
-#### desktop-commander MCP Server
-
-**Use desktop-commander for advanced system interaction, terminal control, and development tasks.**
-
-Available capabilities:
-
-- **Terminal Control:**
-  - Execute terminal commands with output streaming
-  - Run long-running commands in background
-  - Manage and kill processes
-  - Monitor command output in real-time
-
-- **Filesystem Operations:**
-  - Read/write files
-  - Create/list directories
-  - Move files and directories
-  - Search files across filesystem
-  - Get file metadata
-  - Negative offset reading (like Unix `tail`)
-
-- **Code Editing:**
-  - Surgical text replacements in files
-  - Full file rewrites
-  - Multiple file editing
-  - Pattern-based replacements
-  - VSCode-ripgrep recursive code/text search
-
-- **Development Environment:**
-  - Execute code in memory (Python, Node.js, R)
-  - Instant data analysis for CSV/JSON files
-  - Interact with development servers and databases
-
-**Use desktop-commander when:**
-- Running terminal commands or shell scripts
-- Managing processes or background tasks
-- Performing filesystem operations
-- Editing code or text files
-- Searching code across the project
-- Executing code snippets for quick analysis
-- Interacting with development servers
-
-### General Purpose
-
-- **filesystem**: File operations within the workspace
-- **fetch**: Web content fetching for non-scientific content
-- **memory**: Persistent memory across conversations
-
-## Project Context
-
-- **Field**: Bioinformatics / Computational Biology
-- **Primary Language**: Python
-- **Environment**: Devcontainer with pixi package management
-
-## Code Style Preferences
-
-- Follow existing code style in the repository
-- Use type hints in Python code
-- Include docstrings for functions and classes
-- Follow scientific computing best practices
-
-## Citation Format
-
-When adding inline citations to scientific papers, use Author-Year format:
-- Up to two authors: (Munch, 2025) or (Munch and Hobolth, 2025)
-- Three or more: (Munch et al., 2025)
-- Citation labels should be hyperlinks to the paper on the journal website
-
-## Notes
-
-- This project uses MCP servers for enhanced capabilities
-- The devcontainer includes pixi for package management
-- MCP servers use pixi environments (conda packages + pip when needed)
-- PyPI-based servers are installed with pip in the shared pixi environment to ensure Python headers are available
+- Geometry is deterministic and headless-testable: `Turtle(autoshow=False)`, run commands,
+  assert `pos()/heading()`, and `json.dumps(t._events)` to confirm serializability. These
+  assertions belong in `test/` (port the demo's final self-test cell there).
+- Validate the frontend parses with `node --check` on the extracted `_ESM`.
+- Visual smoke test: run `turtle_demo.ipynb`.
