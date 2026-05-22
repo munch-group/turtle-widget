@@ -1,0 +1,211 @@
+[
+  {
+    "objectID": "pages/demo.html",
+    "href": "pages/demo.html",
+    "title": "turtle-widget — showcase & tests",
+    "section": "",
+    "text": "An animated Turtle graphics widget for Jupyter, built on anywidget so it renders identically in VS Code, JupyterLab, Notebook 7, and Colab.\nEach cell below draws something and animates it on an HTML canvas. Pass show_code=True to display the cell’s source beside the canvas and highlight each line in sync with the drawing. Use the Replay / Pause buttons under any canvas.\n# !pip install anywidget\nfrom turtle_widget import Turtle"
+  },
+  {
+    "objectID": "pages/demo.html#the-basics",
+    "href": "pages/demo.html#the-basics",
+    "title": "turtle-widget — showcase & tests",
+    "section": "1. The basics",
+    "text": "1. The basics\nA turtle starts at the centre (0, 0) facing east (heading 0). forward/backward move it, left/right rotate it (degrees, counter-clockwise positive). Here’s a square.\n\nt = Turtle()\nt.speed(6)\nfor _ in range(4):\n    t.forward(120)\n    t.left(90)"
+  },
+  {
+    "objectID": "pages/demo.html#synced-code-highlighting-show_codetrue",
+    "href": "pages/demo.html#synced-code-highlighting-show_codetrue",
+    "title": "turtle-widget — showcase & tests",
+    "section": "2. Synced code highlighting (show_code=True)",
+    "text": "2. Synced code highlighting (show_code=True)\nThis is your original spiral. With show_code=True, the source appears on the right and the active line is highlighted as the animation reaches it.\n\nt = Turtle(show_code=True)\nt.speed(5)\ncolours = [\"red\", \"blue\", \"yellow\", \"brown\", \"black\", \"purple\", \"green\"]\n\nt.penup(); t.left(90); t.forward(200); t.right(90); t.pendown()\nfor i in range(0, 18):\n    t.pencolor(colours[i % 7])\n    t.right(20)\n    t.forward(50)\n\nt.right(180)\nt.home()"
+  },
+  {
+    "objectID": "pages/demo.html#colours-pen-width-fills",
+    "href": "pages/demo.html#colours-pen-width-fills",
+    "title": "turtle-widget — showcase & tests",
+    "section": "3. Colours, pen width & fills",
+    "text": "3. Colours, pen width & fills\nColours accept CSS names (\"gold\"), hex (\"#ff8800\"), or RGB tuples ((0.1, 0.5, 0.9) on the 0–1 scale, or (255, 128, 0) on the 0–255 scale). Wrap a path in begin_fill() / end_fill() to fill it — the fill lands behind the outline, just like real turtle.\n\nt = Turtle()\nt.speed(8)\nt.pensize(3)\nt.pencolor(\"#d2691e\")          # outline\nt.fillcolor((1.0, 0.84, 0.0))  # gold, on the 0-1 RGB scale\nt.begin_fill()\nfor _ in range(5):             # classic 5-point star\n    t.forward(220)\n    t.right(144)\nt.end_fill()"
+  },
+  {
+    "objectID": "pages/demo.html#circles-arcs",
+    "href": "pages/demo.html#circles-arcs",
+    "title": "turtle-widget — showcase & tests",
+    "section": "4. Circles & arcs",
+    "text": "4. Circles & arcs\ncircle(radius) draws a full circle to the left of the turtle; a negative radius goes right. circle(radius, extent) draws only part of it. Stacking rotated circles gives a spirograph.\n\nt = Turtle()\nt.speed(10)\npalette = [\"crimson\", \"darkorange\", \"seagreen\", \"royalblue\", \"purple\", \"teal\"]\nfor i in range(12):\n    t.pencolor(palette[i % len(palette)])\n    t.circle(90)\n    t.right(30)"
+  },
+  {
+    "objectID": "pages/demo.html#dots-stamps-text-jumps",
+    "href": "pages/demo.html#dots-stamps-text-jumps",
+    "title": "turtle-widget — showcase & tests",
+    "section": "5. Dots, stamps, text & jumps",
+    "text": "5. Dots, stamps, text & jumps\npenup() / pendown() lift and drop the pen so you can jump without drawing. dot(size) plants a filled dot, stamp() leaves a copy of the turtle, and write(text) prints a label.\n\nt = Turtle(width=520, height=320)\nt.speed(7)\n\nt.penup(); t.goto(-210, 30); t.pendown()\nfor i, c in enumerate([\"red\", \"orange\", \"green\", \"blue\", \"purple\"]):\n    t.dot(16 + i * 8, c)\n    t.penup(); t.forward(90); t.pendown()\n\nt.penup(); t.goto(-210, 90); t.pendown()\nt.pencolor(\"black\")\nt.write(\"dots grow to the right\", font=(\"sans-serif\", 16, \"normal\"))\n\nt.penup(); t.goto(0, -70); t.setheading(60); t.pendown()\nt.pencolor(\"seagreen\")\nt.stamp()"
+  },
+  {
+    "objectID": "pages/demo.html#speed-instant-mode",
+    "href": "pages/demo.html#speed-instant-mode",
+    "title": "turtle-widget — showcase & tests",
+    "section": "6. Speed & instant mode",
+    "text": "6. Speed & instant mode\nspeed(1) is slowest, speed(10) is fastest, and speed(0) disables animation entirely — the whole drawing appears at once, which is handy for dense figures. (Word forms also work: \"slowest\", \"slow\", \"normal\", \"fast\", \"fastest\".)\n\nt = Turtle()\nt.speed(0)               # no animation: drawn instantly\nt.speed('slowest')\nt.pencolor(\"teal\")\nt.pensize(1)\nfor _ in range(72):\n    t.forward(160)\n    t.left(175)          # a dense star spiral\nt.hideturtle()"
+  },
+  {
+    "objectID": "pages/demo.html#reading-turtle-state",
+    "href": "pages/demo.html#reading-turtle-state",
+    "title": "turtle-widget — showcase & tests",
+    "section": "7. Reading turtle state",
+    "text": "7. Reading turtle state\nGetters return the current state without drawing anything: pos(), xcor(), ycor(), heading(), isdown(), isvisible(). (Use autoshow=False when you only want to inspect state and not render a widget.)\n\nprobe = Turtle(autoshow=False)\nprobe.forward(100); probe.left(90); probe.forward(50)\nprint(\"position:\", probe.pos())\nprint(\"heading :\", probe.heading())\nprint(\"pen down:\", probe.isdown())"
+  },
+  {
+    "objectID": "pages/demo.html#self-test-headless",
+    "href": "pages/demo.html#self-test-headless",
+    "title": "turtle-widget — showcase & tests",
+    "section": "8. Self-test (headless)",
+    "text": "8. Self-test (headless)\nGeometry is computed in Python, so it can be validated without a browser. This cell asserts a few invariants and checks the event stream is JSON-serializable (which is what gets sent to the frontend).\n\nimport json\nfrom turtle_widget import Turtle\n\n# movement + heading\nt = Turtle(autoshow=False)\nt.forward(100); t.left(90); t.forward(100)\nassert abs(t.xcor() - 100) &lt; 1e-9, t.xcor()\nassert abs(t.ycor() - 100) &lt; 1e-9, t.ycor()\nassert round(t.heading() % 360, 6) == 90\n\n# home returns to origin, heading 0\nt.home()\nassert abs(t.xcor()) &lt; 1e-9 and abs(t.ycor()) &lt; 1e-9\nassert round(t.heading() % 360, 6) == 0\n\n# circle returns (approximately) to its start\nc = Turtle(autoshow=False)\nc.begin_fill(); c.circle(60); c.end_fill()\nassert abs(c.xcor()) &lt; 1e-6 and abs(c.ycor()) &lt; 1e-6\nassert any(e[\"op\"] == \"fill\" for e in c._events)\n\n# every event is JSON-serializable and carries a source line + speed\npayload = json.dumps(t._events)\nassert all(\"line\" in e and \"speed\" in e for e in t._events)\n\nprint(\"All self-tests passed.\")\nprint(\"square+home events:\", len(t._events), \"| circle events:\", len(c._events))"
+  },
+  {
+    "objectID": "api/scriptname.html",
+    "href": "api/scriptname.html",
+    "title": "scriptname",
+    "section": "",
+    "text": "scriptname\nturtle_widget.modulename.scriptname()",
+    "crumbs": [
+      "Some other section",
+      "scriptname"
+    ]
+  },
+  {
+    "objectID": "api/functionname.html",
+    "href": "api/functionname.html",
+    "title": "functionname",
+    "section": "",
+    "text": "turtle_widget.modulename.functionname(x=1, y=1)\nThe sum of two numbers.\n\n\n\nx : int = 1\n\nThe first number\n\ny : int = 1\n\nThe second number.\n\n\n\n\n\n\n : int\n\nSum of two numbers.\n\n\n\n\n\nAdding two numbers\nresult = foo(2, 4)\n\n\n\nlibraryname.modulename.scriptname",
+    "crumbs": [
+      "Some section",
+      "functionname"
+    ]
+  },
+  {
+    "objectID": "api/functionname.html#parameters",
+    "href": "api/functionname.html#parameters",
+    "title": "functionname",
+    "section": "",
+    "text": "x : int = 1\n\nThe first number\n\ny : int = 1\n\nThe second number.",
+    "crumbs": [
+      "Some section",
+      "functionname"
+    ]
+  },
+  {
+    "objectID": "api/functionname.html#returns",
+    "href": "api/functionname.html#returns",
+    "title": "functionname",
+    "section": "",
+    "text": ": int\n\nSum of two numbers.",
+    "crumbs": [
+      "Some section",
+      "functionname"
+    ]
+  },
+  {
+    "objectID": "api/functionname.html#examples",
+    "href": "api/functionname.html#examples",
+    "title": "functionname",
+    "section": "",
+    "text": "Adding two numbers\nresult = foo(2, 4)",
+    "crumbs": [
+      "Some section",
+      "functionname"
+    ]
+  },
+  {
+    "objectID": "api/functionname.html#see-also",
+    "href": "api/functionname.html#see-also",
+    "title": "functionname",
+    "section": "",
+    "text": "libraryname.modulename.scriptname",
+    "crumbs": [
+      "Some section",
+      "functionname"
+    ]
+  },
+  {
+    "objectID": "api/index.html",
+    "href": "api/index.html",
+    "title": "Function reference",
+    "section": "",
+    "text": "Some description…\n\n\n\nfunctionname\nThe sum of two numbers.\n\n\n\n\n\n\nSome description…\n\n\n\nscriptname",
+    "crumbs": [
+      "Function reference"
+    ]
+  },
+  {
+    "objectID": "api/index.html#some-section",
+    "href": "api/index.html#some-section",
+    "title": "Function reference",
+    "section": "",
+    "text": "Some description…\n\n\n\nfunctionname\nThe sum of two numbers.",
+    "crumbs": [
+      "Function reference"
+    ]
+  },
+  {
+    "objectID": "api/index.html#some-other-section",
+    "href": "api/index.html#some-other-section",
+    "title": "Function reference",
+    "section": "",
+    "text": "Some description…\n\n\n\nscriptname",
+    "crumbs": [
+      "Function reference"
+    ]
+  },
+  {
+    "objectID": "pages/overview.html",
+    "href": "pages/overview.html",
+    "title": "Overview",
+    "section": "",
+    "text": "turtle-widget lets you …\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sagittis posuere ligula sit amet lacinia. Duis dignissim pellentesque magna, rhoncus congue sapien finibus mollis. Ut eu sem laoreet, vehicula ipsum in, convallis erat. Vestibulum magna sem, blandit pulvinar augue sit amet, auctor malesuada sapien. Nullam faucibus leo eget eros hendrerit, non laoreet ipsum lacinia. Curabitur cursus diam elit, non tempus ante volutpat a. Quisque hendrerit blandit purus non fringilla. Integer sit amet elit viverra ante dapibus semper. Vestibulum viverra rutrum enim, at luctus enim posuere eu. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.",
+    "crumbs": [
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "pages/overview.html#installation",
+    "href": "pages/overview.html#installation",
+    "title": "Overview",
+    "section": "Installation",
+    "text": "Installation\n\npixicondapip\n\n\npixi workspace channel add munch-group\npixi add turtle-widget\n\n\nconda install -c munch-group turtle-widget\n\n\npip install turtle-widget",
+    "crumbs": [
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "pages/overview.html#basic-use",
+    "href": "pages/overview.html#basic-use",
+    "title": "Overview",
+    "section": "Basic use",
+    "text": "Basic use",
+    "crumbs": [
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "pages/overview.html#some-use-case",
+    "href": "pages/overview.html#some-use-case",
+    "title": "Overview",
+    "section": "Some use case",
+    "text": "Some use case\nThe functionname function does … turtle_widget.modulename.functionname does … functionname does …\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sagittis posuere ligula sit amet lacinia. Duis dignissim pellentesque magna, rhoncus congue sapien finibus mollis. Ut eu sem laoreet, vehicula ipsum in, convallis erat. Vestibulum magna sem, blandit pulvinar augue sit amet, auctor malesuada sapien. Nullam faucibus leo eget eros hendrerit, non laoreet ipsum lacinia. Curabitur cursus diam elit, non tempus ante volutpat a. Quisque hendrerit blandit purus non fringilla. Integer sit amet elit viverra ante dapibus semper. Vestibulum viverra rutrum enim, at luctus enim posuere eu. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.\n\n# from turtle_widget.modulename import functionname\n# functionname(3, 4)\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sagittis posuere ligula sit amet lacinia. Duis dignissim pellentesque magna, rhoncus congue sapien finibus mollis. Ut eu sem laoreet, vehicula ipsum in, convallis erat. Vestibulum magna sem, blandit pulvinar augue sit amet, auctor malesuada sapien. Nullam faucibus leo eget eros hendrerit, non laoreet ipsum lacinia. Curabitur cursus diam elit, non tempus ante volutpat a. Quisque hendrerit blandit purus non fringilla. Integer sit amet elit viverra ante dapibus semper. Vestibulum viverra rutrum enim, at luctus enim posuere eu. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.\ncontents:\n  - MdRenderer\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sagittis posuere ligula sit amet lacinia. Duis dignissim pellentesque magna, rhoncus congue sapien finibus mollis. Ut eu sem laoreet, vehicula ipsum in, convallis erat. Vestibulum magna sem, blandit pulvinar augue sit amet, auctor malesuada sapien. Nullam faucibus leo eget eros hendrerit, non laoreet ipsum lacinia. Curabitur cursus diam elit, non tempus ante volutpat a. Quisque hendrerit blandit purus non fringilla. Integer sit amet elit viverra ante dapibus semper. Vestibulum viverra rutrum enim, at luctus enim posuere eu. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.",
+    "crumbs": [
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "pages/overview.html#learning-more",
+    "href": "pages/overview.html#learning-more",
+    "title": "Overview",
+    "section": "Learning more",
+    "text": "Learning more\nGo to the anvanced page to learn how to …\n\nExamples page: sites using quartodoc.",
+    "crumbs": [
+      "Overview"
+    ]
+  }
+]
