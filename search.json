@@ -2,130 +2,133 @@
   {
     "objectID": "pages/demo.html",
     "href": "pages/demo.html",
-    "title": "turtle-widget — showcase & tests",
+    "title": "Showcase & tests",
     "section": "",
-    "text": "An animated Turtle graphics widget for Jupyter, built on anywidget so it renders identically in VS Code, JupyterLab, Notebook 7, and Colab.\nEach cell below draws something and animates it on an HTML canvas. Pass show_code=True to display the cell’s source beside the canvas and highlight each line in sync with the drawing. Use the Replay / Pause buttons under any canvas.\n# !pip install anywidget\nfrom turtle_widget import Turtle"
+    "text": "An animated Turtle graphics widget for Jupyter, built on anywidget so it renders identically in VS Code, JupyterLab, Notebook 7, and Colab. Each cell below draws something and animates it on an HTML canvas. Pass show_code=True to display the cell’s source beside the canvas and highlight each line in sync with the drawing. Use the Replay/Pause buttons under any canvas.\nfrom turtle_widget import Turtle",
+    "crumbs": [
+      "Examples",
+      "Showcase & tests"
+    ]
   },
   {
     "objectID": "pages/demo.html#the-basics",
     "href": "pages/demo.html#the-basics",
-    "title": "turtle-widget — showcase & tests",
+    "title": "Showcase & tests",
     "section": "1. The basics",
-    "text": "1. The basics\nA turtle starts at the centre (0, 0) facing east (heading 0). forward/backward move it, left/right rotate it (degrees, counter-clockwise positive). Here’s a square.\n\nt = Turtle()\nt.speed(6)\nfor _ in range(4):\n    t.forward(120)\n    t.left(90)"
+    "text": "1. The basics\nA turtle starts at the centre (0, 0) facing east (heading 0). forward/backward move it, left/right rotate it (degrees, counter-clockwise positive). Here’s a square.\n\nt = Turtle()\nt.speed(6)\nfor _ in range(4):\n    t.forward(120)\n    t.left(90)",
+    "crumbs": [
+      "Examples",
+      "Showcase & tests"
+    ]
   },
   {
     "objectID": "pages/demo.html#synced-code-highlighting-show_codetrue",
     "href": "pages/demo.html#synced-code-highlighting-show_codetrue",
-    "title": "turtle-widget — showcase & tests",
+    "title": "Showcase & tests",
     "section": "2. Synced code highlighting (show_code=True)",
-    "text": "2. Synced code highlighting (show_code=True)\nThis is your original spiral. With show_code=True, the source appears on the right and the active line is highlighted as the animation reaches it.\n\nt = Turtle(show_code=True)\nt.speed(5)\ncolours = [\"red\", \"blue\", \"yellow\", \"brown\", \"black\", \"purple\", \"green\"]\n\nt.penup(); t.left(90); t.forward(200); t.right(90); t.pendown()\nfor i in range(0, 18):\n    t.pencolor(colours[i % 7])\n    t.right(20)\n    t.forward(50)\n\nt.right(180)\nt.home()"
+    "text": "2. Synced code highlighting (show_code=True)\nThis is your original spiral. With show_code=True, the source appears on the right and the active line is highlighted as the animation reaches it.\n\nt = Turtle(show_code=True)\nt.speed(1)\ncolours = [\"red\", \"blue\", \"yellow\", \"brown\", \"black\", \"purple\", \"green\"]\n\nt.penup(); t.left(90); t.forward(200); t.right(90); t.pendown()\nfor i in range(0, 18):\n    t.pencolor(colours[i % 7])\n    t.right(20)\n    t.forward(50)\n\nt.right(180)\nt.home()",
+    "crumbs": [
+      "Examples",
+      "Showcase & tests"
+    ]
   },
   {
-    "objectID": "pages/demo.html#colours-pen-width-fills",
-    "href": "pages/demo.html#colours-pen-width-fills",
-    "title": "turtle-widget — showcase & tests",
-    "section": "3. Colours, pen width & fills",
-    "text": "3. Colours, pen width & fills\nColours accept CSS names (\"gold\"), hex (\"#ff8800\"), or RGB tuples ((0.1, 0.5, 0.9) on the 0–1 scale, or (255, 128, 0) on the 0–255 scale). Wrap a path in begin_fill() / end_fill() to fill it — the fill lands behind the outline, just like real turtle.\n\nt = Turtle()\nt.speed(8)\nt.pensize(3)\nt.pencolor(\"#d2691e\")          # outline\nt.fillcolor((1.0, 0.84, 0.0))  # gold, on the 0-1 RGB scale\nt.begin_fill()\nfor _ in range(5):             # classic 5-point star\n    t.forward(220)\n    t.right(144)\nt.end_fill()"
+    "objectID": "pages/demo.html#colors-pen-width-fills",
+    "href": "pages/demo.html#colors-pen-width-fills",
+    "title": "Showcase & tests",
+    "section": "3. Colors, pen width & fills",
+    "text": "3. Colors, pen width & fills\nColours accept CSS names (\"gold\"), hex (\"#ff8800\"), or RGB tuples ((0.1, 0.5, 0.9) on the 0–1 scale, or (255, 128, 0) on the 0–255 scale). Wrap a path in begin_fill() / end_fill() to fill it — the fill lands behind the outline, just like real turtle.\n\nt = Turtle()\nt.speed(8)\nt.pensize(3)\nt.pencolor(\"#d2691e\")          # outline\nt.fillcolor((1.0, 0.84, 0.0))  # gold, on the 0-1 RGB scale\nt.begin_fill()\nfor _ in range(5):             # classic 5-point star\n    t.forward(220)\n    t.right(144)\nt.end_fill()",
+    "crumbs": [
+      "Examples",
+      "Showcase & tests"
+    ]
   },
   {
     "objectID": "pages/demo.html#circles-arcs",
     "href": "pages/demo.html#circles-arcs",
-    "title": "turtle-widget — showcase & tests",
+    "title": "Showcase & tests",
     "section": "4. Circles & arcs",
-    "text": "4. Circles & arcs\ncircle(radius) draws a full circle to the left of the turtle; a negative radius goes right. circle(radius, extent) draws only part of it. Stacking rotated circles gives a spirograph.\n\nt = Turtle()\nt.speed(10)\npalette = [\"crimson\", \"darkorange\", \"seagreen\", \"royalblue\", \"purple\", \"teal\"]\nfor i in range(12):\n    t.pencolor(palette[i % len(palette)])\n    t.circle(90)\n    t.right(30)"
+    "text": "4. Circles & arcs\ncircle(radius) draws a full circle to the left of the turtle; a negative radius goes right. circle(radius, extent) draws only part of it. Stacking rotated circles gives a spirograph.\n\nt = Turtle()\nt.speed(10)\npalette = [\"crimson\", \"darkorange\", \"seagreen\", \"royalblue\", \"purple\", \"teal\"]\nfor i in range(12):\n    t.pencolor(palette[i % len(palette)])\n    t.circle(90)\n    t.right(30)",
+    "crumbs": [
+      "Examples",
+      "Showcase & tests"
+    ]
   },
   {
     "objectID": "pages/demo.html#dots-stamps-text-jumps",
     "href": "pages/demo.html#dots-stamps-text-jumps",
-    "title": "turtle-widget — showcase & tests",
+    "title": "Showcase & tests",
     "section": "5. Dots, stamps, text & jumps",
-    "text": "5. Dots, stamps, text & jumps\npenup() / pendown() lift and drop the pen so you can jump without drawing. dot(size) plants a filled dot, stamp() leaves a copy of the turtle, and write(text) prints a label.\n\nt = Turtle(width=520, height=320)\nt.speed(7)\n\nt.penup(); t.goto(-210, 30); t.pendown()\nfor i, c in enumerate([\"red\", \"orange\", \"green\", \"blue\", \"purple\"]):\n    t.dot(16 + i * 8, c)\n    t.penup(); t.forward(90); t.pendown()\n\nt.penup(); t.goto(-210, 90); t.pendown()\nt.pencolor(\"black\")\nt.write(\"dots grow to the right\", font=(\"sans-serif\", 16, \"normal\"))\n\nt.penup(); t.goto(0, -70); t.setheading(60); t.pendown()\nt.pencolor(\"seagreen\")\nt.stamp()"
+    "text": "5. Dots, stamps, text & jumps\npenup() / pendown() lift and drop the pen so you can jump without drawing. dot(size) plants a filled dot, stamp() leaves a copy of the turtle, and write(text) prints a label.\n\nt = Turtle(width=520, height=320)\nt.speed(7)\n\nt.penup(); t.goto(-210, 30); t.pendown()\nfor i, c in enumerate([\"red\", \"orange\", \"green\", \"blue\", \"purple\"]):\n    t.dot(16 + i * 8, c)\n    t.penup(); t.forward(90); t.pendown()\n\nt.penup(); t.goto(-210, 90); t.pendown()\nt.pencolor(\"black\")\nt.write(\"dots grow to the right\", font=(\"sans-serif\", 16, \"normal\"))\n\nt.penup(); t.goto(0, -70); t.setheading(60); t.pendown()\nt.pencolor(\"seagreen\")\nt.stamp()\n\n34",
+    "crumbs": [
+      "Examples",
+      "Showcase & tests"
+    ]
   },
   {
     "objectID": "pages/demo.html#speed-instant-mode",
     "href": "pages/demo.html#speed-instant-mode",
-    "title": "turtle-widget — showcase & tests",
+    "title": "Showcase & tests",
     "section": "6. Speed & instant mode",
-    "text": "6. Speed & instant mode\nspeed(1) is slowest, speed(10) is fastest, and speed(0) disables animation entirely — the whole drawing appears at once, which is handy for dense figures. (Word forms also work: \"slowest\", \"slow\", \"normal\", \"fast\", \"fastest\".)\n\nt = Turtle()\nt.speed(0)               # no animation: drawn instantly\nt.speed('slowest')\nt.pencolor(\"teal\")\nt.pensize(1)\nfor _ in range(72):\n    t.forward(160)\n    t.left(175)          # a dense star spiral\nt.hideturtle()"
+    "text": "6. Speed & instant mode\nspeed(1) is slowest, speed(10) is fastest, and speed(0) disables animation entirely — the whole drawing appears at once, which is handy for dense figures. (Word forms also work: \"slowest\", \"slow\", \"normal\", \"fast\", \"fastest\".)\n\nt = Turtle()\n#t.speed(0)               # no animation: drawn instantly\nt.speed(10)\nt.pencolor(\"teal\")\nt.pensize(1)\nfor _ in range(72):\n    t.forward(160)\n    t.left(175)          # a dense star spiral\nt.hideturtle()",
+    "crumbs": [
+      "Examples",
+      "Showcase & tests"
+    ]
   },
   {
     "objectID": "pages/demo.html#reading-turtle-state",
     "href": "pages/demo.html#reading-turtle-state",
-    "title": "turtle-widget — showcase & tests",
+    "title": "Showcase & tests",
     "section": "7. Reading turtle state",
-    "text": "7. Reading turtle state\nGetters return the current state without drawing anything: pos(), xcor(), ycor(), heading(), isdown(), isvisible(). (Use autoshow=False when you only want to inspect state and not render a widget.)\n\nprobe = Turtle(autoshow=False)\nprobe.forward(100); probe.left(90); probe.forward(50)\nprint(\"position:\", probe.pos())\nprint(\"heading :\", probe.heading())\nprint(\"pen down:\", probe.isdown())"
+    "text": "7. Reading turtle state\nGetters return the current state without drawing anything: pos(), xcor(), ycor(), heading(), isdown(), isvisible(). (Use autoshow=False when you only want to inspect state and not render a widget.)\n\nprobe = Turtle(autoshow=False)\nprobe.forward(100); probe.left(90); probe.forward(50)\nprint(\"position:\", probe.pos())\nprint(\"heading :\", probe.heading())\nprint(\"pen down:\", probe.isdown())\n\nposition: (100.0, 50.0)\nheading : 90.0\npen down: True",
+    "crumbs": [
+      "Examples",
+      "Showcase & tests"
+    ]
   },
   {
     "objectID": "pages/demo.html#self-test-headless",
     "href": "pages/demo.html#self-test-headless",
-    "title": "turtle-widget — showcase & tests",
+    "title": "Showcase & tests",
     "section": "8. Self-test (headless)",
-    "text": "8. Self-test (headless)\nGeometry is computed in Python, so it can be validated without a browser. This cell asserts a few invariants and checks the event stream is JSON-serializable (which is what gets sent to the frontend).\n\nimport json\nfrom turtle_widget import Turtle\n\n# movement + heading\nt = Turtle(autoshow=False)\nt.forward(100); t.left(90); t.forward(100)\nassert abs(t.xcor() - 100) &lt; 1e-9, t.xcor()\nassert abs(t.ycor() - 100) &lt; 1e-9, t.ycor()\nassert round(t.heading() % 360, 6) == 90\n\n# home returns to origin, heading 0\nt.home()\nassert abs(t.xcor()) &lt; 1e-9 and abs(t.ycor()) &lt; 1e-9\nassert round(t.heading() % 360, 6) == 0\n\n# circle returns (approximately) to its start\nc = Turtle(autoshow=False)\nc.begin_fill(); c.circle(60); c.end_fill()\nassert abs(c.xcor()) &lt; 1e-6 and abs(c.ycor()) &lt; 1e-6\nassert any(e[\"op\"] == \"fill\" for e in c._events)\n\n# every event is JSON-serializable and carries a source line + speed\npayload = json.dumps(t._events)\nassert all(\"line\" in e and \"speed\" in e for e in t._events)\n\nprint(\"All self-tests passed.\")\nprint(\"square+home events:\", len(t._events), \"| circle events:\", len(c._events))"
-  },
-  {
-    "objectID": "api/scriptname.html",
-    "href": "api/scriptname.html",
-    "title": "scriptname",
-    "section": "",
-    "text": "scriptname\nturtle_widget.modulename.scriptname()",
+    "text": "8. Self-test (headless)\nGeometry is computed in Python, so it can be validated without a browser. This cell asserts a few invariants and checks the event stream is JSON-serializable (which is what gets sent to the frontend).\n\nimport json\nfrom turtle_widget import Turtle\n\n# movement + heading\nt = Turtle(autoshow=False)\nt.forward(100); t.left(90); t.forward(100)\nassert abs(t.xcor() - 100) &lt; 1e-9, t.xcor()\nassert abs(t.ycor() - 100) &lt; 1e-9, t.ycor()\nassert round(t.heading() % 360, 6) == 90\n\n# home returns to origin, heading 0\nt.home()\nassert abs(t.xcor()) &lt; 1e-9 and abs(t.ycor()) &lt; 1e-9\nassert round(t.heading() % 360, 6) == 0\n\n# circle returns (approximately) to its start\nc = Turtle(autoshow=False)\nc.begin_fill(); c.circle(60); c.end_fill()\nassert abs(c.xcor()) &lt; 1e-6 and abs(c.ycor()) &lt; 1e-6\nassert any(e[\"op\"] == \"fill\" for e in c._events)\n\n# every event is JSON-serializable and carries a source line + speed\npayload = json.dumps(t._events)\nassert all(\"line\" in e and \"speed\" in e for e in t._events)\n\nprint(\"All self-tests passed.\")\nprint(\"square+home events:\", len(t._events), \"| circle events:\", len(c._events))",
     "crumbs": [
-      "Some other section",
-      "scriptname"
+      "Examples",
+      "Showcase & tests"
     ]
   },
   {
-    "objectID": "api/functionname.html",
-    "href": "api/functionname.html",
-    "title": "functionname",
+    "objectID": "api/Turtle.html",
+    "href": "api/Turtle.html",
+    "title": "Turtle",
     "section": "",
-    "text": "turtle_widget.modulename.functionname(x=1, y=1)\nThe sum of two numbers.\n\n\n\nx : int = 1\n\nThe first number\n\ny : int = 1\n\nThe second number.\n\n\n\n\n\n\n : int\n\nSum of two numbers.\n\n\n\n\n\nAdding two numbers\nresult = foo(2, 4)\n\n\n\nlibraryname.modulename.scriptname",
+    "text": "turtle_widget.Turtle(\n    width=500,\n    height=500,\n    show_code=False,\n    code=None,\n    autoshow=True,\n    bg='white',\n)\nAn animated, turtle-compatible drawing widget for Jupyter notebooks.\nTurtle commands are recorded in Python as a stream of events and replayed as a canvas animation below the cell. The widget displays itself automatically at the end of the cell; you can also call show() or evaluate the turtle to display it.\n\n\n\nwidth : int = 500\n\nCanvas width in pixels. Default 500.\n\nheight : int = 500\n\nCanvas height in pixels. Default 500.\n\nshow_code : bool = False\n\nIf True, show the cell source beside the canvas and highlight the active line in sync with the animation. Default False.\n\ncode : str = None\n\nSource to display instead of the captured cell source.\n\nautoshow : bool = True\n\nIf True (default), display the widget automatically at the end of the cell. Set False for headless use such as tests.\n\nbg : str = 'white'\n\nCanvas background colour. Default \"white\".\n\n\n\n\n\n\n\n\nName\nDescription\n\n\n\n\nbackward\nMove the turtle backward by distance (opposite its heading).\n\n\nbegin_fill\nStart recording a filled shape.\n\n\nbgcolor\nGet or set the canvas background colour.\n\n\ncircle\nDraw a circle or arc, approximated by a series of straight chords.\n\n\nclear\nClear all drawing from the canvas, keeping the turtle state.\n\n\ncolor\nGet or set the pen colour, the fill colour, or both at once.\n\n\ndot\nDraw a filled dot at the current position.\n\n\nend_fill\nFill the shape traced since the last begin_fill.\n\n\nfillcolor\nGet or set the fill colour used by begin_fill / end_fill.\n\n\nforward\nMove the turtle forward by distance, drawing if the pen is down.\n\n\ngoto\nMove the turtle to an absolute position, drawing if the pen is down.\n\n\nheading\nReturn the current heading in degrees.\n\n\nhideturtle\nHide the turtle marker.\n\n\nhome\nMove the turtle to the origin (0, 0) and set its heading to 0.\n\n\nisdown\nReturn whether the pen is down.\n\n\nisvisible\nReturn whether the turtle marker is visible.\n\n\nleft\nTurn the turtle counter-clockwise by angle degrees.\n\n\npencolor\nGet or set the pen (outline) colour.\n\n\npendown\nLower the pen so subsequent moves draw.\n\n\npensize\nGet or set the pen width.\n\n\npenup\nLift the pen so subsequent moves do not draw.\n\n\nposition\nReturn the current position.\n\n\nreset\nClear the drawing and reset the turtle to its initial state.\n\n\nright\nTurn the turtle clockwise by angle degrees.\n\n\nsetheading\nTurn the turtle to face an absolute heading.\n\n\nsetx\nSet the x-coordinate, keeping y unchanged.\n\n\nsety\nSet the y-coordinate, keeping x unchanged.\n\n\nshow\nFlush the recorded commands and display the widget now.\n\n\nshowturtle\nMake the turtle marker visible.\n\n\nspeed\nGet or set the drawing speed.\n\n\nstamp\nStamp a copy of the turtle shape at the current position and heading.\n\n\nwrite\nWrite text at the current position.\n\n\nxcor\nReturn the current x-coordinate.\n\n\nycor\nReturn the current y-coordinate.\n\n\n\n\n\nturtle_widget.Turtle.backward(distance)\nMove the turtle backward by distance (opposite its heading).\n\n\n\ndistance : float\n\nDistance to move opposite the current heading.\n\n\n\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.begin_fill()\nStart recording a filled shape.\nCall before the commands that trace the outline, then call end_fill to fill it.\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.bgcolor(*args)\nGet or set the canvas background colour.\n\n\n\n*args :  = ()\n\nA CSS colour name/hex string or an (r, g, b) triple. With no arguments, the current background colour is returned.\n\n\n\n\n\n\n : Turtle or str\n\nThis turtle when setting (to allow chaining), or the current background colour when called with no arguments.\n\n\n\n\n\n\nturtle_widget.Turtle.circle(radius, extent=None, steps=None)\nDraw a circle or arc, approximated by a series of straight chords.\nA positive radius curves to the left of the turtle, a negative radius to the right.\n\n\n\nradius : float\n\nRadius of the circle. Positive curves left, negative curves right.\n\nextent : float = None\n\nAngle of the arc to draw, in degrees. Defaults to 360 (a full circle).\n\nsteps : int = None\n\nNumber of chords approximating the arc. Defaults to a value scaled to the radius and extent.\n\n\n\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.clear()\nClear all drawing from the canvas, keeping the turtle state.\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.color(*args)\nGet or set the pen colour, the fill colour, or both at once.\n\n\n\n*args :  = ()\n\nWith no arguments, returns (pencolor, fillcolor). With one argument, sets both pen and fill to that colour. With two, sets the pen and fill colours respectively. Each colour may be a CSS name/hex string or an (r, g, b) triple.\n\n\n\n\n\n\n : Turtle or tuple of str\n\nThis turtle when setting (to allow chaining), or the (pencolor, fillcolor) pair when called with no arguments.\n\n\n\n\n\n\nturtle_widget.Turtle.dot(size=None, *color)\nDraw a filled dot at the current position.\n\n\n\nsize : float = None\n\nDiameter of the dot in pixels. Defaults to a small multiple of the pen size.\n\n*color :  = ()\n\nOptional dot colour as a CSS name/hex string or an (r, g, b) triple. Defaults to the current pen colour.\n\n\n\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.end_fill()\nFill the shape traced since the last begin_fill.\nThe fill is drawn behind the outline in the current fill colour. Does nothing if fewer than two points were recorded.\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.fillcolor(*args)\nGet or set the fill colour used by begin_fill / end_fill.\n\n\n\n*args :  = ()\n\nA CSS colour name or hex string, or an (r, g, b) triple; see pencolor for the accepted forms.\n\n\n\n\n\n\n : Turtle or str\n\nThis turtle when setting (to allow chaining), or the current fill colour when called with no arguments.\n\n\n\n\n\n\nturtle_widget.Turtle.forward(distance)\nMove the turtle forward by distance, drawing if the pen is down.\n\n\n\ndistance : float\n\nDistance to move along the current heading.\n\n\n\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.goto(x, y=None)\nMove the turtle to an absolute position, drawing if the pen is down.\n\n\n\nx : float or tuple of float\n\nTarget x-coordinate, or an (x, y) pair (then y must be omitted).\n\ny : float = None\n\nTarget y-coordinate.\n\n\n\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.heading()\nReturn the current heading in degrees.\n\n\n\n : float\n\nHeading in [0, 360) degrees, with 0 = east and counter-clockwise positive.\n\n\n\n\n\n\nturtle_widget.Turtle.hideturtle()\nHide the turtle marker.\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.home()\nMove the turtle to the origin (0, 0) and set its heading to 0.\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.isdown()\nReturn whether the pen is down.\n\n\n\n : bool\n\nTrue if the pen is down (drawing), False otherwise.\n\n\n\n\n\n\nturtle_widget.Turtle.isvisible()\nReturn whether the turtle marker is visible.\n\n\n\n : bool\n\nTrue if the turtle marker is shown, False otherwise.\n\n\n\n\n\n\nturtle_widget.Turtle.left(angle)\nTurn the turtle counter-clockwise by angle degrees.\nThe animation spins exactly angle degrees, so multi-turn values such as left(720) are preserved as two full rotations.\n\n\n\nangle : float\n\nDegrees to turn counter-clockwise.\n\n\n\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.pencolor(*args)\nGet or set the pen (outline) colour.\n\n\n\n*args :  = ()\n\nA CSS colour name or hex string (\"red\", \"#ff8800\"), or an (r, g, b) triple given as three arguments or one tuple. Float components in [0, 1] use the 0-1 scale, otherwise 0-255.\n\n\n\n\n\n\n : Turtle or str\n\nThis turtle when setting (to allow chaining), or the current pen colour when called with no arguments.\n\n\n\n\n\n\nturtle_widget.Turtle.pendown()\nLower the pen so subsequent moves draw.\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.pensize(width=None)\nGet or set the pen width.\n\n\n\nwidth : float = None\n\nNew pen width in pixels. If omitted, the current width is returned.\n\n\n\n\n\n\n : Turtle or float\n\nThis turtle when setting (to allow chaining), or the current pen width when called with no argument.\n\n\n\n\n\nNamed pensize (alias width_) because width is the canvas-size trait.\n\n\n\n\nturtle_widget.Turtle.penup()\nLift the pen so subsequent moves do not draw.\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.position()\nReturn the current position.\n\n\n\n : tuple of float\n\nThe (x, y) coordinates, with the origin at the canvas centre.\n\n\n\n\n\n\nturtle_widget.Turtle.reset()\nClear the drawing and reset the turtle to its initial state.\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.right(angle)\nTurn the turtle clockwise by angle degrees.\nThe animation spins exactly angle degrees, so multi-turn values such as right(720) are preserved as two full rotations.\n\n\n\nangle : float\n\nDegrees to turn clockwise.\n\n\n\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.setheading(to_angle)\nTurn the turtle to face an absolute heading.\nRotates along the shortest path, so turning from 0 to 270 spins -90 degrees rather than +270. Headings are in degrees with 0 = east, counter-clockwise positive.\n\n\n\nto_angle : float\n\nAbsolute heading in degrees.\n\n\n\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.setx(x)\nSet the x-coordinate, keeping y unchanged.\n\n\n\nx : float\n\nNew x-coordinate.\n\n\n\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.sety(y)\nSet the y-coordinate, keeping x unchanged.\n\n\n\ny : float\n\nNew y-coordinate.\n\n\n\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.show()\nFlush the recorded commands and display the widget now.\n\n\n\n : Turtle\n\nThis turtle.\n\n\n\n\n\n\nturtle_widget.Turtle.showturtle()\nMake the turtle marker visible.\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.speed(s=None)\nGet or set the drawing speed.\n\n\n\ns : int or str = None\n\nSpeed from 0 to 10, or a name: \"fastest\" (0), \"fast\" (10), \"normal\" (6), \"slow\" (3), \"slowest\" (1). 0 disables animation (the drawing appears at once). If omitted, the current speed is returned.\n\n\n\n\n\n\n : Turtle or int\n\nThis turtle when setting (to allow chaining), or the current speed when called with no argument.\n\n\n\n\n\n\nturtle_widget.Turtle.stamp()\nStamp a copy of the turtle shape at the current position and heading.\n\n\n\n : int\n\nThe number of recorded events after stamping (a stamp id).\n\n\n\n\n\n\nturtle_widget.Turtle.write(\n    text,\n    align='left',\n    font=('sans-serif', 14, 'normal'),\n)\nWrite text at the current position.\n\n\n\ntext : str\n\nThe text to write.\n\nalign : ('left', 'center', 'right') = \"left\"\n\nHorizontal alignment relative to the turtle. Default \"left\".\n\nfont : tuple = ('sans-serif', 14, 'normal')\n\nA (family, size, style) triple; only family and size are used. Default (\"sans-serif\", 14, \"normal\").\n\n\n\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.xcor()\nReturn the current x-coordinate.\n\n\n\n : float\n\nThe current x-coordinate.\n\n\n\n\n\n\nturtle_widget.Turtle.ycor()\nReturn the current y-coordinate.\n\n\n\n : float\n\nThe current y-coordinate.",
     "crumbs": [
-      "Some section",
-      "functionname"
+      "Widget",
+      "Turtle"
     ]
   },
   {
-    "objectID": "api/functionname.html#parameters",
-    "href": "api/functionname.html#parameters",
-    "title": "functionname",
+    "objectID": "api/Turtle.html#parameters",
+    "href": "api/Turtle.html#parameters",
+    "title": "Turtle",
     "section": "",
-    "text": "x : int = 1\n\nThe first number\n\ny : int = 1\n\nThe second number.",
+    "text": "width : int = 500\n\nCanvas width in pixels. Default 500.\n\nheight : int = 500\n\nCanvas height in pixels. Default 500.\n\nshow_code : bool = False\n\nIf True, show the cell source beside the canvas and highlight the active line in sync with the animation. Default False.\n\ncode : str = None\n\nSource to display instead of the captured cell source.\n\nautoshow : bool = True\n\nIf True (default), display the widget automatically at the end of the cell. Set False for headless use such as tests.\n\nbg : str = 'white'\n\nCanvas background colour. Default \"white\".",
     "crumbs": [
-      "Some section",
-      "functionname"
+      "Widget",
+      "Turtle"
     ]
   },
   {
-    "objectID": "api/functionname.html#returns",
-    "href": "api/functionname.html#returns",
-    "title": "functionname",
+    "objectID": "api/Turtle.html#methods",
+    "href": "api/Turtle.html#methods",
+    "title": "Turtle",
     "section": "",
-    "text": ": int\n\nSum of two numbers.",
+    "text": "Name\nDescription\n\n\n\n\nbackward\nMove the turtle backward by distance (opposite its heading).\n\n\nbegin_fill\nStart recording a filled shape.\n\n\nbgcolor\nGet or set the canvas background colour.\n\n\ncircle\nDraw a circle or arc, approximated by a series of straight chords.\n\n\nclear\nClear all drawing from the canvas, keeping the turtle state.\n\n\ncolor\nGet or set the pen colour, the fill colour, or both at once.\n\n\ndot\nDraw a filled dot at the current position.\n\n\nend_fill\nFill the shape traced since the last begin_fill.\n\n\nfillcolor\nGet or set the fill colour used by begin_fill / end_fill.\n\n\nforward\nMove the turtle forward by distance, drawing if the pen is down.\n\n\ngoto\nMove the turtle to an absolute position, drawing if the pen is down.\n\n\nheading\nReturn the current heading in degrees.\n\n\nhideturtle\nHide the turtle marker.\n\n\nhome\nMove the turtle to the origin (0, 0) and set its heading to 0.\n\n\nisdown\nReturn whether the pen is down.\n\n\nisvisible\nReturn whether the turtle marker is visible.\n\n\nleft\nTurn the turtle counter-clockwise by angle degrees.\n\n\npencolor\nGet or set the pen (outline) colour.\n\n\npendown\nLower the pen so subsequent moves draw.\n\n\npensize\nGet or set the pen width.\n\n\npenup\nLift the pen so subsequent moves do not draw.\n\n\nposition\nReturn the current position.\n\n\nreset\nClear the drawing and reset the turtle to its initial state.\n\n\nright\nTurn the turtle clockwise by angle degrees.\n\n\nsetheading\nTurn the turtle to face an absolute heading.\n\n\nsetx\nSet the x-coordinate, keeping y unchanged.\n\n\nsety\nSet the y-coordinate, keeping x unchanged.\n\n\nshow\nFlush the recorded commands and display the widget now.\n\n\nshowturtle\nMake the turtle marker visible.\n\n\nspeed\nGet or set the drawing speed.\n\n\nstamp\nStamp a copy of the turtle shape at the current position and heading.\n\n\nwrite\nWrite text at the current position.\n\n\nxcor\nReturn the current x-coordinate.\n\n\nycor\nReturn the current y-coordinate.\n\n\n\n\n\nturtle_widget.Turtle.backward(distance)\nMove the turtle backward by distance (opposite its heading).\n\n\n\ndistance : float\n\nDistance to move opposite the current heading.\n\n\n\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.begin_fill()\nStart recording a filled shape.\nCall before the commands that trace the outline, then call end_fill to fill it.\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.bgcolor(*args)\nGet or set the canvas background colour.\n\n\n\n*args :  = ()\n\nA CSS colour name/hex string or an (r, g, b) triple. With no arguments, the current background colour is returned.\n\n\n\n\n\n\n : Turtle or str\n\nThis turtle when setting (to allow chaining), or the current background colour when called with no arguments.\n\n\n\n\n\n\nturtle_widget.Turtle.circle(radius, extent=None, steps=None)\nDraw a circle or arc, approximated by a series of straight chords.\nA positive radius curves to the left of the turtle, a negative radius to the right.\n\n\n\nradius : float\n\nRadius of the circle. Positive curves left, negative curves right.\n\nextent : float = None\n\nAngle of the arc to draw, in degrees. Defaults to 360 (a full circle).\n\nsteps : int = None\n\nNumber of chords approximating the arc. Defaults to a value scaled to the radius and extent.\n\n\n\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.clear()\nClear all drawing from the canvas, keeping the turtle state.\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.color(*args)\nGet or set the pen colour, the fill colour, or both at once.\n\n\n\n*args :  = ()\n\nWith no arguments, returns (pencolor, fillcolor). With one argument, sets both pen and fill to that colour. With two, sets the pen and fill colours respectively. Each colour may be a CSS name/hex string or an (r, g, b) triple.\n\n\n\n\n\n\n : Turtle or tuple of str\n\nThis turtle when setting (to allow chaining), or the (pencolor, fillcolor) pair when called with no arguments.\n\n\n\n\n\n\nturtle_widget.Turtle.dot(size=None, *color)\nDraw a filled dot at the current position.\n\n\n\nsize : float = None\n\nDiameter of the dot in pixels. Defaults to a small multiple of the pen size.\n\n*color :  = ()\n\nOptional dot colour as a CSS name/hex string or an (r, g, b) triple. Defaults to the current pen colour.\n\n\n\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.end_fill()\nFill the shape traced since the last begin_fill.\nThe fill is drawn behind the outline in the current fill colour. Does nothing if fewer than two points were recorded.\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.fillcolor(*args)\nGet or set the fill colour used by begin_fill / end_fill.\n\n\n\n*args :  = ()\n\nA CSS colour name or hex string, or an (r, g, b) triple; see pencolor for the accepted forms.\n\n\n\n\n\n\n : Turtle or str\n\nThis turtle when setting (to allow chaining), or the current fill colour when called with no arguments.\n\n\n\n\n\n\nturtle_widget.Turtle.forward(distance)\nMove the turtle forward by distance, drawing if the pen is down.\n\n\n\ndistance : float\n\nDistance to move along the current heading.\n\n\n\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.goto(x, y=None)\nMove the turtle to an absolute position, drawing if the pen is down.\n\n\n\nx : float or tuple of float\n\nTarget x-coordinate, or an (x, y) pair (then y must be omitted).\n\ny : float = None\n\nTarget y-coordinate.\n\n\n\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.heading()\nReturn the current heading in degrees.\n\n\n\n : float\n\nHeading in [0, 360) degrees, with 0 = east and counter-clockwise positive.\n\n\n\n\n\n\nturtle_widget.Turtle.hideturtle()\nHide the turtle marker.\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.home()\nMove the turtle to the origin (0, 0) and set its heading to 0.\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.isdown()\nReturn whether the pen is down.\n\n\n\n : bool\n\nTrue if the pen is down (drawing), False otherwise.\n\n\n\n\n\n\nturtle_widget.Turtle.isvisible()\nReturn whether the turtle marker is visible.\n\n\n\n : bool\n\nTrue if the turtle marker is shown, False otherwise.\n\n\n\n\n\n\nturtle_widget.Turtle.left(angle)\nTurn the turtle counter-clockwise by angle degrees.\nThe animation spins exactly angle degrees, so multi-turn values such as left(720) are preserved as two full rotations.\n\n\n\nangle : float\n\nDegrees to turn counter-clockwise.\n\n\n\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.pencolor(*args)\nGet or set the pen (outline) colour.\n\n\n\n*args :  = ()\n\nA CSS colour name or hex string (\"red\", \"#ff8800\"), or an (r, g, b) triple given as three arguments or one tuple. Float components in [0, 1] use the 0-1 scale, otherwise 0-255.\n\n\n\n\n\n\n : Turtle or str\n\nThis turtle when setting (to allow chaining), or the current pen colour when called with no arguments.\n\n\n\n\n\n\nturtle_widget.Turtle.pendown()\nLower the pen so subsequent moves draw.\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.pensize(width=None)\nGet or set the pen width.\n\n\n\nwidth : float = None\n\nNew pen width in pixels. If omitted, the current width is returned.\n\n\n\n\n\n\n : Turtle or float\n\nThis turtle when setting (to allow chaining), or the current pen width when called with no argument.\n\n\n\n\n\nNamed pensize (alias width_) because width is the canvas-size trait.\n\n\n\n\nturtle_widget.Turtle.penup()\nLift the pen so subsequent moves do not draw.\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.position()\nReturn the current position.\n\n\n\n : tuple of float\n\nThe (x, y) coordinates, with the origin at the canvas centre.\n\n\n\n\n\n\nturtle_widget.Turtle.reset()\nClear the drawing and reset the turtle to its initial state.\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.right(angle)\nTurn the turtle clockwise by angle degrees.\nThe animation spins exactly angle degrees, so multi-turn values such as right(720) are preserved as two full rotations.\n\n\n\nangle : float\n\nDegrees to turn clockwise.\n\n\n\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.setheading(to_angle)\nTurn the turtle to face an absolute heading.\nRotates along the shortest path, so turning from 0 to 270 spins -90 degrees rather than +270. Headings are in degrees with 0 = east, counter-clockwise positive.\n\n\n\nto_angle : float\n\nAbsolute heading in degrees.\n\n\n\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.setx(x)\nSet the x-coordinate, keeping y unchanged.\n\n\n\nx : float\n\nNew x-coordinate.\n\n\n\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.sety(y)\nSet the y-coordinate, keeping x unchanged.\n\n\n\ny : float\n\nNew y-coordinate.\n\n\n\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.show()\nFlush the recorded commands and display the widget now.\n\n\n\n : Turtle\n\nThis turtle.\n\n\n\n\n\n\nturtle_widget.Turtle.showturtle()\nMake the turtle marker visible.\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.speed(s=None)\nGet or set the drawing speed.\n\n\n\ns : int or str = None\n\nSpeed from 0 to 10, or a name: \"fastest\" (0), \"fast\" (10), \"normal\" (6), \"slow\" (3), \"slowest\" (1). 0 disables animation (the drawing appears at once). If omitted, the current speed is returned.\n\n\n\n\n\n\n : Turtle or int\n\nThis turtle when setting (to allow chaining), or the current speed when called with no argument.\n\n\n\n\n\n\nturtle_widget.Turtle.stamp()\nStamp a copy of the turtle shape at the current position and heading.\n\n\n\n : int\n\nThe number of recorded events after stamping (a stamp id).\n\n\n\n\n\n\nturtle_widget.Turtle.write(\n    text,\n    align='left',\n    font=('sans-serif', 14, 'normal'),\n)\nWrite text at the current position.\n\n\n\ntext : str\n\nThe text to write.\n\nalign : ('left', 'center', 'right') = \"left\"\n\nHorizontal alignment relative to the turtle. Default \"left\".\n\nfont : tuple = ('sans-serif', 14, 'normal')\n\nA (family, size, style) triple; only family and size are used. Default (\"sans-serif\", 14, \"normal\").\n\n\n\n\n\n\n : Turtle\n\nThis turtle, to allow method chaining.\n\n\n\n\n\n\nturtle_widget.Turtle.xcor()\nReturn the current x-coordinate.\n\n\n\n : float\n\nThe current x-coordinate.\n\n\n\n\n\n\nturtle_widget.Turtle.ycor()\nReturn the current y-coordinate.\n\n\n\n : float\n\nThe current y-coordinate.",
     "crumbs": [
-      "Some section",
-      "functionname"
-    ]
-  },
-  {
-    "objectID": "api/functionname.html#examples",
-    "href": "api/functionname.html#examples",
-    "title": "functionname",
-    "section": "",
-    "text": "Adding two numbers\nresult = foo(2, 4)",
-    "crumbs": [
-      "Some section",
-      "functionname"
-    ]
-  },
-  {
-    "objectID": "api/functionname.html#see-also",
-    "href": "api/functionname.html#see-also",
-    "title": "functionname",
-    "section": "",
-    "text": "libraryname.modulename.scriptname",
-    "crumbs": [
-      "Some section",
-      "functionname"
+      "Widget",
+      "Turtle"
     ]
   },
   {
@@ -133,27 +136,17 @@
     "href": "api/index.html",
     "title": "Function reference",
     "section": "",
-    "text": "Some description…\n\n\n\nfunctionname\nThe sum of two numbers.\n\n\n\n\n\n\nSome description…\n\n\n\nscriptname",
+    "text": "The animated turtle-graphics drawing widget.\n\n\n\nTurtle\nAn animated, turtle-compatible drawing widget for Jupyter notebooks.",
     "crumbs": [
       "Function reference"
     ]
   },
   {
-    "objectID": "api/index.html#some-section",
-    "href": "api/index.html#some-section",
+    "objectID": "api/index.html#widget",
+    "href": "api/index.html#widget",
     "title": "Function reference",
     "section": "",
-    "text": "Some description…\n\n\n\nfunctionname\nThe sum of two numbers.",
-    "crumbs": [
-      "Function reference"
-    ]
-  },
-  {
-    "objectID": "api/index.html#some-other-section",
-    "href": "api/index.html#some-other-section",
-    "title": "Function reference",
-    "section": "",
-    "text": "Some description…\n\n\n\nscriptname",
+    "text": "The animated turtle-graphics drawing widget.\n\n\n\nTurtle\nAn animated, turtle-compatible drawing widget for Jupyter notebooks.",
     "crumbs": [
       "Function reference"
     ]
@@ -163,7 +156,7 @@
     "href": "pages/overview.html",
     "title": "Overview",
     "section": "",
-    "text": "turtle-widget lets you …\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sagittis posuere ligula sit amet lacinia. Duis dignissim pellentesque magna, rhoncus congue sapien finibus mollis. Ut eu sem laoreet, vehicula ipsum in, convallis erat. Vestibulum magna sem, blandit pulvinar augue sit amet, auctor malesuada sapien. Nullam faucibus leo eget eros hendrerit, non laoreet ipsum lacinia. Curabitur cursus diam elit, non tempus ante volutpat a. Quisque hendrerit blandit purus non fringilla. Integer sit amet elit viverra ante dapibus semper. Vestibulum viverra rutrum enim, at luctus enim posuere eu. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.",
+    "text": "turtle-widget is an animated, turtle-compatible drawing widget for Jupyter notebooks. You write ordinary turtle code in Python; the widget records each command and replays it as a smooth canvas animation right below the cell.\nBuilt on anywidget, it behaves identically in VS Code, JupyterLab, Notebook 7, and Colab, and works offline.",
     "crumbs": [
       "Overview"
     ]
@@ -173,27 +166,7 @@
     "href": "pages/overview.html#installation",
     "title": "Overview",
     "section": "Installation",
-    "text": "Installation\n\npixicondapip\n\n\npixi workspace channel add munch-group\npixi add turtle-widget\n\n\nconda install -c munch-group turtle-widget\n\n\npip install turtle-widget",
-    "crumbs": [
-      "Overview"
-    ]
-  },
-  {
-    "objectID": "pages/overview.html#basic-use",
-    "href": "pages/overview.html#basic-use",
-    "title": "Overview",
-    "section": "Basic use",
-    "text": "Basic use",
-    "crumbs": [
-      "Overview"
-    ]
-  },
-  {
-    "objectID": "pages/overview.html#some-use-case",
-    "href": "pages/overview.html#some-use-case",
-    "title": "Overview",
-    "section": "Some use case",
-    "text": "Some use case\nThe functionname function does … turtle_widget.modulename.functionname does … functionname does …\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sagittis posuere ligula sit amet lacinia. Duis dignissim pellentesque magna, rhoncus congue sapien finibus mollis. Ut eu sem laoreet, vehicula ipsum in, convallis erat. Vestibulum magna sem, blandit pulvinar augue sit amet, auctor malesuada sapien. Nullam faucibus leo eget eros hendrerit, non laoreet ipsum lacinia. Curabitur cursus diam elit, non tempus ante volutpat a. Quisque hendrerit blandit purus non fringilla. Integer sit amet elit viverra ante dapibus semper. Vestibulum viverra rutrum enim, at luctus enim posuere eu. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.\n\n# from turtle_widget.modulename import functionname\n# functionname(3, 4)\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sagittis posuere ligula sit amet lacinia. Duis dignissim pellentesque magna, rhoncus congue sapien finibus mollis. Ut eu sem laoreet, vehicula ipsum in, convallis erat. Vestibulum magna sem, blandit pulvinar augue sit amet, auctor malesuada sapien. Nullam faucibus leo eget eros hendrerit, non laoreet ipsum lacinia. Curabitur cursus diam elit, non tempus ante volutpat a. Quisque hendrerit blandit purus non fringilla. Integer sit amet elit viverra ante dapibus semper. Vestibulum viverra rutrum enim, at luctus enim posuere eu. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.\ncontents:\n  - MdRenderer\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sagittis posuere ligula sit amet lacinia. Duis dignissim pellentesque magna, rhoncus congue sapien finibus mollis. Ut eu sem laoreet, vehicula ipsum in, convallis erat. Vestibulum magna sem, blandit pulvinar augue sit amet, auctor malesuada sapien. Nullam faucibus leo eget eros hendrerit, non laoreet ipsum lacinia. Curabitur cursus diam elit, non tempus ante volutpat a. Quisque hendrerit blandit purus non fringilla. Integer sit amet elit viverra ante dapibus semper. Vestibulum viverra rutrum enim, at luctus enim posuere eu. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.",
+    "text": "Installation\n\npixicondapip\n\n\npixi workspace channel add munch-group\npixi add turtle-widget\n\n\nconda install -c munch-group turtle-widget\n\n\npip install turtle-widget\n\n\n\n\nfrom turtle_widget import Turtle\n\nt = Turtle()\nt.speed(6)\nfor _ in range(4):     # a square\n    t.forward(120)\n    t.left(90)",
     "crumbs": [
       "Overview"
     ]
@@ -203,7 +176,7 @@
     "href": "pages/overview.html#learning-more",
     "title": "Overview",
     "section": "Learning more",
-    "text": "Learning more\nGo to the anvanced page to learn how to …\n\nExamples page: sites using quartodoc.",
+    "text": "Learning more\n\nShowcase & tests — a guided tour through movement, colours, fills, circles, text, and synced code highlighting, each with a live animation.\nAPI reference — the full Turtle API.",
     "crumbs": [
       "Overview"
     ]

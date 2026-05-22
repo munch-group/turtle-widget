@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>turtle – turtle-widget</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../api/index.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-3e7735b7b22659e5fa437aca0bb49075.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../api/_styles-quartodoc.css">
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">turtle-widget</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../api/"> 
+<span class="menu-text">API reference</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/munch-group/turtle-widget/"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api/Turtle.html">Widget</a></li><li class="breadcrumb-item"><a href="../api/Turtle.html">Turtle</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Function reference</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Widget</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/Turtle.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Turtle</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#turtle_widget.Turtle" id="toc-turtle_widget.Turtle" class="nav-link active" data-scroll-target="#turtle_widget.Turtle">Turtle</a>
+  <ul class="collapse">
+  <li><a href="#parameters" id="toc-parameters" class="nav-link" data-scroll-target="#parameters">Parameters</a></li>
+  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
+  <ul class="collapse">
+  <li><a href="#turtle_widget.Turtle.backward" id="toc-turtle_widget.Turtle.backward" class="nav-link" data-scroll-target="#turtle_widget.Turtle.backward">backward</a></li>
+  <li><a href="#turtle_widget.Turtle.begin_fill" id="toc-turtle_widget.Turtle.begin_fill" class="nav-link" data-scroll-target="#turtle_widget.Turtle.begin_fill">begin_fill</a></li>
+  <li><a href="#turtle_widget.Turtle.bgcolor" id="toc-turtle_widget.Turtle.bgcolor" class="nav-link" data-scroll-target="#turtle_widget.Turtle.bgcolor">bgcolor</a></li>
+  <li><a href="#turtle_widget.Turtle.circle" id="toc-turtle_widget.Turtle.circle" class="nav-link" data-scroll-target="#turtle_widget.Turtle.circle">circle</a></li>
+  <li><a href="#turtle_widget.Turtle.clear" id="toc-turtle_widget.Turtle.clear" class="nav-link" data-scroll-target="#turtle_widget.Turtle.clear">clear</a></li>
+  <li><a href="#turtle_widget.Turtle.color" id="toc-turtle_widget.Turtle.color" class="nav-link" data-scroll-target="#turtle_widget.Turtle.color">color</a></li>
+  <li><a href="#turtle_widget.Turtle.dot" id="toc-turtle_widget.Turtle.dot" class="nav-link" data-scroll-target="#turtle_widget.Turtle.dot">dot</a></li>
+  <li><a href="#turtle_widget.Turtle.end_fill" id="toc-turtle_widget.Turtle.end_fill" class="nav-link" data-scroll-target="#turtle_widget.Turtle.end_fill">end_fill</a></li>
+  <li><a href="#turtle_widget.Turtle.fillcolor" id="toc-turtle_widget.Turtle.fillcolor" class="nav-link" data-scroll-target="#turtle_widget.Turtle.fillcolor">fillcolor</a></li>
+  <li><a href="#turtle_widget.Turtle.forward" id="toc-turtle_widget.Turtle.forward" class="nav-link" data-scroll-target="#turtle_widget.Turtle.forward">forward</a></li>
+  <li><a href="#turtle_widget.Turtle.goto" id="toc-turtle_widget.Turtle.goto" class="nav-link" data-scroll-target="#turtle_widget.Turtle.goto">goto</a></li>
+  <li><a href="#turtle_widget.Turtle.heading" id="toc-turtle_widget.Turtle.heading" class="nav-link" data-scroll-target="#turtle_widget.Turtle.heading">heading</a></li>
+  <li><a href="#turtle_widget.Turtle.hideturtle" id="toc-turtle_widget.Turtle.hideturtle" class="nav-link" data-scroll-target="#turtle_widget.Turtle.hideturtle">hideturtle</a></li>
+  <li><a href="#turtle_widget.Turtle.home" id="toc-turtle_widget.Turtle.home" class="nav-link" data-scroll-target="#turtle_widget.Turtle.home">home</a></li>
+  <li><a href="#turtle_widget.Turtle.isdown" id="toc-turtle_widget.Turtle.isdown" class="nav-link" data-scroll-target="#turtle_widget.Turtle.isdown">isdown</a></li>
+  <li><a href="#turtle_widget.Turtle.isvisible" id="toc-turtle_widget.Turtle.isvisible" class="nav-link" data-scroll-target="#turtle_widget.Turtle.isvisible">isvisible</a></li>
+  <li><a href="#turtle_widget.Turtle.left" id="toc-turtle_widget.Turtle.left" class="nav-link" data-scroll-target="#turtle_widget.Turtle.left">left</a></li>
+  <li><a href="#turtle_widget.Turtle.pencolor" id="toc-turtle_widget.Turtle.pencolor" class="nav-link" data-scroll-target="#turtle_widget.Turtle.pencolor">pencolor</a></li>
+  <li><a href="#turtle_widget.Turtle.pendown" id="toc-turtle_widget.Turtle.pendown" class="nav-link" data-scroll-target="#turtle_widget.Turtle.pendown">pendown</a></li>
+  <li><a href="#turtle_widget.Turtle.pensize" id="toc-turtle_widget.Turtle.pensize" class="nav-link" data-scroll-target="#turtle_widget.Turtle.pensize">pensize</a></li>
+  <li><a href="#turtle_widget.Turtle.penup" id="toc-turtle_widget.Turtle.penup" class="nav-link" data-scroll-target="#turtle_widget.Turtle.penup">penup</a></li>
+  <li><a href="#turtle_widget.Turtle.position" id="toc-turtle_widget.Turtle.position" class="nav-link" data-scroll-target="#turtle_widget.Turtle.position">position</a></li>
+  <li><a href="#turtle_widget.Turtle.reset" id="toc-turtle_widget.Turtle.reset" class="nav-link" data-scroll-target="#turtle_widget.Turtle.reset">reset</a></li>
+  <li><a href="#turtle_widget.Turtle.right" id="toc-turtle_widget.Turtle.right" class="nav-link" data-scroll-target="#turtle_widget.Turtle.right">right</a></li>
+  <li><a href="#turtle_widget.Turtle.setheading" id="toc-turtle_widget.Turtle.setheading" class="nav-link" data-scroll-target="#turtle_widget.Turtle.setheading">setheading</a></li>
+  <li><a href="#turtle_widget.Turtle.setx" id="toc-turtle_widget.Turtle.setx" class="nav-link" data-scroll-target="#turtle_widget.Turtle.setx">setx</a></li>
+  <li><a href="#turtle_widget.Turtle.sety" id="toc-turtle_widget.Turtle.sety" class="nav-link" data-scroll-target="#turtle_widget.Turtle.sety">sety</a></li>
+  <li><a href="#turtle_widget.Turtle.show" id="toc-turtle_widget.Turtle.show" class="nav-link" data-scroll-target="#turtle_widget.Turtle.show">show</a></li>
+  <li><a href="#turtle_widget.Turtle.showturtle" id="toc-turtle_widget.Turtle.showturtle" class="nav-link" data-scroll-target="#turtle_widget.Turtle.showturtle">showturtle</a></li>
+  <li><a href="#turtle_widget.Turtle.speed" id="toc-turtle_widget.Turtle.speed" class="nav-link" data-scroll-target="#turtle_widget.Turtle.speed">speed</a></li>
+  <li><a href="#turtle_widget.Turtle.stamp" id="toc-turtle_widget.Turtle.stamp" class="nav-link" data-scroll-target="#turtle_widget.Turtle.stamp">stamp</a></li>
+  <li><a href="#turtle_widget.Turtle.write" id="toc-turtle_widget.Turtle.write" class="nav-link" data-scroll-target="#turtle_widget.Turtle.write">write</a></li>
+  <li><a href="#turtle_widget.Turtle.xcor" id="toc-turtle_widget.Turtle.xcor" class="nav-link" data-scroll-target="#turtle_widget.Turtle.xcor">xcor</a></li>
+  <li><a href="#turtle_widget.Turtle.ycor" id="toc-turtle_widget.Turtle.ycor" class="nav-link" data-scroll-target="#turtle_widget.Turtle.ycor">ycor</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api/Turtle.html">Widget</a></li><li class="breadcrumb-item"><a href="../api/Turtle.html">Turtle</a></li></ol></nav></header>
+
+
+
+
+<section id="turtle_widget.Turtle" class="level1">
+<h1>Turtle</h1>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    width<span class="op">=</span><span class="dv">500</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    height<span class="op">=</span><span class="dv">500</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    show_code<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    code<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    autoshow<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    bg<span class="op">=</span><span class="st">'white'</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>An animated, turtle-compatible drawing widget for Jupyter notebooks.</p>
+<p>Turtle commands are recorded in Python as a stream of events and replayed as a canvas animation below the cell. The widget displays itself automatically at the end of the cell; you can also call <code>show()</code> or evaluate the turtle to display it.</p>
+<section id="parameters" class="level2 doc-section doc-section-parameters">
+<h2 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h2>
+<dl>
+<dt><code><span class="parameter-name"><strong>width</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#int">int</a></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">500</span></code></dt>
+<dd>
+<p>Canvas width in pixels. Default 500.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>height</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#int">int</a></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">500</span></code></dt>
+<dd>
+<p>Canvas height in pixels. Default 500.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>show_code</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#bool">bool</a></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">False</span></code></dt>
+<dd>
+<p>If True, show the cell source beside the canvas and highlight the active line in sync with the animation. Default False.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>code</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/stdtypes.html#str">str</a></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">None</span></code></dt>
+<dd>
+<p>Source to display instead of the captured cell source.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>autoshow</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#bool">bool</a></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">True</span></code></dt>
+<dd>
+<p>If True (default), display the widget automatically at the end of the cell. Set False for headless use such as tests.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>bg</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/stdtypes.html#str">str</a></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">'white'</span></code></dt>
+<dd>
+<p>Canvas background colour. Default <code>"white"</code>.</p>
+</dd>
+</dl>
+</section>
+<section id="methods" class="level2">
+<h2 class="anchored" data-anchor-id="methods">Methods</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#turtle_widget.Turtle.backward">backward</a></td>
+<td>Move the turtle backward by <code>distance</code> (opposite its heading).</td>
+</tr>
+<tr class="even">
+<td><a href="#turtle_widget.Turtle.begin_fill">begin_fill</a></td>
+<td>Start recording a filled shape.</td>
+</tr>
+<tr class="odd">
+<td><a href="#turtle_widget.Turtle.bgcolor">bgcolor</a></td>
+<td>Get or set the canvas background colour.</td>
+</tr>
+<tr class="even">
+<td><a href="#turtle_widget.Turtle.circle">circle</a></td>
+<td>Draw a circle or arc, approximated by a series of straight chords.</td>
+</tr>
+<tr class="odd">
+<td><a href="#turtle_widget.Turtle.clear">clear</a></td>
+<td>Clear all drawing from the canvas, keeping the turtle state.</td>
+</tr>
+<tr class="even">
+<td><a href="#turtle_widget.Turtle.color">color</a></td>
+<td>Get or set the pen colour, the fill colour, or both at once.</td>
+</tr>
+<tr class="odd">
+<td><a href="#turtle_widget.Turtle.dot">dot</a></td>
+<td>Draw a filled dot at the current position.</td>
+</tr>
+<tr class="even">
+<td><a href="#turtle_widget.Turtle.end_fill">end_fill</a></td>
+<td>Fill the shape traced since the last <code>begin_fill</code>.</td>
+</tr>
+<tr class="odd">
+<td><a href="#turtle_widget.Turtle.fillcolor">fillcolor</a></td>
+<td>Get or set the fill colour used by <code>begin_fill</code> / <code>end_fill</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="#turtle_widget.Turtle.forward">forward</a></td>
+<td>Move the turtle forward by <code>distance</code>, drawing if the pen is down.</td>
+</tr>
+<tr class="odd">
+<td><a href="#turtle_widget.Turtle.goto">goto</a></td>
+<td>Move the turtle to an absolute position, drawing if the pen is down.</td>
+</tr>
+<tr class="even">
+<td><a href="#turtle_widget.Turtle.heading">heading</a></td>
+<td>Return the current heading in degrees.</td>
+</tr>
+<tr class="odd">
+<td><a href="#turtle_widget.Turtle.hideturtle">hideturtle</a></td>
+<td>Hide the turtle marker.</td>
+</tr>
+<tr class="even">
+<td><a href="#turtle_widget.Turtle.home">home</a></td>
+<td>Move the turtle to the origin <code>(0, 0)</code> and set its heading to 0.</td>
+</tr>
+<tr class="odd">
+<td><a href="#turtle_widget.Turtle.isdown">isdown</a></td>
+<td>Return whether the pen is down.</td>
+</tr>
+<tr class="even">
+<td><a href="#turtle_widget.Turtle.isvisible">isvisible</a></td>
+<td>Return whether the turtle marker is visible.</td>
+</tr>
+<tr class="odd">
+<td><a href="#turtle_widget.Turtle.left">left</a></td>
+<td>Turn the turtle counter-clockwise by <code>angle</code> degrees.</td>
+</tr>
+<tr class="even">
+<td><a href="#turtle_widget.Turtle.pencolor">pencolor</a></td>
+<td>Get or set the pen (outline) colour.</td>
+</tr>
+<tr class="odd">
+<td><a href="#turtle_widget.Turtle.pendown">pendown</a></td>
+<td>Lower the pen so subsequent moves draw.</td>
+</tr>
+<tr class="even">
+<td><a href="#turtle_widget.Turtle.pensize">pensize</a></td>
+<td>Get or set the pen width.</td>
+</tr>
+<tr class="odd">
+<td><a href="#turtle_widget.Turtle.penup">penup</a></td>
+<td>Lift the pen so subsequent moves do not draw.</td>
+</tr>
+<tr class="even">
+<td><a href="#turtle_widget.Turtle.position">position</a></td>
+<td>Return the current position.</td>
+</tr>
+<tr class="odd">
+<td><a href="#turtle_widget.Turtle.reset">reset</a></td>
+<td>Clear the drawing and reset the turtle to its initial state.</td>
+</tr>
+<tr class="even">
+<td><a href="#turtle_widget.Turtle.right">right</a></td>
+<td>Turn the turtle clockwise by <code>angle</code> degrees.</td>
+</tr>
+<tr class="odd">
+<td><a href="#turtle_widget.Turtle.setheading">setheading</a></td>
+<td>Turn the turtle to face an absolute heading.</td>
+</tr>
+<tr class="even">
+<td><a href="#turtle_widget.Turtle.setx">setx</a></td>
+<td>Set the x-coordinate, keeping y unchanged.</td>
+</tr>
+<tr class="odd">
+<td><a href="#turtle_widget.Turtle.sety">sety</a></td>
+<td>Set the y-coordinate, keeping x unchanged.</td>
+</tr>
+<tr class="even">
+<td><a href="#turtle_widget.Turtle.show">show</a></td>
+<td>Flush the recorded commands and display the widget now.</td>
+</tr>
+<tr class="odd">
+<td><a href="#turtle_widget.Turtle.showturtle">showturtle</a></td>
+<td>Make the turtle marker visible.</td>
+</tr>
+<tr class="even">
+<td><a href="#turtle_widget.Turtle.speed">speed</a></td>
+<td>Get or set the drawing speed.</td>
+</tr>
+<tr class="odd">
+<td><a href="#turtle_widget.Turtle.stamp">stamp</a></td>
+<td>Stamp a copy of the turtle shape at the current position and heading.</td>
+</tr>
+<tr class="even">
+<td><a href="#turtle_widget.Turtle.write">write</a></td>
+<td>Write text at the current position.</td>
+</tr>
+<tr class="odd">
+<td><a href="#turtle_widget.Turtle.xcor">xcor</a></td>
+<td>Return the current x-coordinate.</td>
+</tr>
+<tr class="even">
+<td><a href="#turtle_widget.Turtle.ycor">ycor</a></td>
+<td>Return the current y-coordinate.</td>
+</tr>
+</tbody>
+</table>
+<section id="turtle_widget.Turtle.backward" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.backward">backward</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.backward(distance)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Move the turtle backward by <code>distance</code> (opposite its heading).</p>
+<section id="parameters-1" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-1">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>distance</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span></code></dt>
+<dd>
+<p>Distance to move opposite the current heading.</p>
+</dd>
+</dl>
+</section>
+<section id="returns" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a></span></code></dt>
+<dd>
+<p>This turtle, to allow method chaining.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.begin_fill" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.begin_fill">begin_fill</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.begin_fill()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Start recording a filled shape.</p>
+<p>Call before the commands that trace the outline, then call <code>end_fill</code> to fill it.</p>
+<section id="returns-1" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-1">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a></span></code></dt>
+<dd>
+<p>This turtle, to allow method chaining.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.bgcolor" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.bgcolor">bgcolor</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.bgcolor(<span class="op">*</span>args)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Get or set the canvas background colour.</p>
+<section id="parameters-2" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-2">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name">*<strong>args</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">()</span></code></dt>
+<dd>
+<p>A CSS colour name/hex string or an <code>(r, g, b)</code> triple. With no arguments, the current background colour is returned.</p>
+</dd>
+</dl>
+</section>
+<section id="returns-2" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-2">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a> or <a href="https://docs.python.org/3/library/stdtypes.html#str">str</a></span></code></dt>
+<dd>
+<p>This turtle when setting (to allow chaining), or the current background colour when called with no arguments.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.circle" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.circle">circle</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.circle(radius, extent<span class="op">=</span><span class="va">None</span>, steps<span class="op">=</span><span class="va">None</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Draw a circle or arc, approximated by a series of straight chords.</p>
+<p>A positive <code>radius</code> curves to the left of the turtle, a negative <code>radius</code> to the right.</p>
+<section id="parameters-3" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-3">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>radius</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span></code></dt>
+<dd>
+<p>Radius of the circle. Positive curves left, negative curves right.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>extent</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">None</span></code></dt>
+<dd>
+<p>Angle of the arc to draw, in degrees. Defaults to 360 (a full circle).</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>steps</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#int">int</a></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">None</span></code></dt>
+<dd>
+<p>Number of chords approximating the arc. Defaults to a value scaled to the radius and extent.</p>
+</dd>
+</dl>
+</section>
+<section id="returns-3" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-3">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a></span></code></dt>
+<dd>
+<p>This turtle, to allow method chaining.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.clear" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.clear">clear</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.clear()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Clear all drawing from the canvas, keeping the turtle state.</p>
+<section id="returns-4" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-4">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a></span></code></dt>
+<dd>
+<p>This turtle, to allow method chaining.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.color" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.color">color</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.color(<span class="op">*</span>args)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Get or set the pen colour, the fill colour, or both at once.</p>
+<section id="parameters-4" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-4">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name">*<strong>args</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">()</span></code></dt>
+<dd>
+<p>With no arguments, returns <code>(pencolor, fillcolor)</code>. With one argument, sets both pen and fill to that colour. With two, sets the pen and fill colours respectively. Each colour may be a CSS name/hex string or an <code>(r, g, b)</code> triple.</p>
+</dd>
+</dl>
+</section>
+<section id="returns-5" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-5">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation">Turtle or tuple of str</span></code></dt>
+<dd>
+<p>This turtle when setting (to allow chaining), or the <code>(pencolor, fillcolor)</code> pair when called with no arguments.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.dot" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.dot">dot</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.dot(size<span class="op">=</span><span class="va">None</span>, <span class="op">*</span>color)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Draw a filled dot at the current position.</p>
+<section id="parameters-5" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-5">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>size</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">None</span></code></dt>
+<dd>
+<p>Diameter of the dot in pixels. Defaults to a small multiple of the pen size.</p>
+</dd>
+<dt><code><span class="parameter-name">*<strong>color</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">()</span></code></dt>
+<dd>
+<p>Optional dot colour as a CSS name/hex string or an <code>(r, g, b)</code> triple. Defaults to the current pen colour.</p>
+</dd>
+</dl>
+</section>
+<section id="returns-6" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-6">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a></span></code></dt>
+<dd>
+<p>This turtle, to allow method chaining.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.end_fill" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.end_fill">end_fill</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.end_fill()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Fill the shape traced since the last <code>begin_fill</code>.</p>
+<p>The fill is drawn behind the outline in the current fill colour. Does nothing if fewer than two points were recorded.</p>
+<section id="returns-7" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-7">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a></span></code></dt>
+<dd>
+<p>This turtle, to allow method chaining.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.fillcolor" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.fillcolor">fillcolor</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.fillcolor(<span class="op">*</span>args)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Get or set the fill colour used by <code>begin_fill</code> / <code>end_fill</code>.</p>
+<section id="parameters-6" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-6">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name">*<strong>args</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">()</span></code></dt>
+<dd>
+<p>A CSS colour name or hex string, or an <code>(r, g, b)</code> triple; see <code>pencolor</code> for the accepted forms.</p>
+</dd>
+</dl>
+</section>
+<section id="returns-8" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-8">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a> or <a href="https://docs.python.org/3/library/stdtypes.html#str">str</a></span></code></dt>
+<dd>
+<p>This turtle when setting (to allow chaining), or the current fill colour when called with no arguments.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.forward" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.forward">forward</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.forward(distance)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Move the turtle forward by <code>distance</code>, drawing if the pen is down.</p>
+<section id="parameters-7" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-7">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>distance</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span></code></dt>
+<dd>
+<p>Distance to move along the current heading.</p>
+</dd>
+</dl>
+</section>
+<section id="returns-9" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-9">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a></span></code></dt>
+<dd>
+<p>This turtle, to allow method chaining.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.goto" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.goto">goto</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.goto(x, y<span class="op">=</span><span class="va">None</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Move the turtle to an absolute position, drawing if the pen is down.</p>
+<section id="parameters-8" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-8">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>x</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation">float or tuple of float</span></code></dt>
+<dd>
+<p>Target x-coordinate, or an <code>(x, y)</code> pair (then <code>y</code> must be omitted).</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>y</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">None</span></code></dt>
+<dd>
+<p>Target y-coordinate.</p>
+</dd>
+</dl>
+</section>
+<section id="returns-10" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-10">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a></span></code></dt>
+<dd>
+<p>This turtle, to allow method chaining.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.heading" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.heading">heading</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.heading()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Return the current heading in degrees.</p>
+<section id="returns-11" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-11">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span></code></dt>
+<dd>
+<p>Heading in <code>[0, 360)</code> degrees, with 0 = east and counter-clockwise positive.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.hideturtle" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.hideturtle">hideturtle</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.hideturtle()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Hide the turtle marker.</p>
+<section id="returns-12" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-12">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a></span></code></dt>
+<dd>
+<p>This turtle, to allow method chaining.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.home" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.home">home</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.home()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Move the turtle to the origin <code>(0, 0)</code> and set its heading to 0.</p>
+<section id="returns-13" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-13">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a></span></code></dt>
+<dd>
+<p>This turtle, to allow method chaining.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.isdown" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.isdown">isdown</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.isdown()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Return whether the pen is down.</p>
+<section id="returns-14" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-14">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#bool">bool</a></span></code></dt>
+<dd>
+<p>True if the pen is down (drawing), False otherwise.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.isvisible" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.isvisible">isvisible</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.isvisible()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Return whether the turtle marker is visible.</p>
+<section id="returns-15" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-15">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#bool">bool</a></span></code></dt>
+<dd>
+<p>True if the turtle marker is shown, False otherwise.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.left" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.left">left</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.left(angle)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Turn the turtle counter-clockwise by <code>angle</code> degrees.</p>
+<p>The animation spins exactly <code>angle</code> degrees, so multi-turn values such as <code>left(720)</code> are preserved as two full rotations.</p>
+<section id="parameters-9" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-9">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>angle</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span></code></dt>
+<dd>
+<p>Degrees to turn counter-clockwise.</p>
+</dd>
+</dl>
+</section>
+<section id="returns-16" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-16">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a></span></code></dt>
+<dd>
+<p>This turtle, to allow method chaining.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.pencolor" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.pencolor">pencolor</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.pencolor(<span class="op">*</span>args)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Get or set the pen (outline) colour.</p>
+<section id="parameters-10" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-10">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name">*<strong>args</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">()</span></code></dt>
+<dd>
+<p>A CSS colour name or hex string (<code>"red"</code>, <code>"#ff8800"</code>), or an <code>(r, g, b)</code> triple given as three arguments or one tuple. Float components in <code>[0, 1]</code> use the 0-1 scale, otherwise 0-255.</p>
+</dd>
+</dl>
+</section>
+<section id="returns-17" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-17">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a> or <a href="https://docs.python.org/3/library/stdtypes.html#str">str</a></span></code></dt>
+<dd>
+<p>This turtle when setting (to allow chaining), or the current pen colour when called with no arguments.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.pendown" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.pendown">pendown</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.pendown()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Lower the pen so subsequent moves draw.</p>
+<section id="returns-18" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-18">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a></span></code></dt>
+<dd>
+<p>This turtle, to allow method chaining.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.pensize" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.pensize">pensize</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.pensize(width<span class="op">=</span><span class="va">None</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Get or set the pen width.</p>
+<section id="parameters-11" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-11">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>width</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">None</span></code></dt>
+<dd>
+<p>New pen width in pixels. If omitted, the current width is returned.</p>
+</dd>
+</dl>
+</section>
+<section id="returns-19" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-19">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a> or <a href="https://docs.python.org/3/library/functions.html#float">float</a></span></code></dt>
+<dd>
+<p>This turtle when setting (to allow chaining), or the current pen width when called with no argument.</p>
+</dd>
+</dl>
+</section>
+<section id="notes" class="level4 doc-section doc-section-notes">
+<h4 class="doc-section doc-section-notes anchored" data-anchor-id="notes">Notes</h4>
+<p>Named <code>pensize</code> (alias <code>width_</code>) because <code>width</code> is the canvas-size trait.</p>
+</section>
+</section>
+<section id="turtle_widget.Turtle.penup" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.penup">penup</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.penup()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Lift the pen so subsequent moves do not draw.</p>
+<section id="returns-20" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-20">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a></span></code></dt>
+<dd>
+<p>This turtle, to allow method chaining.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.position" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.position">position</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.position()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Return the current position.</p>
+<section id="returns-21" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-21">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation">tuple of float</span></code></dt>
+<dd>
+<p>The <code>(x, y)</code> coordinates, with the origin at the canvas centre.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.reset" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.reset">reset</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.reset()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Clear the drawing and reset the turtle to its initial state.</p>
+<section id="returns-22" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-22">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a></span></code></dt>
+<dd>
+<p>This turtle, to allow method chaining.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.right" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.right">right</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.right(angle)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Turn the turtle clockwise by <code>angle</code> degrees.</p>
+<p>The animation spins exactly <code>angle</code> degrees, so multi-turn values such as <code>right(720)</code> are preserved as two full rotations.</p>
+<section id="parameters-12" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-12">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>angle</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span></code></dt>
+<dd>
+<p>Degrees to turn clockwise.</p>
+</dd>
+</dl>
+</section>
+<section id="returns-23" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-23">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a></span></code></dt>
+<dd>
+<p>This turtle, to allow method chaining.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.setheading" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.setheading">setheading</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.setheading(to_angle)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Turn the turtle to face an absolute heading.</p>
+<p>Rotates along the shortest path, so turning from 0 to 270 spins -90 degrees rather than +270. Headings are in degrees with 0 = east, counter-clockwise positive.</p>
+<section id="parameters-13" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-13">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>to_angle</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span></code></dt>
+<dd>
+<p>Absolute heading in degrees.</p>
+</dd>
+</dl>
+</section>
+<section id="returns-24" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-24">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a></span></code></dt>
+<dd>
+<p>This turtle, to allow method chaining.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.setx" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.setx">setx</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.setx(x)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Set the x-coordinate, keeping y unchanged.</p>
+<section id="parameters-14" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-14">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>x</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span></code></dt>
+<dd>
+<p>New x-coordinate.</p>
+</dd>
+</dl>
+</section>
+<section id="returns-25" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-25">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a></span></code></dt>
+<dd>
+<p>This turtle, to allow method chaining.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.sety" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.sety">sety</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.sety(y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Set the y-coordinate, keeping x unchanged.</p>
+<section id="parameters-15" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-15">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>y</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span></code></dt>
+<dd>
+<p>New y-coordinate.</p>
+</dd>
+</dl>
+</section>
+<section id="returns-26" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-26">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a></span></code></dt>
+<dd>
+<p>This turtle, to allow method chaining.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.show" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.show">show</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Flush the recorded commands and display the widget now.</p>
+<section id="returns-27" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-27">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a></span></code></dt>
+<dd>
+<p>This turtle.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.showturtle" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.showturtle">showturtle</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.showturtle()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Make the turtle marker visible.</p>
+<section id="returns-28" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-28">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a></span></code></dt>
+<dd>
+<p>This turtle, to allow method chaining.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.speed" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.speed">speed</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.speed(s<span class="op">=</span><span class="va">None</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Get or set the drawing speed.</p>
+<section id="parameters-16" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-16">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>s</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#int">int</a> or <a href="https://docs.python.org/3/library/stdtypes.html#str">str</a></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">None</span></code></dt>
+<dd>
+<p>Speed from 0 to 10, or a name: <code>"fastest"</code> (0), <code>"fast"</code> (10), <code>"normal"</code> (6), <code>"slow"</code> (3), <code>"slowest"</code> (1). <code>0</code> disables animation (the drawing appears at once). If omitted, the current speed is returned.</p>
+</dd>
+</dl>
+</section>
+<section id="returns-29" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-29">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a> or <a href="https://docs.python.org/3/library/functions.html#int">int</a></span></code></dt>
+<dd>
+<p>This turtle when setting (to allow chaining), or the current speed when called with no argument.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.stamp" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.stamp">stamp</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.stamp()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Stamp a copy of the turtle shape at the current position and heading.</p>
+<section id="returns-30" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-30">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#int">int</a></span></code></dt>
+<dd>
+<p>The number of recorded events after stamping (a stamp id).</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.write" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.write">write</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.write(</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    text,</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    align<span class="op">=</span><span class="st">'left'</span>,</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    font<span class="op">=</span>(<span class="st">'sans-serif'</span>, <span class="dv">14</span>, <span class="st">'normal'</span>),</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Write text at the current position.</p>
+<section id="parameters-17" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-17">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>text</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/stdtypes.html#str">str</a></span></code></dt>
+<dd>
+<p>The text to write.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>align</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation">('left', 'center', 'right')</span> <span class="parameter-default-sep">=</span> <span class="parameter-default">"left"</span></code></dt>
+<dd>
+<p>Horizontal alignment relative to the turtle. Default <code>"left"</code>.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>font</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/stdtypes.html#tuple">tuple</a></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">('sans-serif', 14, 'normal')</span></code></dt>
+<dd>
+<p>A <code>(family, size, style)</code> triple; only family and size are used. Default <code>("sans-serif", 14, "normal")</code>.</p>
+</dd>
+</dl>
+</section>
+<section id="returns-31" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-31">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a></span></code></dt>
+<dd>
+<p>This turtle, to allow method chaining.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.xcor" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.xcor">xcor</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.xcor()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Return the current x-coordinate.</p>
+<section id="returns-32" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-32">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span></code></dt>
+<dd>
+<p>The current x-coordinate.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="turtle_widget.Turtle.ycor" class="level3">
+<h3 class="anchored" data-anchor-id="turtle_widget.Turtle.ycor">ycor</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.Turtle.ycor()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Return the current y-coordinate.</p>
+<section id="returns-33" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-33">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span></code></dt>
+<dd>
+<p>The current y-coordinate.</p>
+</dd>
+</dl>
+
+
+</section>
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/munch-group\.github\.io\/turtle-widget\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../api/index.html" class="pagination-link" aria-label="Function reference">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Function reference</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
