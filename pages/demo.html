@@ -207,7 +207,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#dots-stamps-text-jumps" id="toc-dots-stamps-text-jumps" class="nav-link" data-scroll-target="#dots-stamps-text-jumps">5. Dots, stamps, text &amp; jumps</a></li>
   <li><a href="#speed-instant-mode" id="toc-speed-instant-mode" class="nav-link" data-scroll-target="#speed-instant-mode">6. Speed &amp; instant mode</a></li>
   <li><a href="#reading-turtle-state" id="toc-reading-turtle-state" class="nav-link" data-scroll-target="#reading-turtle-state">7. Reading turtle state</a></li>
-  <li><a href="#self-test-headless" id="toc-self-test-headless" class="nav-link" data-scroll-target="#self-test-headless">8. Self-test (headless)</a></li>
+  <li><a href="#sensing-obstacles" id="toc-sensing-obstacles" class="nav-link" data-scroll-target="#sensing-obstacles">8. Sensing obstacles</a></li>
+  <li><a href="#self-test-headless" id="toc-self-test-headless" class="nav-link" data-scroll-target="#self-test-headless">9. Self-test (headless)</a></li>
   </ul>
 </nav>
     </div>
@@ -234,13 +235,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>An animated <a href="https://docs.python.org/3/library/turtle.html">Turtle graphics</a> widget for Jupyter, built on <a href="https://anywidget.dev"><code>anywidget</code></a> so it renders identically in VS Code, JupyterLab, Notebook 7, and Colab. Each cell below draws something and animates it on an HTML canvas. Pass <code>show_code=True</code> to display the cell’s source beside the canvas and highlight each line in sync with the drawing. Use the Replay/Pause buttons under any canvas.</p>
-<div id="8c2f5629" class="cell" data-execution_count="1">
+<div id="8c2f5629" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> turtle_widget <span class="im">import</span> Turtle</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="the-basics" class="level2">
 <h2 class="anchored" data-anchor-id="the-basics">1. The basics</h2>
 <p>A turtle starts at the centre <code>(0, 0)</code> facing <strong>east</strong> (heading <code>0</code>). <code>forward</code>/<code>backward</code> move it, <code>left</code>/<code>right</code> rotate it (degrees, counter-clockwise positive). Here’s a square.</p>
-<div id="77a14641" class="cell" data-execution_count="2">
+<div id="77a14641" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> Turtle()</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>t.speed(<span class="dv">6</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">4</span>):</span>
@@ -248,15 +249,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    t.left(<span class="dv">90</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"8c9d2dc915c749d1a728808f22e6b1cf","version_major":2,"version_minor":1,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+{"model_id":"3d216dcd30a24181bc8b80e93a82af01","version_major":2,"version_minor":1,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
 </script>
 </div>
 </div>
-</section>
-<section id="synced-code-highlighting-show_codetrue" class="level2">
-<h2 class="anchored" data-anchor-id="synced-code-highlighting-show_codetrue">2. Synced code highlighting (<code>show_code=True</code>)</h2>
-<p>This is your original spiral. With <code>show_code=True</code>, the source appears on the right and the active line is highlighted as the animation reaches it.</p>
-<div id="6117d170" class="cell" data-execution_count="3">
+<div id="ddc563d3" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> Turtle(show_code<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>t.speed(<span class="dv">1</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>colours <span class="op">=</span> [<span class="st">"red"</span>, <span class="st">"blue"</span>, <span class="st">"yellow"</span>, <span class="st">"brown"</span>, <span class="st">"black"</span>, <span class="st">"purple"</span>, <span class="st">"green"</span>]</span>
@@ -269,9 +266,44 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>t.right(<span class="dv">180</span>)</span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>t.home()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="3">
+<div class="cell-output cell-output-display" data-execution_count="7">
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"3584179988974ff483c03022d783e11d","version_major":2,"version_minor":1,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+{"model_id":"884ca49963fd40b3b3a1bbb9e0dcd26f","version_major":2,"version_minor":1,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+</div>
+</section>
+<section id="synced-code-highlighting-show_codetrue" class="level2">
+<h2 class="anchored" data-anchor-id="synced-code-highlighting-show_codetrue">2. Synced code highlighting (<code>show_code=True</code>)</h2>
+<p>With <code>show_code=True</code>, the source appears on the right and the active line is highlighted as the animation reaches it.</p>
+<div id="8bc2fb57" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> Turtle(show_code<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>t.speed(<span class="dv">2</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">4</span>):</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    t.forward(<span class="dv">120</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    t.left(<span class="dv">90</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"72f24a70288247efae211dc7589b2ece","version_major":2,"version_minor":1,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+</div>
+<div id="6117d170" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> Turtle(show_code<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>t.speed(<span class="dv">1</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>colours <span class="op">=</span> [<span class="st">"red"</span>, <span class="st">"blue"</span>, <span class="st">"yellow"</span>, <span class="st">"brown"</span>, <span class="st">"black"</span>, <span class="st">"purple"</span>, <span class="st">"green"</span>]</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>t.penup()<span class="op">;</span> t.left(<span class="dv">90</span>)<span class="op">;</span> t.forward(<span class="dv">200</span>)<span class="op">;</span> t.right(<span class="dv">90</span>)<span class="op">;</span> t.pendown()</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">18</span>):</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    t.pencolor(colours[i <span class="op">%</span> <span class="dv">7</span>])</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    t.right(<span class="dv">20</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    t.forward(<span class="dv">50</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>t.right(<span class="dv">180</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>t.home()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"2a9b095cd28541f38235323b97f7acb4","version_major":2,"version_minor":1,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
 </script>
 </div>
 </div>
@@ -279,20 +311,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="colors-pen-width-fills" class="level2">
 <h2 class="anchored" data-anchor-id="colors-pen-width-fills">3. Colors, pen width &amp; fills</h2>
 <p>Colours accept CSS names (<code>"gold"</code>), hex (<code>"#ff8800"</code>), or RGB tuples (<code>(0.1, 0.5, 0.9)</code> on the 0–1 scale, or <code>(255, 128, 0)</code> on the 0–255 scale). Wrap a path in <code>begin_fill()</code> / <code>end_fill()</code> to fill it — the fill lands <em>behind</em> the outline, just like real turtle.</p>
-<div id="a804dc68" class="cell" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> Turtle()</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>t.speed(<span class="dv">8</span>)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>t.pensize(<span class="dv">3</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>t.pencolor(<span class="st">"#d2691e"</span>)          <span class="co"># outline</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>t.fillcolor((<span class="fl">1.0</span>, <span class="fl">0.84</span>, <span class="fl">0.0</span>))  <span class="co"># gold, on the 0-1 RGB scale</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>t.begin_fill()</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>):             <span class="co"># classic 5-point star</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    t.forward(<span class="dv">220</span>)</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    t.right(<span class="dv">144</span>)</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>t.end_fill()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="4">
+<div id="a804dc68" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> Turtle()</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>t.speed(<span class="dv">8</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>t.pensize(<span class="dv">3</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>t.pencolor(<span class="st">"#d2691e"</span>)          <span class="co"># outline</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>t.fillcolor((<span class="fl">1.0</span>, <span class="fl">0.84</span>, <span class="fl">0.0</span>))  <span class="co"># gold, on the 0-1 RGB scale</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>t.begin_fill()</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>):             <span class="co"># classic 5-point star</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    t.forward(<span class="dv">220</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    t.right(<span class="dv">144</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>t.end_fill()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"2c1fad84342243b38cd7583be6de3f42","version_major":2,"version_minor":1,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+{"model_id":"5c685f762c774dd184fcd9f2fedb0940","version_major":2,"version_minor":1,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
 </script>
 </div>
 </div>
@@ -300,17 +332,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="circles-arcs" class="level2">
 <h2 class="anchored" data-anchor-id="circles-arcs">4. Circles &amp; arcs</h2>
 <p><code>circle(radius)</code> draws a full circle to the <strong>left</strong> of the turtle; a negative radius goes right. <code>circle(radius, extent)</code> draws only part of it. Stacking rotated circles gives a spirograph.</p>
-<div id="68a951b2" class="cell" data-execution_count="6">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> Turtle()</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>t.speed(<span class="dv">10</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>palette <span class="op">=</span> [<span class="st">"crimson"</span>, <span class="st">"darkorange"</span>, <span class="st">"seagreen"</span>, <span class="st">"royalblue"</span>, <span class="st">"purple"</span>, <span class="st">"teal"</span>]</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">12</span>):</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    t.pencolor(palette[i <span class="op">%</span> <span class="bu">len</span>(palette)])</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    t.circle(<span class="dv">90</span>)</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    t.right(<span class="dv">30</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="68a951b2" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> Turtle()</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>t.speed(<span class="dv">10</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>palette <span class="op">=</span> [<span class="st">"crimson"</span>, <span class="st">"darkorange"</span>, <span class="st">"seagreen"</span>, <span class="st">"royalblue"</span>, <span class="st">"purple"</span>, <span class="st">"teal"</span>]</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">12</span>):</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    t.right(<span class="dv">5</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">12</span>):    </span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        t.pencolor(palette[i <span class="op">%</span> <span class="bu">len</span>(palette)])</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        t.circle(<span class="dv">90</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        t.right(<span class="dv">30</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"e1ce35a05912464c8c6ca9157b0b8535","version_major":2,"version_minor":1,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+{"model_id":"ea628aaf49314c8682653c1277e22af2","version_major":2,"version_minor":1,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
 </script>
 </div>
 </div>
@@ -318,28 +352,28 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="dots-stamps-text-jumps" class="level2">
 <h2 class="anchored" data-anchor-id="dots-stamps-text-jumps">5. Dots, stamps, text &amp; jumps</h2>
 <p><code>penup()</code> / <code>pendown()</code> lift and drop the pen so you can jump without drawing. <code>dot(size)</code> plants a filled dot, <code>stamp()</code> leaves a copy of the turtle, and <code>write(text)</code> prints a label.</p>
-<div id="e4eb877b" class="cell" data-execution_count="7">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> Turtle(width<span class="op">=</span><span class="dv">520</span>, height<span class="op">=</span><span class="dv">320</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>t.speed(<span class="dv">7</span>)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>t.penup()<span class="op">;</span> t.goto(<span class="op">-</span><span class="dv">210</span>, <span class="dv">30</span>)<span class="op">;</span> t.pendown()</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, c <span class="kw">in</span> <span class="bu">enumerate</span>([<span class="st">"red"</span>, <span class="st">"orange"</span>, <span class="st">"green"</span>, <span class="st">"blue"</span>, <span class="st">"purple"</span>]):</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    t.dot(<span class="dv">16</span> <span class="op">+</span> i <span class="op">*</span> <span class="dv">8</span>, c)</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    t.penup()<span class="op">;</span> t.forward(<span class="dv">90</span>)<span class="op">;</span> t.pendown()</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>t.penup()<span class="op">;</span> t.goto(<span class="op">-</span><span class="dv">210</span>, <span class="dv">90</span>)<span class="op">;</span> t.pendown()</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>t.pencolor(<span class="st">"black"</span>)</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>t.write(<span class="st">"dots grow to the right"</span>, font<span class="op">=</span>(<span class="st">"sans-serif"</span>, <span class="dv">16</span>, <span class="st">"normal"</span>))</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>t.penup()<span class="op">;</span> t.goto(<span class="dv">0</span>, <span class="op">-</span><span class="dv">70</span>)<span class="op">;</span> t.setheading(<span class="dv">60</span>)<span class="op">;</span> t.pendown()</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>t.pencolor(<span class="st">"seagreen"</span>)</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>t.stamp()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="7">
+<div id="e4eb877b" class="cell" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> Turtle(width<span class="op">=</span><span class="dv">520</span>, height<span class="op">=</span><span class="dv">320</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>t.speed(<span class="dv">7</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>t.penup()<span class="op">;</span> t.goto(<span class="op">-</span><span class="dv">210</span>, <span class="dv">30</span>)<span class="op">;</span> t.pendown()</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, c <span class="kw">in</span> <span class="bu">enumerate</span>([<span class="st">"red"</span>, <span class="st">"orange"</span>, <span class="st">"green"</span>, <span class="st">"blue"</span>, <span class="st">"purple"</span>]):</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    t.dot(<span class="dv">16</span> <span class="op">+</span> i <span class="op">*</span> <span class="dv">8</span>, c)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    t.penup()<span class="op">;</span> t.forward(<span class="dv">90</span>)<span class="op">;</span> t.pendown()</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>t.penup()<span class="op">;</span> t.goto(<span class="op">-</span><span class="dv">210</span>, <span class="dv">90</span>)<span class="op">;</span> t.pendown()</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>t.pencolor(<span class="st">"black"</span>)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>t.write(<span class="st">"dots grow to the right"</span>, font<span class="op">=</span>(<span class="st">"sans-serif"</span>, <span class="dv">16</span>, <span class="st">"normal"</span>))</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>t.penup()<span class="op">;</span> t.goto(<span class="dv">0</span>, <span class="op">-</span><span class="dv">70</span>)<span class="op">;</span> t.setheading(<span class="dv">60</span>)<span class="op">;</span> t.pendown()</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>t.pencolor(<span class="st">"seagreen"</span>)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>t.stamp()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
 <pre><code>34</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"9c6dad07d1084c809d954df9ff807a14","version_major":2,"version_minor":1,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+{"model_id":"6120cbac8d954c28b84d705a09a6a0b6","version_major":2,"version_minor":1,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
 </script>
 </div>
 </div>
@@ -347,19 +381,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="speed-instant-mode" class="level2">
 <h2 class="anchored" data-anchor-id="speed-instant-mode">6. Speed &amp; instant mode</h2>
 <p><code>speed(1)</code> is slowest, <code>speed(10)</code> is fastest, and <code>speed(0)</code> disables animation entirely — the whole drawing appears at once, which is handy for dense figures. (Word forms also work: <code>"slowest"</code>, <code>"slow"</code>, <code>"normal"</code>, <code>"fast"</code>, <code>"fastest"</code>.)</p>
-<div id="6897f5da" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> Turtle()</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#t.speed(0)               # no animation: drawn instantly</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>t.speed(<span class="dv">10</span>)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>t.pencolor(<span class="st">"teal"</span>)</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>t.pensize(<span class="dv">1</span>)</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">72</span>):</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    t.forward(<span class="dv">160</span>)</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    t.left(<span class="dv">175</span>)          <span class="co"># a dense star spiral</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>t.hideturtle()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="12">
+<div id="6897f5da" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> Turtle()</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>t.speed(<span class="dv">0</span>)               <span class="co"># no animation: drawn instantly</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># t.speed(10)</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>t.pencolor(<span class="st">"teal"</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>t.pensize(<span class="dv">1</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">72</span>):</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    t.forward(<span class="dv">160</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    t.left(<span class="dv">175</span>)          <span class="co"># a dense star spiral</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>t.hideturtle()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"349af55c9ac74fbfa1ebd7f4e5637fc9","version_major":2,"version_minor":1,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+{"model_id":"5558c879b50741529ced1ae1e6365bbb","version_major":2,"version_minor":1,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
 </script>
 </div>
 </div>
@@ -367,12 +401,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="reading-turtle-state" class="level2">
 <h2 class="anchored" data-anchor-id="reading-turtle-state">7. Reading turtle state</h2>
 <p>Getters return the current state without drawing anything: <code>pos()</code>, <code>xcor()</code>, <code>ycor()</code>, <code>heading()</code>, <code>isdown()</code>, <code>isvisible()</code>. (Use <code>autoshow=False</code> when you only want to inspect state and not render a widget.)</p>
-<div id="553c2fac" class="cell" data-execution_count="13">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>probe <span class="op">=</span> Turtle(autoshow<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>probe.forward(<span class="dv">100</span>)<span class="op">;</span> probe.left(<span class="dv">90</span>)<span class="op">;</span> probe.forward(<span class="dv">50</span>)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"position:"</span>, probe.pos())</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"heading :"</span>, probe.heading())</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"pen down:"</span>, probe.isdown())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="553c2fac" class="cell" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>probe <span class="op">=</span> Turtle(autoshow<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>probe.forward(<span class="dv">100</span>)<span class="op">;</span> probe.left(<span class="dv">90</span>)<span class="op">;</span> probe.forward(<span class="dv">50</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"position:"</span>, probe.pos())</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"heading :"</span>, probe.heading())</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"pen down:"</span>, probe.isdown())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>position: (100.0, 50.0)
 heading : 90.0
@@ -380,37 +414,257 @@ pen down: True</code></pre>
 </div>
 </div>
 </section>
+<section id="sensing-obstacles" class="level2">
+<h2 class="anchored" data-anchor-id="sensing-obstacles">8. Sensing obstacles</h2>
+<p>The turtle can <strong>sense obstacles</strong>: registered shapes (<code>add_circle</code>, <code>add_rectangle</code>, <code>add_segment</code>, <code>add_polygon</code>), its own drawn trail, and the canvas edges.</p>
+<ul>
+<li><code>distance_ahead()</code> casts a ray along the heading and returns the distance to the first obstacle (or <code>None</code>).</li>
+<li><code>sense(max_distance=...)</code> returns every obstacle within range, nearest first, each with the distance and the signed angle (degrees, <strong>+ = left</strong>) to its closest point.</li>
+<li><code>nearest()</code> is just the closest one.</li>
+</ul>
+<p>Pass <code>draw=True</code> to any of them to overlay the sensor rays on the canvas.</p>
+<div id="9a4d63a4" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> turtle_widget <span class="im">import</span> Turtle</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> Turtle()</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>t.speed(<span class="dv">5</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> on_hit(c): </span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    t.penup()<span class="op">;</span> t.goto(c.point)<span class="op">;</span> t.pencolor(<span class="st">"red"</span>)<span class="op">;</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    t.right(<span class="dv">180</span><span class="op">+</span><span class="dv">2</span><span class="op">*</span>c.angle, speed<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    t.pendown()<span class="op">;</span>  </span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    t.dot(<span class="dv">15</span>) </span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    t.pencolor(<span class="st">"black"</span>)</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    t.forward(c.speed)</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>t.on_collision(on_hit) </span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>t.add_circle(<span class="dv">120</span>, <span class="dv">60</span>, <span class="dv">35</span>)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>t.add_rectangle(<span class="op">-</span><span class="dv">180</span>, <span class="op">-</span><span class="dv">120</span>, <span class="op">-</span><span class="dv">80</span>, <span class="dv">60</span>)</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>t.add_segment(<span class="dv">40</span>, <span class="op">-</span><span class="dv">160</span>, <span class="dv">200</span>, <span class="op">-</span><span class="dv">40</span>)</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="co"># t.hide_obstacles()</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="co"># t.show_obstacles()  </span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">300</span>):</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    d <span class="op">=</span> t.distance_ahead(draw<span class="op">=</span><span class="va">True</span>, trail<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    d.distance</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> d <span class="kw">in</span> t.sense(max_distance<span class="op">=</span><span class="dv">200</span>, draw<span class="op">=</span><span class="va">True</span>, color<span class="op">=</span><span class="st">'gray'</span>):</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>        d.angle</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"83c41f78049e431ea2fe29765322de47","version_major":2,"version_minor":1,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+</div>
+<div id="cd9047b7" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> turtle_widget <span class="im">import</span> Turtle</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> GameEnded(<span class="pp">Exception</span>):</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> run_student_function(fun, salad):</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> on_hit(c): </span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>        x, y <span class="op">=</span> t.position()</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> <span class="op">-</span>canvas_size<span class="op">/</span><span class="dv">2</span> <span class="op">&lt;</span> x <span class="op">&lt;</span> canvas_size<span class="op">/</span><span class="dv">2</span> <span class="kw">and</span> <span class="op">-</span>canvas_size<span class="op">/</span><span class="dv">2</span> <span class="op">&lt;</span> y <span class="op">&lt;</span> canvas_size<span class="op">/</span><span class="dv">2</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>        font <span class="op">=</span> (<span class="st">"sans-serif"</span>, <span class="dv">20</span>, <span class="st">"normal"</span>)</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>        l <span class="op">=</span> c.obstacle.label</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> l <span class="op">==</span> <span class="st">'start'</span>:</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> l <span class="op">==</span> <span class="st">'end'</span> <span class="kw">or</span> t.total_movement <span class="op">&gt;=</span> salad:</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>            score <span class="op">=</span> <span class="st">'NA'</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> l <span class="op">==</span> <span class="st">'end'</span>:</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>                t.goto(canvas_size<span class="op">/</span><span class="dv">2</span>, canvas_size<span class="op">/</span><span class="dv">2</span>)</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>                t.pencolor(<span class="st">'green'</span>)</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>                t.dot(<span class="dv">2</span><span class="op">*</span>size)</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>                score <span class="op">=</span> t.total_movement <span class="op">+</span> t.nr_collisions <span class="op">+</span> t.nr_right <span class="op">+</span> t.nr_left <span class="op">+</span> t.nr_distance_ahead <span class="op">+</span> t.nr_sense</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>            t.pencolor(<span class="st">'black'</span>)</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>            t.penup()</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>            t.pencolor(<span class="st">'white'</span>)</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>            t.add_rectangle(<span class="op">-</span>canvas_size<span class="op">/</span><span class="dv">2</span>, <span class="op">-</span>canvas_size<span class="op">/</span><span class="dv">2</span>, canvas_size<span class="op">/</span><span class="dv">2</span>, canvas_size<span class="op">/</span><span class="dv">2</span>, color<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>            t.add_rectangle(<span class="op">-</span>canvas_size<span class="op">/</span><span class="dv">2</span>, <span class="op">-</span>canvas_size<span class="op">/</span><span class="dv">2</span>, canvas_size<span class="op">/</span><span class="dv">2</span>, canvas_size<span class="op">/</span><span class="dv">2</span>, color<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>            t.add_rectangle(<span class="op">-</span>canvas_size<span class="op">/</span><span class="dv">2</span>, <span class="op">-</span>canvas_size<span class="op">/</span><span class="dv">2</span>, canvas_size<span class="op">/</span><span class="dv">2</span>, canvas_size<span class="op">/</span><span class="dv">2</span>, color<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>            t.add_rectangle(<span class="op">-</span>canvas_size<span class="op">/</span><span class="dv">2</span>, <span class="op">-</span>canvas_size<span class="op">/</span><span class="dv">2</span>, canvas_size<span class="op">/</span><span class="dv">2</span>, canvas_size<span class="op">/</span><span class="dv">2</span>, color<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>            t.add_rectangle(<span class="op">-</span>canvas_size<span class="op">/</span><span class="dv">2</span>, <span class="op">-</span>canvas_size<span class="op">/</span><span class="dv">2</span>, canvas_size<span class="op">/</span><span class="dv">2</span>, canvas_size<span class="op">/</span><span class="dv">2</span>, color<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>            t.add_rectangle(<span class="op">-</span>canvas_size<span class="op">/</span><span class="dv">2</span>, <span class="op">-</span>canvas_size<span class="op">/</span><span class="dv">2</span>, canvas_size<span class="op">/</span><span class="dv">2</span>, canvas_size<span class="op">/</span><span class="dv">2</span>, color<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>            t.pencolor(<span class="st">'black'</span>)</span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>            line_height <span class="op">=</span> <span class="dv">25</span></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>            y <span class="op">=</span> <span class="dv">200</span>    </span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>            t.goto(<span class="op">-</span>canvas_size<span class="op">/</span><span class="dv">2</span><span class="op">+</span><span class="dv">20</span>, y)</span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>            t.write(<span class="ss">f"Time: </span><span class="sc">{</span>t<span class="sc">.</span>duration()<span class="sc">:.3f}</span><span class="ss">"</span>, font<span class="op">=</span>font)</span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>            y <span class="op">-=</span> line_height</span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>            t.goto(<span class="op">-</span>canvas_size<span class="op">/</span><span class="dv">2</span><span class="op">+</span><span class="dv">20</span>, y)</span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>            t.write(<span class="ss">f"Moved: </span><span class="sc">{</span>t<span class="sc">.</span>total_movement<span class="sc">:.3f}</span><span class="ss">"</span>, font<span class="op">=</span>font)</span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>            y <span class="op">-=</span> line_height</span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>            t.goto(<span class="op">-</span>canvas_size<span class="op">/</span><span class="dv">2</span><span class="op">+</span><span class="dv">20</span>, y)</span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>            t.write(<span class="ss">f"Turns: </span><span class="sc">{</span>t<span class="sc">.</span>nr_left <span class="op">+</span> t<span class="sc">.</span>nr_right<span class="sc">}</span><span class="ss">"</span>, font<span class="op">=</span>font)</span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>            y <span class="op">-=</span> line_height</span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a>            t.goto(<span class="op">-</span>canvas_size<span class="op">/</span><span class="dv">2</span><span class="op">+</span><span class="dv">20</span>, y)</span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a>            t.write(<span class="ss">f"Dist. ahead: </span><span class="sc">{</span>t<span class="sc">.</span>nr_distance_ahead<span class="sc">}</span><span class="ss">"</span>, font<span class="op">=</span>font)</span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a>            y <span class="op">-=</span> line_height</span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a>            t.goto(<span class="op">-</span>canvas_size<span class="op">/</span><span class="dv">2</span><span class="op">+</span><span class="dv">20</span>, y)</span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a>            t.write(<span class="ss">f"Sense: </span><span class="sc">{</span>t<span class="sc">.</span>nr_sense<span class="sc">}</span><span class="ss">"</span>, font<span class="op">=</span>font)</span>
+<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a>            y <span class="op">-=</span> line_height</span>
+<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a>            t.goto(<span class="op">-</span>canvas_size<span class="op">/</span><span class="dv">2</span><span class="op">+</span><span class="dv">20</span>, y)</span>
+<span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a>            t.write(<span class="ss">f"Collisions: </span><span class="sc">{</span>t<span class="sc">.</span>nr_collisions<span class="sc">}</span><span class="ss">"</span>, font<span class="op">=</span>font)</span>
+<span id="cb14-65"><a href="#cb14-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-66"><a href="#cb14-66" aria-hidden="true" tabindex="-1"></a>            y <span class="op">-=</span> line_height</span>
+<span id="cb14-67"><a href="#cb14-67" aria-hidden="true" tabindex="-1"></a>            y <span class="op">-=</span> line_height</span>
+<span id="cb14-68"><a href="#cb14-68" aria-hidden="true" tabindex="-1"></a>            t.goto(<span class="op">-</span>canvas_size<span class="op">/</span><span class="dv">2</span><span class="op">+</span><span class="dv">20</span>, y)</span>
+<span id="cb14-69"><a href="#cb14-69" aria-hidden="true" tabindex="-1"></a>            t.write(<span class="ss">f"Score: </span><span class="sc">{</span>score<span class="sc">}</span><span class="ss">"</span>, font<span class="op">=</span>font)</span>
+<span id="cb14-70"><a href="#cb14-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-71"><a href="#cb14-71" aria-hidden="true" tabindex="-1"></a>            t.goto(<span class="op">-</span>canvas_size<span class="op">/</span><span class="dv">2</span><span class="op">+</span><span class="dv">20</span>, y<span class="op">-</span><span class="dv">5</span>)</span>
+<span id="cb14-72"><a href="#cb14-72" aria-hidden="true" tabindex="-1"></a>            t.pendown()</span>
+<span id="cb14-73"><a href="#cb14-73" aria-hidden="true" tabindex="-1"></a>            t.goto(<span class="op">-</span>canvas_size<span class="op">/</span><span class="dv">2</span><span class="op">+</span><span class="dv">20</span><span class="op">+</span><span class="dv">250</span>, y<span class="op">-</span><span class="dv">5</span>, speed<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb14-74"><a href="#cb14-74" aria-hidden="true" tabindex="-1"></a>            t.right(<span class="dv">1000</span>)</span>
+<span id="cb14-75"><a href="#cb14-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-76"><a href="#cb14-76" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> GameEnded</span>
+<span id="cb14-77"><a href="#cb14-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-78"><a href="#cb14-78" aria-hidden="true" tabindex="-1"></a>        t.penup()<span class="op">;</span> </span>
+<span id="cb14-79"><a href="#cb14-79" aria-hidden="true" tabindex="-1"></a>        t.goto(c.point)<span class="op">;</span> </span>
+<span id="cb14-80"><a href="#cb14-80" aria-hidden="true" tabindex="-1"></a>        t.right(<span class="dv">180</span><span class="op">+</span><span class="dv">2</span><span class="op">*</span>c.angle, speed<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb14-81"><a href="#cb14-81" aria-hidden="true" tabindex="-1"></a>        t.pendown()<span class="op">;</span>  </span>
+<span id="cb14-82"><a href="#cb14-82" aria-hidden="true" tabindex="-1"></a>        t.pencolor(<span class="st">"magenta"</span>)<span class="op">;</span></span>
+<span id="cb14-83"><a href="#cb14-83" aria-hidden="true" tabindex="-1"></a>        t.dot(<span class="dv">25</span>) </span>
+<span id="cb14-84"><a href="#cb14-84" aria-hidden="true" tabindex="-1"></a>        t.pencolor(<span class="st">"black"</span>)</span>
+<span id="cb14-85"><a href="#cb14-85" aria-hidden="true" tabindex="-1"></a>        t.forward(c.speed)</span>
+<span id="cb14-86"><a href="#cb14-86" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-87"><a href="#cb14-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-88"><a href="#cb14-88" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> obstacle_track(t, canvas_size, size, sep, visible<span class="op">=</span><span class="va">True</span>):</span>
+<span id="cb14-89"><a href="#cb14-89" aria-hidden="true" tabindex="-1"></a>        c <span class="op">=</span> canvas_size <span class="op">//</span> <span class="dv">2</span></span>
+<span id="cb14-90"><a href="#cb14-90" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="op">-</span>c<span class="op">-</span>(size)<span class="op">//</span><span class="dv">2</span>, c, size<span class="op">+</span>sep):</span>
+<span id="cb14-91"><a href="#cb14-91" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="op">-</span>c<span class="op">-</span>(size)<span class="op">//</span><span class="dv">2</span>, c, size<span class="op">+</span>sep):</span>
+<span id="cb14-92"><a href="#cb14-92" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> i <span class="op">&lt;</span> <span class="op">-</span>c<span class="op">+</span>size<span class="op">+</span>sep <span class="kw">and</span> j <span class="op">&lt;</span> <span class="op">-</span>c<span class="op">+</span>size<span class="op">+</span>sep:</span>
+<span id="cb14-93"><a href="#cb14-93" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">continue</span></span>
+<span id="cb14-94"><a href="#cb14-94" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> i <span class="op">&gt;</span> c<span class="op">-</span><span class="dv">2</span><span class="op">*</span>(size<span class="op">+</span>sep) <span class="kw">and</span> j <span class="op">&gt;</span> c<span class="op">-</span><span class="dv">2</span><span class="op">*</span>(size<span class="op">+</span>sep):</span>
+<span id="cb14-95"><a href="#cb14-95" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">continue</span></span>
+<span id="cb14-96"><a href="#cb14-96" aria-hidden="true" tabindex="-1"></a>                t.add_rectangle(i, j, i<span class="op">+</span>size, j<span class="op">+</span>size, visible<span class="op">=</span>visible)</span>
+<span id="cb14-97"><a href="#cb14-97" aria-hidden="true" tabindex="-1"></a>        t.add_circle(<span class="op">-</span><span class="dv">250</span>, <span class="op">-</span><span class="dv">250</span>, size, color<span class="op">=</span><span class="st">'red'</span>, label<span class="op">=</span><span class="st">'start'</span>,</span>
+<span id="cb14-98"><a href="#cb14-98" aria-hidden="true" tabindex="-1"></a>                    sense<span class="op">=</span><span class="va">False</span></span>
+<span id="cb14-99"><a href="#cb14-99" aria-hidden="true" tabindex="-1"></a>                    )</span>
+<span id="cb14-100"><a href="#cb14-100" aria-hidden="true" tabindex="-1"></a>        t.add_circle(<span class="dv">250</span>, <span class="dv">250</span>, size, color<span class="op">=</span><span class="st">'green'</span>, label<span class="op">=</span><span class="st">'end'</span>, </span>
+<span id="cb14-101"><a href="#cb14-101" aria-hidden="true" tabindex="-1"></a>                    sense<span class="op">=</span><span class="va">False</span></span>
+<span id="cb14-102"><a href="#cb14-102" aria-hidden="true" tabindex="-1"></a>                    )</span>
+<span id="cb14-103"><a href="#cb14-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-104"><a href="#cb14-104" aria-hidden="true" tabindex="-1"></a>    <span class="co"># obstacle_track(t, canvas_size, size, sep, visible=True)</span></span>
+<span id="cb14-105"><a href="#cb14-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-106"><a href="#cb14-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-107"><a href="#cb14-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-108"><a href="#cb14-108" aria-hidden="true" tabindex="-1"></a>    canvas_size <span class="op">=</span> <span class="dv">500</span></span>
+<span id="cb14-109"><a href="#cb14-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-110"><a href="#cb14-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-111"><a href="#cb14-111" aria-hidden="true" tabindex="-1"></a>    <span class="co"># size = 30</span></span>
+<span id="cb14-112"><a href="#cb14-112" aria-hidden="true" tabindex="-1"></a>    <span class="co"># sep = 80</span></span>
+<span id="cb14-113"><a href="#cb14-113" aria-hidden="true" tabindex="-1"></a>    size <span class="op">=</span> <span class="dv">30</span></span>
+<span id="cb14-114"><a href="#cb14-114" aria-hidden="true" tabindex="-1"></a>    sep <span class="op">=</span> <span class="dv">30</span></span>
+<span id="cb14-115"><a href="#cb14-115" aria-hidden="true" tabindex="-1"></a>    t <span class="op">=</span> Turtle(canvas_size, home<span class="op">=</span>(<span class="op">-</span><span class="dv">240</span>, <span class="op">-</span><span class="dv">240</span>))</span>
+<span id="cb14-116"><a href="#cb14-116" aria-hidden="true" tabindex="-1"></a>    t.home()</span>
+<span id="cb14-117"><a href="#cb14-117" aria-hidden="true" tabindex="-1"></a>    t.left(<span class="dv">45</span>, speed<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb14-118"><a href="#cb14-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-119"><a href="#cb14-119" aria-hidden="true" tabindex="-1"></a>    t.speed(<span class="dv">5</span>)</span>
+<span id="cb14-120"><a href="#cb14-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-121"><a href="#cb14-121" aria-hidden="true" tabindex="-1"></a>    obstacle_track(t, canvas_size, size, sep, visible<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb14-122"><a href="#cb14-122" aria-hidden="true" tabindex="-1"></a>    t.on_collision(on_hit) </span>
+<span id="cb14-123"><a href="#cb14-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-124"><a href="#cb14-124" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb14-125"><a href="#cb14-125" aria-hidden="true" tabindex="-1"></a>        fun(t, salad)</span>
+<span id="cb14-126"><a href="#cb14-126" aria-hidden="true" tabindex="-1"></a>        t.forward(<span class="dv">2</span><span class="op">*</span>canvas_size)</span>
+<span id="cb14-127"><a href="#cb14-127" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> GameEnded <span class="im">as</span> e:</span>
+<span id="cb14-128"><a href="#cb14-128" aria-hidden="true" tabindex="-1"></a>        <span class="cf">pass</span></span>
+<span id="cb14-129"><a href="#cb14-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-130"><a href="#cb14-130" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> student_function(t, salad):</span>
+<span id="cb14-131"><a href="#cb14-131" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> t.total_movement <span class="op">&lt;=</span> salad:</span>
+<span id="cb14-132"><a href="#cb14-132" aria-hidden="true" tabindex="-1"></a>        <span class="co"># for d in t.sense(max_distance=30, draw=True, color='blue'):</span></span>
+<span id="cb14-133"><a href="#cb14-133" aria-hidden="true" tabindex="-1"></a>        <span class="co">#     d.angle</span></span>
+<span id="cb14-134"><a href="#cb14-134" aria-hidden="true" tabindex="-1"></a>        d <span class="op">=</span> t.distance_ahead(draw<span class="op">=</span><span class="va">True</span>, trail<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb14-135"><a href="#cb14-135" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> d <span class="kw">and</span> d.distance <span class="op">&lt;</span> <span class="dv">60</span>:</span>
+<span id="cb14-136"><a href="#cb14-136" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> d.angle <span class="op">&lt;</span> <span class="dv">0</span>:</span>
+<span id="cb14-137"><a href="#cb14-137" aria-hidden="true" tabindex="-1"></a>                t.right(<span class="dv">10</span>)</span>
+<span id="cb14-138"><a href="#cb14-138" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb14-139"><a href="#cb14-139" aria-hidden="true" tabindex="-1"></a>                t.left(<span class="dv">10</span>)</span>
+<span id="cb14-140"><a href="#cb14-140" aria-hidden="true" tabindex="-1"></a>        t.forward(<span class="dv">5</span>)</span>
+<span id="cb14-141"><a href="#cb14-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-142"><a href="#cb14-142" aria-hidden="true" tabindex="-1"></a>run_student_function(student_function, salad<span class="op">=</span><span class="dv">2000</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"45a82aa4ff9049e38d55fdc7456f2f90","version_major":2,"version_minor":1,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+</div>
+<div id="6d311c3e" class="cell" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> turtle_widget <span class="im">import</span> Turtle</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> Turtle()</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>t.speed(<span class="dv">3</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>t.add_circle(<span class="dv">120</span>, <span class="dv">0</span>, <span class="dv">40</span>)              <span class="co"># an obstacle dead ahead</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> on_hit(c):                        <span class="co"># mark each contact; motion is unchanged</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    t.penup()<span class="op">;</span> t.goto(c.point)<span class="op">;</span> t.pencolor(<span class="st">"red"</span>)<span class="op">;</span> t.dot(<span class="dv">30</span>) </span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># t.left(160) ;</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    t.pencolor(<span class="st">'none'</span>)<span class="op">;</span> </span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    t.forward(<span class="dv">2000</span>)</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># t.goto(c.pos); t.pencolor("black"); t.pendown()</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>t.on_collision(on_hit)                <span class="co"># canvas edge included by default</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>t.forward(<span class="dv">4000</span>)                        <span class="co"># zooms through the circle, then off the east edge</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="co">#  The turtle drives straight across (unchanged), then red dots appear where it touched the</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="co">#  circle and the canvas edge. Because you get .normal, a bounce handler is a few lines if</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="co">#  you want one later.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"a1ff4c27615249d3905e61041d133e0b","version_major":2,"version_minor":1,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+</div>
+</section>
 <section id="self-test-headless" class="level2">
-<h2 class="anchored" data-anchor-id="self-test-headless">8. Self-test (headless)</h2>
+<h2 class="anchored" data-anchor-id="self-test-headless">9. Self-test (headless)</h2>
 <p>Geometry is computed in Python, so it can be validated without a browser. This cell asserts a few invariants and checks the event stream is JSON-serializable (which is what gets sent to the frontend).</p>
-<div id="b4f0642b" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> turtle_widget <span class="im">import</span> Turtle</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># movement + heading</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> Turtle(autoshow<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>t.forward(<span class="dv">100</span>)<span class="op">;</span> t.left(<span class="dv">90</span>)<span class="op">;</span> t.forward(<span class="dv">100</span>)</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">abs</span>(t.xcor() <span class="op">-</span> <span class="dv">100</span>) <span class="op">&lt;</span> <span class="fl">1e-9</span>, t.xcor()</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">abs</span>(t.ycor() <span class="op">-</span> <span class="dv">100</span>) <span class="op">&lt;</span> <span class="fl">1e-9</span>, t.ycor()</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">round</span>(t.heading() <span class="op">%</span> <span class="dv">360</span>, <span class="dv">6</span>) <span class="op">==</span> <span class="dv">90</span></span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="co"># home returns to origin, heading 0</span></span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>t.home()</span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">abs</span>(t.xcor()) <span class="op">&lt;</span> <span class="fl">1e-9</span> <span class="kw">and</span> <span class="bu">abs</span>(t.ycor()) <span class="op">&lt;</span> <span class="fl">1e-9</span></span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">round</span>(t.heading() <span class="op">%</span> <span class="dv">360</span>, <span class="dv">6</span>) <span class="op">==</span> <span class="dv">0</span></span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="co"># circle returns (approximately) to its start</span></span>
-<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>c <span class="op">=</span> Turtle(autoshow<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>c.begin_fill()<span class="op">;</span> c.circle(<span class="dv">60</span>)<span class="op">;</span> c.end_fill()</span>
-<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">abs</span>(c.xcor()) <span class="op">&lt;</span> <span class="fl">1e-6</span> <span class="kw">and</span> <span class="bu">abs</span>(c.ycor()) <span class="op">&lt;</span> <span class="fl">1e-6</span></span>
-<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">any</span>(e[<span class="st">"op"</span>] <span class="op">==</span> <span class="st">"fill"</span> <span class="cf">for</span> e <span class="kw">in</span> c._events)</span>
-<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a><span class="co"># every event is JSON-serializable and carries a source line + speed</span></span>
-<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>payload <span class="op">=</span> json.dumps(t._events)</span>
-<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">all</span>(<span class="st">"line"</span> <span class="kw">in</span> e <span class="kw">and</span> <span class="st">"speed"</span> <span class="kw">in</span> e <span class="cf">for</span> e <span class="kw">in</span> t._events)</span>
-<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"All self-tests passed."</span>)</span>
-<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"square+home events:"</span>, <span class="bu">len</span>(t._events), <span class="st">"| circle events:"</span>, <span class="bu">len</span>(c._events))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="b4f0642b" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> turtle_widget <span class="im">import</span> Turtle</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># movement + heading</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> Turtle(autoshow<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>t.forward(<span class="dv">100</span>)<span class="op">;</span> t.left(<span class="dv">90</span>)<span class="op">;</span> t.forward(<span class="dv">100</span>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">abs</span>(t.xcor() <span class="op">-</span> <span class="dv">100</span>) <span class="op">&lt;</span> <span class="fl">1e-9</span>, t.xcor()</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">abs</span>(t.ycor() <span class="op">-</span> <span class="dv">100</span>) <span class="op">&lt;</span> <span class="fl">1e-9</span>, t.ycor()</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">round</span>(t.heading() <span class="op">%</span> <span class="dv">360</span>, <span class="dv">6</span>) <span class="op">==</span> <span class="dv">90</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="co"># home returns to origin, heading 0</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>t.home()</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">abs</span>(t.xcor()) <span class="op">&lt;</span> <span class="fl">1e-9</span> <span class="kw">and</span> <span class="bu">abs</span>(t.ycor()) <span class="op">&lt;</span> <span class="fl">1e-9</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">round</span>(t.heading() <span class="op">%</span> <span class="dv">360</span>, <span class="dv">6</span>) <span class="op">==</span> <span class="dv">0</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="co"># circle returns (approximately) to its start</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>c <span class="op">=</span> Turtle(autoshow<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>c.begin_fill()<span class="op">;</span> c.circle(<span class="dv">60</span>)<span class="op">;</span> c.end_fill()</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">abs</span>(c.xcor()) <span class="op">&lt;</span> <span class="fl">1e-6</span> <span class="kw">and</span> <span class="bu">abs</span>(c.ycor()) <span class="op">&lt;</span> <span class="fl">1e-6</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">any</span>(e[<span class="st">"op"</span>] <span class="op">==</span> <span class="st">"fill"</span> <span class="cf">for</span> e <span class="kw">in</span> c._events)</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a><span class="co"># every event is JSON-serializable and carries a source line + speed</span></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>payload <span class="op">=</span> json.dumps(t._events)</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">all</span>(<span class="st">"line"</span> <span class="kw">in</span> e <span class="kw">and</span> <span class="st">"speed"</span> <span class="kw">in</span> e <span class="cf">for</span> e <span class="kw">in</span> t._events)</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"All self-tests passed."</span>)</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"square+home events:"</span>, <span class="bu">len</span>(t._events), <span class="st">"| circle events:"</span>, <span class="bu">len</span>(c._events))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>All self-tests passed.
+square+home events: 5 | circle events: 23</code></pre>
+</div>
 </div>
 
 
