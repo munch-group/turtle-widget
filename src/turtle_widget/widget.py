@@ -33,6 +33,8 @@ evaluating `t`. Pass `autoshow=False` to disable the automatic display.
 
 from __future__ import annotations
 
+import collections
+import contextlib
 import functools
 import linecache
 import math
@@ -60,6 +62,14 @@ __all__ = ["Turtle"]
 # --------------------------------------------------------------------------- #
 
 _ESM = r"""
+// --- turtle-widget diagnostics: set TW_DEBUG=true to log render/build timeline to the
+// console and show a per-widget status panel (used to debug VS Code re-render issues) ---
+const TW_DEBUG = false;
+const _twDiag = (typeof window !== "undefined")
+  ? (window.__twDiag = window.__twDiag || { renders: 0, builds: 0 })
+  : { renders: 0, builds: 0 };
+function twlog(){ if (!TW_DEBUG) return; try { console.log.apply(console, ["[turtle-widget]"].concat([].slice.call(arguments))); } catch (e) {} }
+
 const KEYWORDS = new Set(["False","None","True","and","as","assert","async","await",
   "break","class","continue","def","del","elif","else","except","finally","for","from",
   "global","if","import","in","is","lambda","nonlocal","not","or","pass","raise","return",
@@ -98,15 +108,20 @@ function highlight(line){
   return out;
 }
 
-function render({ model, el }){
+function build({ model, el, rid }){
   el.innerHTML = "";
+  _twDiag.builds++;
+  const bid = _twDiag.builds;
 
   const width   = model.get("width");
   const height  = model.get("height");
   const showCode= model.get("show_code");
-  const bgColor = model.get("bg") || "white";
+  let bgColor = model.get("bg") || "white";
   const events  = model.get("events") || [];
   const source  = model.get("source_lines") || [];
+  twlog("build #" + bid + " (render #" + (rid || "?") + "):",
+        "events=" + events.length, "source_lines=" + source.length,
+        "show_code=" + showCode, "size=" + width + "x" + height);
 
   const dpr = window.devicePixelRatio || 1;
   const cx = width / 2, cy = height / 2;
@@ -137,6 +152,15 @@ function render({ model, el }){
   const bctx = base.getContext("2d");
   bctx.scale(dpr, dpr);
 
+  // obstacles live on their own layer (composited under the art) so they can be
+  // shown/hidden in one go and survive clear()
+  const obs = document.createElement("canvas");
+  obs.width = width * dpr; obs.height = height * dpr;
+  const octx = obs.getContext("2d");
+  octx.scale(dpr, dpr);
+
+  let obstacles = [];   // world obstacles, drawn on the obs layer
+
   // controls
   const bar = document.createElement("div");
   bar.className = "tw-bar";
@@ -146,6 +170,16 @@ function render({ model, el }){
   pauseBtn.className = "tw-btn"; pauseBtn.textContent = "\u275a\u275a Pause";
   bar.appendChild(replayBtn); bar.appendChild(pauseBtn);
   left.appendChild(bar);
+
+  let diagEl = null;
+  if (TW_DEBUG){
+    diagEl = document.createElement("div");
+    diagEl.className = "tw-diag";
+    diagEl.style.cssText = "font:11px/1.45 ui-monospace,monospace;color:#888;margin-top:6px;white-space:pre-wrap;";
+    left.appendChild(diagEl);
+  }
+  function setDiag(s){ if (diagEl) diagEl.textContent = s; }
+  setDiag("render #" + (rid || "?") + " · build #" + bid + " · events " + events.length + " · waiting…");
 
   // code column
   let codeRows = [];
@@ -211,6 +245,47 @@ function render({ model, el }){
     bctx.restore();
   }
 
+  function drawObstacle(g, ob){
+    g.save();
+    const col = ob.color || "#6c6c84";
+    if (ob.kind === "segment"){
+      g.strokeStyle = col; g.lineWidth = 3; g.lineCap = "round";
+      g.beginPath(); g.moveTo(TX(ob.x1), TY(ob.y1)); g.lineTo(TX(ob.x2), TY(ob.y2)); g.stroke();
+    } else if (ob.kind === "circle"){
+      g.beginPath(); g.arc(TX(ob.x), TY(ob.y), ob.r, 0, 2*Math.PI);
+      g.globalAlpha = 0.18; g.fillStyle = col; g.fill();
+      g.globalAlpha = 1; g.strokeStyle = col; g.lineWidth = 1.5; g.stroke();
+    } else if (ob.kind === "polygon" && ob.points && ob.points.length){
+      g.beginPath(); g.moveTo(TX(ob.points[0][0]), TY(ob.points[0][1]));
+      for (let k = 1; k < ob.points.length; k++) g.lineTo(TX(ob.points[k][0]), TY(ob.points[k][1]));
+      g.closePath();
+      g.globalAlpha = 0.18; g.fillStyle = col; g.fill();
+      g.globalAlpha = 1; g.strokeStyle = col; g.lineWidth = 1.5; g.stroke();
+    }
+    g.restore();
+  }
+
+  function redrawObstacles(){
+    octx.clearRect(0, 0, width, height);
+    for (const o of obstacles) if (o.visible !== false) drawObstacle(octx, o);
+  }
+
+  function commitSense(ev){
+    const col = ev.color || "rgba(220,50,50,0.9)";
+    bctx.save();
+    bctx.strokeStyle = col; bctx.fillStyle = col; bctx.lineWidth = 1; bctx.setLineDash([4,3]);
+    (ev.rays || []).forEach(r => {
+      const rad = r.a * Math.PI / 180;
+      const ex = ev.x + r.d * Math.cos(rad), ey = ev.y + r.d * Math.sin(rad);
+      bctx.beginPath(); bctx.moveTo(TX(ev.x), TY(ev.y)); bctx.lineTo(TX(ex), TY(ey)); bctx.stroke();
+      if (r.hit){
+        bctx.save(); bctx.setLineDash([]);
+        bctx.beginPath(); bctx.arc(TX(ex), TY(ey), 3.5, 0, 2*Math.PI); bctx.fill(); bctx.restore();
+      }
+    });
+    bctx.restore();
+  }
+
   function commit(ev){
     switch (ev.op){
       case "line": commitLine(ev); break;
@@ -237,19 +312,25 @@ function render({ model, el }){
           bctx.closePath(); bctx.fill(); bctx.restore();
         }
         break;
-      case "bgcolor":
-        bctx.save(); bctx.globalCompositeOperation = "destination-over";
-        bctx.fillStyle = ev.color || "white"; bctx.fillRect(0,0,width,height);
-        bctx.restore(); break;
-      case "clear":
-        bctx.clearRect(0,0,width,height); paintBg(bctx); break;
+      case "bgcolor": bgColor = ev.color || "white"; break;
+      case "obstacle": obstacles.push(ev); redrawObstacles(); break;
+      case "obstacles_visible":
+        for (const o of obstacles) o.visible = ev.visible;
+        redrawObstacles(); break;
+      case "sense": commitSense(ev); break;
+      case "clear": bctx.clearRect(0,0,width,height); break;   // art only; obstacles persist
       default: break; // pure config events (color/width/pen/visibility) handled in state
     }
   }
 
   // ---- animation engine -------------------------------------------------- //
   const state = { x: 0, y: 0, heading: 0, visible: true, pencolor: "black" };
-  let idx = 0, evStart = null, raf = null, paused = false;
+  let idx = 0, evStart = null, timer = null, paused = false, frameCount = 0;
+  const FRAME_MS = 16;
+  // Drive frames with setTimeout, not requestAnimationFrame: notebook webviews
+  // (VS Code) stop ticking the compositor when an output goes idle, so a fresh
+  // rAF after one animation finished never fires and re-runs sit frozen.
+  function schedule(){ timer = setTimeout(() => step(performance.now()), FRAME_MS); }
 
   function pxPerSec(s){ return (s == null ? 6 : s) <= 0 ? Infinity : s * 150; }
   function degPerSec(s){ return (s == null ? 6 : s) <= 0 ? Infinity : s * 180; }
@@ -286,13 +367,20 @@ function render({ model, el }){
       if (ev.op === "line" && ev.color) state.pencolor = ev.color;
     } else if (ev.op === "turn"){
       state.x = ev.x; state.y = ev.y; state.heading = ev.to;
+    } else if (ev.op === "teleport"){
+      state.x = ev.x; state.y = ev.y; state.heading = ev.heading;
     } else if (ev.op === "dot" || ev.op === "write" || ev.op === "stamp"){
       if (ev.x != null) state.x = ev.x;
       if (ev.y != null) state.y = ev.y;
     }
   }
 
-  function blitBase(){ ctx.clearRect(0,0,width,height); ctx.drawImage(base, 0,0, width, height); }
+  function blitBase(){
+    ctx.clearRect(0,0,width,height);
+    paintBg(ctx);                                   // background
+    ctx.drawImage(obs, 0,0, width, height);         // obstacles, under the art
+    ctx.drawImage(base, 0,0, width, height);        // committed art
+  }
 
   function renderProgress(ev, p){
     blitBase();
@@ -323,8 +411,9 @@ function render({ model, el }){
   }
 
   function step(ts){
-    if (paused){ raf = requestAnimationFrame(step); return; }
+    if (paused){ schedule(); return; }
     if (evStart === null) evStart = ts;
+    frameCount++;
     while (idx < events.length){
       const ev = events[idx];
       const dur = durationOf(ev);
@@ -340,21 +429,28 @@ function render({ model, el }){
         commit(ev); endState(ev);
         idx++; evStart = ts - (elapsed - dur); continue;
       }
-      raf = requestAnimationFrame(step);
+      schedule();
       return;
     }
     drawFinal();
-    raf = null;
+    timer = null;
+    twlog("build #" + bid + " animation DONE:", "frames=" + frameCount, "events=" + events.length);
+    setDiag("render #" + (rid || "?") + " · build #" + bid + " · events " + events.length +
+            " · DONE in " + frameCount + " frames");
   }
 
   function start(){
-    if (raf !== null){ cancelAnimationFrame(raf); raf = null; }
+    if (timer !== null){ clearTimeout(timer); timer = null; }
     idx = 0; evStart = null; paused = false;
     pauseBtn.textContent = "\u275a\u275a Pause";
     state.x = 0; state.y = 0; state.heading = 0; state.visible = true; state.pencolor = "black";
-    paintBg(bctx); blitBase();
+    obstacles = []; bgColor = model.get("bg") || "white";
+    bctx.clearRect(0,0,width,height); octx.clearRect(0,0,width,height);
+    blitBase();
     if (state.visible) drawTurtle(ctx, 0, 0, 0, "black");
-    raf = requestAnimationFrame(step);
+    twlog("build #" + bid + " animation START:", "events=" + events.length);
+    setDiag("render #" + (rid || "?") + " · build #" + bid + " · events " + events.length + " · animating…");
+    step(performance.now());
   }
 
   replayBtn.addEventListener("click", start);
@@ -366,7 +462,42 @@ function render({ model, el }){
   start();
 
   // anywidget cleanup hook
-  return () => { if (raf !== null) cancelAnimationFrame(raf); };
+  return () => { if (timer !== null) clearTimeout(timer); };
+}
+
+// Re-mount on any state change, not just once at view creation. Notebook
+// frontends (esp. VS Code) may create a view before the model state has synced,
+// or reuse a view across cell re-executions; rebuilding on change makes the
+// canvas render/animate reliably every time.
+function render({ model, el }){
+  _twDiag.renders++;
+  const rid = _twDiag.renders;
+  twlog("render() call #" + rid + ":",
+        "events=" + (model.get("events") || []).length,
+        "source_lines=" + (model.get("source_lines") || []).length,
+        "show_code=" + model.get("show_code"),
+        "size=" + model.get("width") + "x" + model.get("height"));
+  let inner = null, pending = false, destroyed = false;
+  const remount = () => { if (destroyed) return; if (inner) inner(); inner = build({ model, el, rid }); };
+  const schedule = () => {
+    if (pending || destroyed) return;
+    pending = true;
+    Promise.resolve().then(() => { pending = false; remount(); });   // coalesce burst of changes
+  };
+  const evNames = ["change:events", "change:source_lines", "change:width",
+                   "change:height", "change:show_code", "change:bg"];
+  const handlers = {};
+  remount();                                       // initial, synchronous
+  evNames.forEach(e => {
+    handlers[e] = () => { twlog("render #" + rid + ": " + e + " changed -> remount"); schedule(); };
+    model.on(e, handlers[e]);
+  });
+  return () => {
+    twlog("render #" + rid + ": cleanup (view torn down)");
+    destroyed = true;
+    evNames.forEach(e => model.off(e, handlers[e]));
+    if (inner) inner();
+  };
 }
 
 export default { render };
@@ -432,6 +563,193 @@ def _records(method):
 
 _SPEEDS = {"fastest": 0, "fast": 10, "normal": 6, "slow": 3, "slowest": 1}
 
+# --- obstacles & sensing --------------------------------------------------- #
+
+_OBSTACLE_COLOR = "#6c6c84"
+_SENSE_EPS = 1e-6
+
+#: One detected obstacle: ``distance`` to its closest ``point`` (x, y); ``obstacle`` the shape
+#: hit (an ``Obstacle`` — ``.kind``/``.label``/geometry), with ``kind``/``index`` mirroring it.
+#: ``angle`` is the signed bearing (degrees, + = left) to that point for ``sense``/``nearest``,
+#: or the signed angle of incidence (0 = head-on, ±90 = grazing) for ``distance_ahead``.
+Detection = collections.namedtuple(
+    "Detection", ["distance", "angle", "point", "kind", "index", "obstacle"])
+
+#: One collision reported to an ``on_collision`` handler. ``obstacle`` is the shape hit (an
+#: ``Obstacle`` — ``.kind``/``.label``/geometry); ``point`` the contact location; ``normal``
+#: the unit surface normal there (facing the turtle); ``distance`` how far into the move it
+#: occurred; ``angle`` the signed angle of incidence (degrees, 0 = head-on, ±90 = grazing);
+#: ``speed`` the effective move speed at impact; the rest is the turtle's state.
+Collision = collections.namedtuple(
+    "Collision",
+    ["point", "obstacle", "index", "normal", "distance", "pos",
+     "heading", "angle", "speed", "isdown", "isvisible", "pencolor", "pensize"])
+
+
+class Obstacle(dict):
+    """A registered obstacle (or a synthetic ``wall``/``trail`` surface) as carried by
+    ``Detection.obstacle`` / ``Collision.obstacle``. Behaves as a dict of its fields and also
+    exposes them as attributes: ``kind`` (``"circle"``/``"segment"``/``"polygon"``/``"wall"``/
+    ``"trail"``), ``label`` (or ``None``), ``color``, ``visible`` (drawn?), ``sense``
+    (detectable by ``distance_ahead``/``sense``/``nearest``?), ``index`` (position among
+    registered obstacles, else ``None``), and geometry (``x``/``y``/``r``,
+    ``x1``/``y1``/``x2``/``y2``, or ``points``)."""
+    def __getattr__(self, name):
+        try:
+            return self[name]
+        except KeyError:
+            if name in ("label", "index", "color", "visible"):
+                return None
+            raise AttributeError(name)
+
+    def __repr__(self):
+        label = " " + repr(self["label"]) if self.get("label") else ""
+        return "<Obstacle " + str(self.get("kind", "?")) + label + ">"
+
+
+def _seg_closest_point(px, py, x1, y1, x2, y2):
+    """Closest point on segment ``(x1,y1)-(x2,y2)`` to ``(px,py)``."""
+    dx, dy = x2 - x1, y2 - y1
+    L2 = dx * dx + dy * dy
+    if L2 == 0.0:
+        return x1, y1
+    t = ((px - x1) * dx + (py - y1) * dy) / L2
+    t = max(0.0, min(1.0, t))
+    return x1 + t * dx, y1 + t * dy
+
+
+def _circle_closest_point(px, py, cx, cy, r):
+    """Closest point on the circle centred ``(cx,cy)`` radius ``r`` to ``(px,py)``."""
+    dx, dy = px - cx, py - cy
+    d = math.hypot(dx, dy)
+    if d == 0.0:
+        return cx + r, cy
+    return cx + r * dx / d, cy + r * dy / d
+
+
+def _ray_segment_t(ox, oy, dx, dy, x1, y1, x2, y2):
+    """Distance ``t >= 0`` along unit ray ``(ox,oy)+t(dx,dy)`` to the segment, or None."""
+    ex, ey = x2 - x1, y2 - y1
+    det = ex * dy - dx * ey
+    if abs(det) < 1e-12:
+        return None
+    cx, cy = x1 - ox, y1 - oy
+    t = (ex * cy - cx * ey) / det
+    u = (dx * cy - dy * cx) / det
+    if t >= 0.0 and 0.0 <= u <= 1.0:
+        return t
+    return None
+
+
+def _ray_circle_t(ox, oy, dx, dy, cx, cy, r, eps=_SENSE_EPS):
+    """Smallest distance ``t > eps`` along the unit ray to the circle, or None."""
+    fx, fy = ox - cx, oy - cy
+    b = 2.0 * (fx * dx + fy * dy)
+    c = fx * fx + fy * fy - r * r
+    disc = b * b - 4.0 * c
+    if disc < 0.0:
+        return None
+    s = math.sqrt(disc)
+    for t in ((-b - s) / 2.0, (-b + s) / 2.0):
+        if t > eps:
+            return t
+    return None
+
+
+def _polygon_edges(points):
+    """Return the ``(x1,y1,x2,y2)`` edges of a closed polygon."""
+    n = len(points)
+    return [(points[i][0], points[i][1], points[(i + 1) % n][0], points[(i + 1) % n][1])
+            for i in range(n)]
+
+
+def _obstacle_closest_point(ob, px, py):
+    """Closest point on an obstacle dict to ``(px,py)``."""
+    kind = ob["kind"]
+    if kind == "circle":
+        return _circle_closest_point(px, py, ob["x"], ob["y"], ob["r"])
+    if kind in ("segment", "trail"):
+        return _seg_closest_point(px, py, ob["x1"], ob["y1"], ob["x2"], ob["y2"])
+    best, best_d = None, float("inf")
+    for x1, y1, x2, y2 in _polygon_edges(ob["points"]):
+        qx, qy = _seg_closest_point(px, py, x1, y1, x2, y2)
+        d = math.hypot(qx - px, qy - py)
+        if d < best_d:
+            best_d, best = d, (qx, qy)
+    return best
+
+
+def _obstacle_ray_t(ob, ox, oy, dx, dy, eps):
+    """Nearest forward intersection distance of a unit ray with an obstacle, or None."""
+    kind = ob["kind"]
+    if kind == "circle":
+        return _ray_circle_t(ox, oy, dx, dy, ob["x"], ob["y"], ob["r"], eps)
+    if kind in ("segment", "trail"):
+        t = _ray_segment_t(ox, oy, dx, dy, ob["x1"], ob["y1"], ob["x2"], ob["y2"])
+        return t if (t is not None and t > eps) else None
+    best = None
+    for x1, y1, x2, y2 in _polygon_edges(ob["points"]):
+        t = _ray_segment_t(ox, oy, dx, dy, x1, y1, x2, y2)
+        if t is not None and t > eps and (best is None or t < best):
+            best = t
+    return best
+
+
+def _rel_angle(qx, qy, ox, oy, heading):
+    """Signed angle (degrees, + = counter-clockwise) of ``(qx,qy)`` relative to ``heading``."""
+    a = math.degrees(math.atan2(qy - oy, qx - ox))
+    return (a - heading + 180.0) % 360.0 - 180.0
+
+
+def _incidence_angle(dx, dy, nx, ny):
+    """Signed angle of incidence (degrees, -90..90) of unit travel ``(dx,dy)`` hitting a
+    surface with unit normal ``(nx,ny)`` that faces the mover. 0 = head-on (perpendicular),
+    ±90 = grazing; the sign distinguishes the two glancing sides."""
+    return math.degrees(math.atan2(ny * dx - nx * dy, -(dx * nx + dy * ny)))
+
+
+def _seg_hit(ax, ay, ux, uy, x1, y1, x2, y2, max_t):
+    """``(t, normal)`` for the nearest crossing of unit ray ``(ax,ay)+t(ux,uy)`` with the
+    segment within ``max_t`` (normal faces back toward the mover), else ``None``."""
+    t = _ray_segment_t(ax, ay, ux, uy, x1, y1, x2, y2)
+    if t is None or t <= _SENSE_EPS or t > max_t:
+        return None
+    ex, ey = x2 - x1, y2 - y1
+    nx, ny = -ey, ex
+    nlen = math.hypot(nx, ny) or 1.0
+    nx, ny = nx / nlen, ny / nlen
+    if ux * nx + uy * ny > 0:
+        nx, ny = -nx, -ny
+    return t, (nx, ny)
+
+
+def _circle_hit(ax, ay, ux, uy, cx, cy, r, max_t):
+    """``(t, normal)`` for the nearest contact of the ray with the circle within ``max_t``."""
+    t = _ray_circle_t(ax, ay, ux, uy, cx, cy, r, _SENSE_EPS)
+    if t is None or t > max_t:
+        return None
+    nx, ny = (ax + t * ux) - cx, (ay + t * uy) - cy
+    nlen = math.hypot(nx, ny) or 1.0
+    nx, ny = nx / nlen, ny / nlen
+    if ux * nx + uy * ny > 0:
+        nx, ny = -nx, -ny
+    return t, (nx, ny)
+
+
+def _obstacle_hit(ob, ax, ay, ux, uy, max_t):
+    """``(t, normal)`` for the nearest contact of the ray with an obstacle dict, else ``None``."""
+    kind = ob["kind"]
+    if kind == "circle":
+        return _circle_hit(ax, ay, ux, uy, ob["x"], ob["y"], ob["r"], max_t)
+    if kind in ("segment", "trail"):
+        return _seg_hit(ax, ay, ux, uy, ob["x1"], ob["y1"], ob["x2"], ob["y2"], max_t)
+    best = None
+    for x1, y1, x2, y2 in _polygon_edges(ob["points"]):
+        h = _seg_hit(ax, ay, ux, uy, x1, y1, x2, y2, max_t)
+        if h is not None and (best is None or h[0] < best[0]):
+            best = h
+    return best
+
 
 # --------------------------------------------------------------------------- #
 # The widget                                                                  #
@@ -460,6 +778,30 @@ class Turtle(anywidget.AnyWidget):
         Set False for headless use such as tests.
     bg : str, optional
         Canvas background colour. Default ``"white"``.
+    home : tuple of float, optional
+        The turtle's home, given as ``(x, y)`` or ``(x, y, heading)`` (heading defaults to
+        0; 0 = east). Defaults to the origin ``(0, 0)`` facing east. The turtle both
+        **starts** here and returns here on :func:`home`. (To re-target the home of an
+        existing turtle *without* moving it, call :func:`sethome`.)
+
+    Attributes
+    ----------
+    nr_collisions : int
+        Running count of collisions detected since the turtle was created (reset to 0 by
+        :func:`reset`). Incremented once per collision reported while an :func:`on_collision`
+        handler is active — so with the default ``stop=True`` it counts the obstacles the
+        turtle has run into, and with ``stop=False`` every crossing reported. Starts at 0.
+    nr_left, nr_right : int
+        Number of times :func:`left` / :func:`right` has been called. Starts at 0, reset by
+        :func:`reset`. (The aliases ``lt``/``rt`` count too, as they are the same methods.)
+    nr_sense, nr_distance_ahead : int
+        Number of times :func:`sense` / :func:`distance_ahead` has been called. Starts at 0,
+        reset by :func:`reset`. ``nearest`` is not counted (it does not call ``sense``).
+    total_movement : float
+        Total distance the turtle has travelled, in turtle units, summed over every move
+        (``forward``/``backward``/``goto``/``circle``/``home``/…), whether the pen is up or
+        down. A move stopped short by a collision contributes only the distance actually
+        travelled; turns contribute nothing. Starts at 0.0, reset by :func:`reset`.
     """
 
     _esm = _ESM
@@ -473,7 +815,7 @@ class Turtle(anywidget.AnyWidget):
     bg = traitlets.Unicode("white").tag(sync=True)
 
     def __init__(self, width=500, height=500, show_code=False,
-                 code=None, autoshow=True, bg="white"):
+                 code=None, autoshow=True, bg="white", home=None):
         super().__init__()
         self.width = int(width)
         self.height = int(height)
@@ -484,14 +826,31 @@ class Turtle(anywidget.AnyWidget):
         self._x = 0.0
         self._y = 0.0
         self._heading = 0.0
+        self._home = (0.0, 0.0)   # target for home(); change with sethome() or home=
+        self._home_heading = 0.0
         self._pendown = True
         self._pencolor = "black"
         self._fillcolor = "black"
         self._pensize = 1
         self._speed = 6
+        self._speed_scale = 1.0   # transient per-move speed multiplier
         self._visible = True
         self._filling = False
         self._fillpath = []
+        self._obstacles = []
+        self._trail_segments = []
+        self._collision_cb = None
+        self._collision_stop = True
+        self._collision_walls = True
+        self._collision_trail = False
+        self._colliding = False
+        # public counters, all zeroed by reset()
+        self.nr_collisions = 0       # collisions reported while on_collision is active
+        self.nr_left = 0             # calls to left()
+        self.nr_right = 0            # calls to right()
+        self.nr_sense = 0            # calls to sense()
+        self.nr_distance_ahead = 0   # calls to distance_ahead()
+        self.total_movement = 0.0    # total distance travelled (pen up or down)
 
         self._events = []
         self._cur_line = None
@@ -500,117 +859,167 @@ class Turtle(anywidget.AnyWidget):
 
         self._rendered = False
         self._hook = None
+        if home is not None:
+            self.sethome(*home)
+            self._spawn_at_home()
         if autoshow:
             self._register_autoshow()
 
     # -- emission ----------------------------------------------------------- #
     def _emit(self, **ev):
         ev.setdefault("line", self._cur_line)
-        ev.setdefault("speed", self._speed)
+        ev.setdefault("speed", self._speed * self._speed_scale)
         self._events.append(ev)
+
+    @contextlib.contextmanager
+    def _scaled(self, mult):
+        """Temporarily scale emitted-event speed by ``mult`` (relative to the global speed)."""
+        prev = self._speed_scale
+        self._speed_scale = float(mult)
+        try:
+            yield
+        finally:
+            self._speed_scale = prev
 
     def _goto(self, x, y):
         x1, y1 = self._x, self._y
+        x, y = float(x), float(y)
+        hits = []
+        stopped = False
+        ux = uy = 0.0
+        if self._collision_cb is not None and not self._colliding:
+            hits = self._collisions_along(x1, y1, x, y)
+            if hits:
+                dx, dy = x - x1, y - y1
+                dist = math.hypot(dx, dy) or 1.0
+                ux, uy = dx / dist, dy / dist          # travel direction (pre-truncation)
+                if self._collision_stop:
+                    x, y = hits[0][1]      # shorten the move to the first contact point
+                    hits = hits[:1]
+                    stopped = True
         if self._pendown:
             self._emit(op="line", x1=x1, y1=y1, x2=x, y2=y,
                        color=self._pencolor, width=self._pensize)
+            self._trail_segments.append((x1, y1, x, y))
         else:
             self._emit(op="move", x1=x1, y1=y1, x2=x, y2=y)
-        self._x, self._y = float(x), float(y)
+        self._x, self._y = x, y
+        self.total_movement += math.hypot(x - x1, y - y1)   # actual (truncated) distance moved
         if self._filling:
             self._fillpath.append((self._x, self._y))
+        if hits:
+            self._dispatch_collisions(hits, ux, uy)
+        return not stopped                 # False if the turtle was stopped short
 
     # -- movement ----------------------------------------------------------- #
     @_records
-    def forward(self, distance):
+    def forward(self, distance, speed=1.0):
         """Move the turtle forward by ``distance``, drawing if the pen is down.
 
         Parameters
         ----------
         distance : float
             Distance to move along the current heading.
+        speed : float, optional
+            Per-move multiplier on the global ``speed()`` (2.0 = twice as fast,
+            0.5 = half). Default 1.0.
 
         Returns
         -------
         Turtle
             This turtle, to allow method chaining.
         """
-        rad = math.radians(self._heading)
-        self._goto(self._x + distance * math.cos(rad),
-                   self._y + distance * math.sin(rad))
+        with self._scaled(speed):
+            rad = math.radians(self._heading)
+            self._goto(self._x + distance * math.cos(rad),
+                       self._y + distance * math.sin(rad))
         return self
     fd = forward
 
     @_records
-    def backward(self, distance):
+    def backward(self, distance, speed=1.0):
         """Move the turtle backward by ``distance`` (opposite its heading).
 
         Parameters
         ----------
         distance : float
             Distance to move opposite the current heading.
+        speed : float, optional
+            Per-move multiplier on the global ``speed()`` (2.0 = twice as fast,
+            0.5 = half). Default 1.0.
 
         Returns
         -------
         Turtle
             This turtle, to allow method chaining.
         """
-        rad = math.radians(self._heading)
-        self._goto(self._x - distance * math.cos(rad),
-                   self._y - distance * math.sin(rad))
+        with self._scaled(speed):
+            rad = math.radians(self._heading)
+            self._goto(self._x - distance * math.cos(rad),
+                       self._y - distance * math.sin(rad))
         return self
     back = bk = backward
 
     @_records
-    def right(self, angle):
+    def right(self, angle, speed=1.0):
         """Turn the turtle clockwise by ``angle`` degrees.
 
         The animation spins exactly ``angle`` degrees, so multi-turn values such as
-        ``right(720)`` are preserved as two full rotations.
+        ``right(720)`` are preserved as two full rotations. Increments ``nr_right``.
 
         Parameters
         ----------
         angle : float
             Degrees to turn clockwise.
+        speed : float, optional
+            Per-move multiplier on the global ``speed()`` (2.0 = twice as fast,
+            0.5 = half). Default 1.0.
 
         Returns
         -------
         Turtle
             This turtle, to allow method chaining.
         """
-        frm = self._heading
-        to = frm - angle                      # spin exactly `angle` (sign matters)
-        self._emit(op="turn", x=self._x, y=self._y, **{"from": frm, "to": to})
-        self._heading = to % 360.0
+        self.nr_right += 1
+        with self._scaled(speed):
+            frm = self._heading
+            to = frm - angle                  # spin exactly `angle` (sign matters)
+            self._emit(op="turn", x=self._x, y=self._y, **{"from": frm, "to": to})
+            self._heading = to % 360.0
         return self
     rt = right
 
     @_records
-    def left(self, angle):
+    def left(self, angle, speed=1.0):
         """Turn the turtle counter-clockwise by ``angle`` degrees.
 
         The animation spins exactly ``angle`` degrees, so multi-turn values such as
-        ``left(720)`` are preserved as two full rotations.
+        ``left(720)`` are preserved as two full rotations. Increments ``nr_left``.
 
         Parameters
         ----------
         angle : float
             Degrees to turn counter-clockwise.
+        speed : float, optional
+            Per-move multiplier on the global ``speed()`` (2.0 = twice as fast,
+            0.5 = half). Default 1.0.
 
         Returns
         -------
         Turtle
             This turtle, to allow method chaining.
         """
-        frm = self._heading
-        to = frm + angle
-        self._emit(op="turn", x=self._x, y=self._y, **{"from": frm, "to": to})
-        self._heading = to % 360.0
+        self.nr_left += 1
+        with self._scaled(speed):
+            frm = self._heading
+            to = frm + angle
+            self._emit(op="turn", x=self._x, y=self._y, **{"from": frm, "to": to})
+            self._heading = to % 360.0
         return self
     lt = left
 
     @_records
-    def setheading(self, to_angle):
+    def setheading(self, to_angle, speed=1.0):
         """Turn the turtle to face an absolute heading.
 
         Rotates along the shortest path, so turning from 0 to 270 spins -90 degrees
@@ -620,13 +1029,17 @@ class Turtle(anywidget.AnyWidget):
         ----------
         to_angle : float
             Absolute heading in degrees.
+        speed : float, optional
+            Per-move multiplier on the global ``speed()`` (2.0 = twice as fast,
+            0.5 = half). Default 1.0.
 
         Returns
         -------
         Turtle
             This turtle, to allow method chaining.
         """
-        self._turn_to(float(to_angle))
+        with self._scaled(speed):
+            self._turn_to(float(to_angle))
         return self
     seth = setheading
 
@@ -638,7 +1051,7 @@ class Turtle(anywidget.AnyWidget):
         self._heading = to_angle % 360.0
 
     @_records
-    def goto(self, x, y=None):
+    def goto(self, x, y=None, speed=1.0):
         """Move the turtle to an absolute position, drawing if the pen is down.
 
         Parameters
@@ -647,6 +1060,89 @@ class Turtle(anywidget.AnyWidget):
             Target x-coordinate, or an ``(x, y)`` pair (then ``y`` must be omitted).
         y : float, optional
             Target y-coordinate.
+        speed : float, optional
+            Per-move multiplier on the global ``speed()`` (2.0 = twice as fast,
+            0.5 = half). Default 1.0.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
+        with self._scaled(speed):
+            if y is None:
+                x, y = x
+            self._goto(float(x), float(y))
+        return self
+    setpos = setposition = goto
+
+    @_records
+    def setx(self, x, speed=1.0):
+        """Set the x-coordinate, keeping y unchanged.
+
+        Parameters
+        ----------
+        x : float
+            New x-coordinate.
+        speed : float, optional
+            Per-move multiplier on the global ``speed()`` (2.0 = twice as fast,
+            0.5 = half). Default 1.0.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
+        with self._scaled(speed):
+            self._goto(float(x), self._y)
+        return self
+
+    @_records
+    def sety(self, y, speed=1.0):
+        """Set the y-coordinate, keeping x unchanged.
+
+        Parameters
+        ----------
+        y : float
+            New y-coordinate.
+        speed : float, optional
+            Per-move multiplier on the global ``speed()`` (2.0 = twice as fast,
+            0.5 = half). Default 1.0.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
+        with self._scaled(speed):
+            self._goto(self._x, float(y))
+        return self
+
+    def _spawn_at_home(self):
+        """Place the turtle at its home position with no animation. If home isn't the
+        origin, emit a leading ``teleport`` event so the frontend marker also starts there
+        (its marker state otherwise initialises to the origin)."""
+        self._x, self._y = self._home
+        self._heading = self._home_heading
+        if (self._x, self._y, self._heading) != (0.0, 0.0, 0.0):
+            self._emit(op="teleport", x=self._x, y=self._y, heading=self._heading)
+
+    def sethome(self, x, y=None, heading=0):
+        """Set the home position that :func:`home` returns to.
+
+        This does **not** move the turtle — it only redefines where ``home()`` goes;
+        the turtle stays where it is. (To set home when creating the turtle, pass
+        ``Turtle(home=(x, y))``.)
+
+        Parameters
+        ----------
+        x : float or tuple of float
+            Home x-coordinate, or an ``(x, y)`` / ``(x, y, heading)`` tuple (then ``y``
+            and ``heading`` must be omitted).
+        y : float, optional
+            Home y-coordinate.
+        heading : float, optional
+            The heading (degrees, 0 = east) the turtle faces after ``home()``. Default 0.
 
         Returns
         -------
@@ -654,60 +1150,39 @@ class Turtle(anywidget.AnyWidget):
             This turtle, to allow method chaining.
         """
         if y is None:
-            x, y = x
-        self._goto(float(x), float(y))
+            seq = tuple(x)
+            x, y = seq[0], seq[1]
+            if len(seq) > 2:
+                heading = seq[2]
+        self._home = (float(x), float(y))
+        self._home_heading = float(heading) % 360.0
         return self
-    setpos = setposition = goto
 
     @_records
-    def setx(self, x):
-        """Set the x-coordinate, keeping y unchanged.
+    def home(self, speed=1.0):
+        """Move the turtle to its home position and turn to the home heading.
+
+        Home is the origin ``(0, 0)`` facing east unless it was changed with
+        :func:`sethome` or the ``home=`` constructor argument.
 
         Parameters
         ----------
-        x : float
-            New x-coordinate.
+        speed : float, optional
+            Per-move multiplier on the global ``speed()`` (2.0 = twice as fast,
+            0.5 = half). Default 1.0.
 
         Returns
         -------
         Turtle
             This turtle, to allow method chaining.
         """
-        self._goto(float(x), self._y)
+        with self._scaled(speed):
+            self._goto(*self._home)
+            self._turn_to(self._home_heading)
         return self
 
     @_records
-    def sety(self, y):
-        """Set the y-coordinate, keeping x unchanged.
-
-        Parameters
-        ----------
-        y : float
-            New y-coordinate.
-
-        Returns
-        -------
-        Turtle
-            This turtle, to allow method chaining.
-        """
-        self._goto(self._x, float(y))
-        return self
-
-    @_records
-    def home(self):
-        """Move the turtle to the origin ``(0, 0)`` and set its heading to 0.
-
-        Returns
-        -------
-        Turtle
-            This turtle, to allow method chaining.
-        """
-        self._goto(0.0, 0.0)
-        self._turn_to(0.0)
-        return self
-
-    @_records
-    def circle(self, radius, extent=None, steps=None):
+    def circle(self, radius, extent=None, steps=None, speed=1.0):
         """Draw a circle or arc, approximated by a series of straight chords.
 
         A positive ``radius`` curves to the left of the turtle, a negative ``radius``
@@ -722,31 +1197,36 @@ class Turtle(anywidget.AnyWidget):
         steps : int, optional
             Number of chords approximating the arc. Defaults to a value scaled to the
             radius and extent.
+        speed : float, optional
+            Per-move multiplier on the global ``speed()`` (2.0 = twice as fast,
+            0.5 = half). Default 1.0.
 
         Returns
         -------
         Turtle
             This turtle, to allow method chaining.
         """
-        if extent is None:
-            extent = 360.0
-        if steps is None:
-            frac = abs(extent) / 360.0
-            steps = 1 + int(min(11.0 + abs(radius) / 6.0, 59.0) * frac)
-        w = extent / steps
-        w2 = 0.5 * w
-        length = 2.0 * radius * math.sin(math.radians(w2))
-        if radius < 0:
-            length, w, w2 = -length, -w, -w2
-        # turn into the arc, walk it, then straighten up
-        self._heading += w2
-        for _ in range(steps):
-            rad = math.radians(self._heading)
-            self._goto(self._x + length * math.cos(rad),
-                       self._y + length * math.sin(rad))
-            self._heading += w
-        self._heading -= w2
-        self._heading %= 360.0
+        with self._scaled(speed):
+            if extent is None:
+                extent = 360.0
+            if steps is None:
+                frac = abs(extent) / 360.0
+                steps = 1 + int(min(11.0 + abs(radius) / 6.0, 59.0) * frac)
+            w = extent / steps
+            w2 = 0.5 * w
+            length = 2.0 * radius * math.sin(math.radians(w2))
+            if radius < 0:
+                length, w, w2 = -length, -w, -w2
+            # turn into the arc, walk it, then straighten up
+            self._heading += w2
+            for _ in range(steps):
+                rad = math.radians(self._heading)
+                if not self._goto(self._x + length * math.cos(rad),
+                                  self._y + length * math.sin(rad)):
+                    break                  # stopped at an obstacle mid-arc
+                self._heading += w
+            self._heading -= w2
+            self._heading %= 360.0
         return self
 
     # -- pen ---------------------------------------------------------------- #
@@ -1026,13 +1506,17 @@ class Turtle(anywidget.AnyWidget):
 
     @_records
     def clear(self):
-        """Clear all drawing from the canvas, keeping the turtle state.
+        """Clear the drawing and the sensed trail from the canvas.
+
+        Registered obstacles are kept (they are redrawn); the turtle's position,
+        heading and pen are unchanged.
 
         Returns
         -------
         Turtle
             This turtle, to allow method chaining.
         """
+        self._trail_segments = []
         self._emit(op="clear")
         return self
 
@@ -1046,6 +1530,8 @@ class Turtle(anywidget.AnyWidget):
             This turtle, to allow method chaining.
         """
         self._events = []
+        self._obstacles = []
+        self._trail_segments = []
         self._x = self._y = self._heading = 0.0
         self._pendown = True
         self._pencolor = self._fillcolor = "black"
@@ -1053,6 +1539,10 @@ class Turtle(anywidget.AnyWidget):
         self._visible = True
         self._filling = False
         self._fillpath = []
+        self.nr_collisions = 0
+        self.nr_left = self.nr_right = self.nr_sense = self.nr_distance_ahead = 0
+        self.total_movement = 0.0
+        self._spawn_at_home()    # return to home (re-emits teleport if home != origin)
         return self
 
     @_records
@@ -1078,6 +1568,44 @@ class Turtle(anywidget.AnyWidget):
             s = _SPEEDS.get(s, 6)
         self._speed = max(0, min(10, int(s)))
         return self
+
+    def duration(self):
+        """Total time the animation will take to play, in seconds.
+
+        Computed from the recorded events using the exact timing the browser uses: a
+        ``line``/``move`` of length *d* at effective speed *s* takes ``d / (s * 150)``
+        seconds, a ``turn`` of *a* degrees takes ``a / (s * 180)`` seconds, and every
+        other event (dots, stamps, writes, fills, pen/colour changes, sensing, …) is
+        instant. A move whose effective speed is ``0`` is instant too — it snaps into
+        place. The effective speed already includes any per-move ``speed=`` multiplier.
+
+        Returns
+        -------
+        float
+            Seconds the full animation will take at the current events' speeds. ``0.0``
+            if speed is ``0`` (everything is instant) or nothing has been drawn yet.
+
+        Notes
+        -----
+        This is the *scheduled* play time derived from the event stream — it excludes the
+        browser's frame-scheduling overhead and does not change as the animation plays.
+        The *currently elapsed* time lives in the browser; the Python ``Turtle`` records
+        events but does not receive playback progress back, so live elapsed/remaining time
+        is not readable here. (It could be exposed by adding a synced trait the frontend
+        updates each frame — ask if you want that.)
+        """
+        total = 0.0
+        for ev in self._events:
+            speed = ev.get("speed")
+            v = 6 if speed is None else speed
+            if v <= 0:
+                continue                              # instant (speed 0 snaps into place)
+            op = ev.get("op")
+            if op in ("line", "move"):
+                total += math.hypot(ev["x2"] - ev["x1"], ev["y2"] - ev["y1"]) / (v * 150.0)
+            elif op == "turn":
+                total += abs(ev["to"] - ev["from"]) / (v * 180.0)
+        return total
 
     # -- getters (no events) ------------------------------------------------ #
     def position(self):
@@ -1141,6 +1669,467 @@ class Turtle(anywidget.AnyWidget):
         """
         return self._visible
 
+    # -- obstacles & sensing ------------------------------------------------ #
+    def _add_obstacle(self, ob, color, visible=True, label=None, sense=True):
+        ob["color"] = _as_color(color) if color is not None else _OBSTACLE_COLOR
+        ob["visible"] = bool(visible)
+        ob["sense"] = bool(sense)
+        ob["label"] = label
+        ob["index"] = len(self._obstacles)
+        obstacle = Obstacle(ob)
+        self._obstacles.append(obstacle)
+        self._emit(op="obstacle", **obstacle)
+
+    def _wall_obstacle(self):
+        w, h = self.width / 2.0, self.height / 2.0
+        return Obstacle(kind="wall", points=[[-w, -h], [w, -h], [w, h], [-w, h]],
+                        color=None, visible=True, sense=True, label=None, index=None)
+
+    @staticmethod
+    def _trail_obstacle(x1, y1, x2, y2):
+        return Obstacle(kind="trail", x1=x1, y1=y1, x2=x2, y2=y2,
+                        color=None, visible=True, sense=True, label=None, index=None)
+
+    @_records
+    def add_circle(self, x, y, radius, color=None, visible=True, label=None, sense=True):
+        """Register a circular obstacle and draw it.
+
+        Parameters
+        ----------
+        x, y : float
+            Centre of the circle, in turtle coordinates.
+        radius : float
+            Radius of the circle.
+        color : str or tuple, optional
+            Outline/fill colour. Defaults to a neutral obstacle colour.
+        visible : bool, optional
+            Whether to draw it (default True). Invisible obstacles are still sensed
+            and still collide.
+        label : str, optional
+            A name carried on the obstacle and surfaced as ``.label`` on the
+            ``Detection``/``Collision`` objects that report it. Not drawn.
+        sense : bool, optional
+            Whether ``distance_ahead``/``sense``/``nearest`` can detect it (default True).
+            A non-sensing obstacle is still drawn (unless ``visible=False``) and still
+            collides — it is only hidden from the sensing queries.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
+        self._add_obstacle({"kind": "circle", "x": float(x), "y": float(y),
+                            "r": float(radius)}, color, visible, label, sense)
+        return self
+
+    @_records
+    def add_segment(self, x1, y1, x2, y2, color=None, visible=True, label=None, sense=True):
+        """Register a line-segment (wall) obstacle and draw it.
+
+        Parameters
+        ----------
+        x1, y1 : float
+            One endpoint of the segment.
+        x2, y2 : float
+            The other endpoint.
+        color : str or tuple, optional
+            Segment colour. Defaults to a neutral obstacle colour.
+        visible : bool, optional
+            Whether to draw it (default True). Invisible obstacles are still sensed
+            and still collide.
+        label : str, optional
+            A name carried on the obstacle and surfaced as ``.label`` on the
+            ``Detection``/``Collision`` objects that report it. Not drawn.
+        sense : bool, optional
+            Whether ``distance_ahead``/``sense``/``nearest`` can detect it (default True).
+            A non-sensing obstacle is still drawn (unless ``visible=False``) and still
+            collides — it is only hidden from the sensing queries.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
+        self._add_obstacle({"kind": "segment", "x1": float(x1), "y1": float(y1),
+                            "x2": float(x2), "y2": float(y2)}, color, visible, label, sense)
+        return self
+
+    @_records
+    def add_polygon(self, points, color=None, visible=True, label=None, sense=True):
+        """Register a filled polygon obstacle and draw it.
+
+        Parameters
+        ----------
+        points : sequence of (float, float)
+            Polygon vertices in turtle coordinates; the last vertex is joined
+            back to the first.
+        color : str or tuple, optional
+            Outline/fill colour. Defaults to a neutral obstacle colour.
+        visible : bool, optional
+            Whether to draw it (default True). Invisible obstacles are still sensed
+            and still collide.
+        label : str, optional
+            A name carried on the obstacle and surfaced as ``.label`` on the
+            ``Detection``/``Collision`` objects that report it. Not drawn.
+        sense : bool, optional
+            Whether ``distance_ahead``/``sense``/``nearest`` can detect it (default True).
+            A non-sensing obstacle is still drawn (unless ``visible=False``) and still
+            collides — it is only hidden from the sensing queries.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
+        pts = [[float(px), float(py)] for px, py in points]
+        self._add_obstacle({"kind": "polygon", "points": pts}, color, visible, label, sense)
+        return self
+
+    @_records
+    def add_rectangle(self, x1, y1, x2, y2, color=None, visible=True, label=None, sense=True):
+        """Register a rectangular obstacle (a 4-point polygon) and draw it.
+
+        Parameters
+        ----------
+        x1, y1 : float
+            One corner of the rectangle.
+        x2, y2 : float
+            The opposite corner.
+        color : str or tuple, optional
+            Outline/fill colour. Defaults to a neutral obstacle colour.
+        visible : bool, optional
+            Whether to draw it (default True). Invisible obstacles are still sensed
+            and still collide.
+        label : str, optional
+            A name carried on the obstacle and surfaced as ``.label`` on the
+            ``Detection``/``Collision`` objects that report it. Not drawn.
+        sense : bool, optional
+            Whether ``distance_ahead``/``sense``/``nearest`` can detect it (default True).
+            A non-sensing obstacle is still drawn (unless ``visible=False``) and still
+            collides — it is only hidden from the sensing queries.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
+        xa, xb = sorted((float(x1), float(x2)))
+        ya, yb = sorted((float(y1), float(y2)))
+        self._add_obstacle({"kind": "polygon",
+                            "points": [[xa, ya], [xb, ya], [xb, yb], [xa, yb]]},
+                           color, visible, label, sense)
+        return self
+
+    @_records
+    def show_obstacles(self):
+        """Make all registered obstacles visible.
+
+        Visibility is purely cosmetic — hidden obstacles are still sensed and still
+        collide. Affects every obstacle added so far.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
+        for ob in self._obstacles:
+            ob["visible"] = True
+        self._emit(op="obstacles_visible", visible=True)
+        return self
+
+    @_records
+    def hide_obstacles(self):
+        """Hide all registered obstacles from view.
+
+        Visibility is purely cosmetic — hidden obstacles are still sensed and still
+        collide (they become invisible walls). Affects every obstacle added so far.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+        """
+        for ob in self._obstacles:
+            ob["visible"] = False
+        self._emit(op="obstacles_visible", visible=False)
+        return self
+
+    def _scan(self, max_distance, walls, trail):
+        px, py, hd = self._x, self._y, self._heading
+        dets = []
+
+        def consider(qx, qy, obstacle):
+            d = math.hypot(qx - px, qy - py)
+            if d > _SENSE_EPS and (max_distance is None or d <= max_distance):
+                dets.append(Detection(d, _rel_angle(qx, qy, px, py, hd), (qx, qy),
+                                       obstacle["kind"], obstacle["index"], obstacle))
+
+        for ob in self._obstacles:
+            if not ob.get("sense", True):
+                continue
+            qx, qy = _obstacle_closest_point(ob, px, py)
+            consider(qx, qy, ob)
+
+        if walls:
+            wall = self._wall_obstacle()
+            qx, qy = _obstacle_closest_point(wall, px, py)
+            consider(qx, qy, wall)
+
+        if trail and self._trail_segments:
+            best = None
+            for seg in self._trail_segments:
+                qx, qy = _seg_closest_point(px, py, *seg)
+                d = math.hypot(qx - px, qy - py)
+                if d > _SENSE_EPS and (best is None or d < best[0]):
+                    best = (d, qx, qy, seg)
+            if best is not None:
+                consider(best[1], best[2], self._trail_obstacle(*best[3]))
+
+        dets.sort(key=lambda D: D.distance)
+        return dets
+
+    def _ray_ahead(self, max_distance, walls, trail):
+        px, py = self._x, self._y
+        rad = math.radians(self._heading)
+        dx, dy = math.cos(rad), math.sin(rad)
+        best = None                                    # (t, normal, obstacle)
+        for ob in self._obstacles:
+            if not ob.get("sense", True):
+                continue
+            h = _obstacle_hit(ob, px, py, dx, dy, math.inf)
+            if h is not None and (best is None or h[0] < best[0]):
+                best = (h[0], h[1], ob)
+        if trail:
+            for x1, y1, x2, y2 in self._trail_segments:
+                h = _seg_hit(px, py, dx, dy, x1, y1, x2, y2, math.inf)
+                if h is not None and (best is None or h[0] < best[0]):
+                    best = (h[0], h[1], self._trail_obstacle(x1, y1, x2, y2))
+        if walls:
+            wall = self._wall_obstacle()
+            h = _obstacle_hit(wall, px, py, dx, dy, math.inf)
+            if h is not None and (best is None or h[0] < best[0]):
+                best = (h[0], h[1], wall)
+        if best is None or (max_distance is not None and best[0] > max_distance):
+            return None
+        t, normal, obstacle = best
+        return Detection(distance=t, point=(px + t * dx, py + t * dy),
+                         kind=obstacle["kind"], index=obstacle["index"], obstacle=obstacle,
+                         angle=_incidence_angle(dx, dy, normal[0], normal[1]))
+
+    @_records
+    def distance_ahead(self, max_distance=None, walls=True, trail=True, draw=False, color="red"):
+        """Sense the nearest obstacle straight ahead.
+
+        Casts a ray from the turtle along its current heading and returns the first
+        obstacle it hits as a ``Detection`` — the same object :func:`sense` yields.
+        Increments ``nr_distance_ahead``.
+
+        Parameters
+        ----------
+        max_distance : float, optional
+            Ignore hits farther than this. ``None`` (default) means unlimited.
+        walls : bool, optional
+            Include the canvas border as an obstacle. Default True.
+        trail : bool, optional
+            Include the turtle's own drawn path as obstacles. Default True.
+        draw : bool, optional
+            If True, also draw the sensor ray on the canvas. Default False.
+        color : str or tuple, optional
+            Colour of the drawn ray, used only when ``draw=True``. Default ``"red"``;
+            accepts a CSS colour string or an ``(r, g, b)`` tuple.
+
+        Returns
+        -------
+        Detection or None
+            The nearest obstacle ahead, with the same fields as a ``sense`` result —
+            ``distance``, ``angle`` (the signed angle of incidence — 0 = head-on,
+            ±90 = grazing), ``point``, ``obstacle`` (the shape hit), ``kind`` and ``index`` —
+            or ``None`` if nothing is within range.
+        """
+        self.nr_distance_ahead += 1
+        det = self._ray_ahead(max_distance, walls, trail)
+        if draw:
+            length = det.distance if det is not None else (
+                max_distance if max_distance is not None else max(self.width, self.height))
+            self._emit(op="sense", x=self._x, y=self._y, color=_as_color(color),
+                       rays=[{"a": self._heading, "d": length, "hit": det is not None}])
+        return det
+
+    @_records
+    def sense(self, max_distance=None, walls=True, trail=True, draw=False, color="red"):
+        """Detect all obstacles within range, with the bearing to each.
+
+        For every obstacle whose closest point lies within ``max_distance`` of
+        the turtle, returns a ``Detection`` giving the distance and the signed
+        angle (relative to the turtle's heading, positive = left / counter-
+        clockwise) to that closest point. A point the turtle is touching is not
+        reported. Increments ``nr_sense`` (``nearest`` does not, since it does not
+        call this method).
+
+        Parameters
+        ----------
+        max_distance : float, optional
+            Only report obstacles whose closest point is within this distance.
+            ``None`` (default) reports every obstacle.
+        walls : bool, optional
+            Include the canvas border. Default True.
+        trail : bool, optional
+            Include the turtle's own drawn path (its nearest point). Default True.
+        draw : bool, optional
+            If True, also draw a ray to each detected point. Default False.
+        color : str or tuple, optional
+            Colour of the drawn rays, used only when ``draw=True``. Default ``"red"``;
+            accepts a CSS colour string or an ``(r, g, b)`` tuple.
+
+        Returns
+        -------
+        list of Detection
+            Detections sorted nearest-first. Each ``Detection`` has fields
+            ``distance``, ``angle`` (degrees), ``point`` (x, y), ``obstacle`` (the shape hit —
+            an ``Obstacle`` exposing ``.kind``/``.label``/geometry), ``kind`` (one of
+            ``"circle"``, ``"segment"``, ``"polygon"``, ``"wall"``, ``"trail"``)
+            and ``index`` (position among registered obstacles, else ``None``).
+        """
+        self.nr_sense += 1
+        dets = self._scan(max_distance, walls, trail)
+        if draw:
+            self._emit(op="sense", x=self._x, y=self._y, color=_as_color(color),
+                       rays=[{"a": self._heading + D.angle, "d": D.distance, "hit": True}
+                             for D in dets])
+        return dets
+
+    @_records
+    def nearest(self, max_distance=None, walls=True, trail=True, draw=False, color="red"):
+        """The single nearest obstacle within range, or ``None``.
+
+        A convenience wrapper around :func:`sense` returning only the closest
+        detection.
+
+        Parameters
+        ----------
+        max_distance : float, optional
+            Only consider obstacles within this distance. ``None`` (default)
+            considers every obstacle.
+        walls : bool, optional
+            Include the canvas border. Default True.
+        trail : bool, optional
+            Include the turtle's own drawn path. Default True.
+        draw : bool, optional
+            If True, draw a ray to the nearest detected point. Default False.
+        color : str or tuple, optional
+            Colour of the drawn ray, used only when ``draw=True``. Default ``"red"``;
+            accepts a CSS colour string or an ``(r, g, b)`` tuple.
+
+        Returns
+        -------
+        Detection or None
+            The nearest detection (see ``sense``), or ``None`` if nothing is
+            within range.
+        """
+        dets = self._scan(max_distance, walls, trail)
+        result = dets[0] if dets else None
+        if draw and result is not None:
+            self._emit(op="sense", x=self._x, y=self._y, color=_as_color(color),
+                       rays=[{"a": self._heading + result.angle,
+                              "d": result.distance, "hit": True}])
+        return result
+
+    def on_collision(self, handler, stop=True, walls=True, trail=False):
+        """Register a hook fired when a move runs into an obstacle.
+
+        Collision detection is **opt-in** — calling this enables it; until then moves are
+        unaffected. By default the turtle **stops at the first obstacle (or canvas edge) it
+        hits**: the move is shortened to the contact point and the turtle ends there. After a
+        move that hit something, ``handler(collision)`` is called with the contact details;
+        the handler may then issue ordinary turtle commands (which animate next) to react.
+        Each reported collision also increments the turtle's ``nr_collisions`` counter.
+
+        Parameters
+        ----------
+        handler : callable or None
+            Called as ``handler(collision)`` with a ``Collision`` (see Notes). Pass ``None``
+            to turn collision detection off again.
+        stop : bool, optional
+            If True (default), the turtle stops at the first contact. If False, motion is
+            unchanged (the move completes) and the handler is notified for *every* obstacle
+            the path crossed, nearest first.
+        walls : bool, optional
+            Treat the canvas border as an obstacle. Default True.
+        trail : bool, optional
+            Also collide with the turtle's own drawn path (self-collision). Default False.
+
+        Returns
+        -------
+        Turtle
+            This turtle, to allow method chaining.
+
+        Notes
+        -----
+        Each ``Collision`` carries the contact ``point`` (x, y); the ``obstacle`` that was hit
+        (an ``Obstacle`` exposing ``.kind`` —
+        ``"circle"``/``"segment"``/``"polygon"``/``"wall"``/``"trail"`` — plus ``.label`` and its
+        geometry); its ``index`` among registered obstacles (else ``None``); the unit surface
+        ``normal`` at the contact,
+        facing back toward the turtle (reflect a direction ``d`` with ``d - 2*(d·n)*n`` to
+        bounce); the ``distance`` travelled into the move; ``angle``, the signed angle of
+        incidence in degrees (0 = a head-on, perpendicular hit; ±90 = a grazing hit parallel to
+        the surface; the sign distinguishes the two glancing sides); ``speed``, the effective
+        animation speed of the move (global ``speed()`` × the move's ``speed=`` multiplier);
+        and the turtle's state — ``pos``, ``heading``, ``isdown``, ``isvisible``, ``pencolor``,
+        ``pensize``. The handler's own moves do not re-trigger collisions, so it can move the
+        turtle freely (e.g. to bounce or back away).
+        """
+        self._collision_cb = handler
+        self._collision_stop = bool(stop)
+        self._collision_walls = bool(walls)
+        self._collision_trail = bool(trail)
+        return self
+
+    def _collisions_along(self, ax, ay, bx, by):
+        """Sorted ``(t, point, normal, obstacle)`` for obstacles/edges the segment
+        ``(ax,ay)->(bx,by)`` crosses, nearest first."""
+        dx, dy = bx - ax, by - ay
+        length = math.hypot(dx, dy)
+        if length <= _SENSE_EPS:
+            return []
+        ux, uy = dx / length, dy / length
+        hits = []
+        for ob in self._obstacles:
+            h = _obstacle_hit(ob, ax, ay, ux, uy, length)
+            if h is not None:
+                hits.append((h[0], (ax + h[0] * ux, ay + h[0] * uy), h[1], ob))
+        if self._collision_walls:
+            wall = self._wall_obstacle()
+            h = _obstacle_hit(wall, ax, ay, ux, uy, length)
+            if h is not None:
+                hits.append((h[0], (ax + h[0] * ux, ay + h[0] * uy), h[1], wall))
+        if self._collision_trail:
+            for x1, y1, x2, y2 in self._trail_segments:
+                h = _seg_hit(ax, ay, ux, uy, x1, y1, x2, y2, length)
+                if h is not None:
+                    hits.append((h[0], (ax + h[0] * ux, ay + h[0] * uy), h[1],
+                                 self._trail_obstacle(x1, y1, x2, y2)))
+        hits.sort(key=lambda r: r[0])
+        return hits
+
+    def _dispatch_collisions(self, hits, ux, uy):
+        end = (self._x, self._y)
+        snap = dict(heading=self._heading, speed=self._speed * self._speed_scale,
+                    isdown=self._pendown, isvisible=self._visible,
+                    pencolor=self._pencolor, pensize=self._pensize)
+        self._colliding = True
+        try:
+            for t, point, normal, obstacle in hits:
+                if self._collision_cb is not None:
+                    self.nr_collisions += 1
+                    # signed angle of incidence: 0 = head-on, ±90 = grazing
+                    angle = _incidence_angle(ux, uy, normal[0], normal[1])
+                    self._collision_cb(Collision(point=point, obstacle=obstacle,
+                                                 index=obstacle["index"], normal=normal,
+                                                 distance=t, pos=end, angle=angle, **snap))
+        finally:
+            self._colliding = False
+
     # -- display / source --------------------------------------------------- #
     def _get_source(self):
         if self._explicit_code is not None:
@@ -1152,8 +2141,12 @@ class Turtle(anywidget.AnyWidget):
         return []
 
     def _flush(self):
-        # set source_lines first so the frontend has it before events trigger render
-        self.source_lines = self._get_source()
+        # set source_lines first so the frontend has it before events trigger render.
+        # Only transmit the cell source when it is actually shown: the captured source
+        # is the *only* content that varies with the cell's text, and sending it over
+        # the comm on every (re-)display when show_code is off is both wasteful and a
+        # source of frontend re-render flakiness on cell re-execution.
+        self.source_lines = self._get_source() if self.show_code else []
         self.events = list(self._events)
 
     def show(self):

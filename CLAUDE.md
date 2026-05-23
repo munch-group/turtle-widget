@@ -114,6 +114,7 @@ Every event is a dict with an `op` plus op-specific fields. `_emit()` injects `l
 | `line`    | `x1,y1,x2,y2,color,width`                | yes       | pen-down move; animated stroke |
 | `move`    | `x1,y1,x2,y2`                            | yes       | pen-up travel; marker only |
 | `turn`    | `x,y,from,to`                            | yes       | rotation; spins exactly `to-from` |
+| `teleport`| `x,y,heading`                            | no        | instant marker placement, no drawing; emitted as the first event when the turtle spawns away from the origin (`home=`) |
 | `dot`     | `x,y,size,color`                         | no        | filled dot |
 | `stamp`   | `x,y,heading,color`                      | no        | turtle-shaped mark |
 | `write`   | `x,y,text,color,align,font`              | no        | `font` is a CSS font string |
@@ -123,22 +124,36 @@ Every event is a dict with an `op` plus op-specific fields. `_emit()` injects `l
 | `pen`     | `down:bool`                              | no        | pen up/down (state only) |
 | `show`/`hide` | —                                    | no        | marker visibility |
 | `bgcolor` | `color`                                  | no        | repaints background behind art |
-| `clear`   | —                                        | no        | clears committed art |
+| `obstacle`| `kind` + shape fields + `color`,`visible`,`sense`,`label`,`index`| no | registered obstacle (circle/segment/polygon); `label` is metadata (not drawn); drawn on the obstacle layer if `visible`; `sense=False` hides it from the sensing queries only |
+| `obstacles_visible` | `visible:bool`                 | no        | show/hide *all* obstacles at once |
+| `sense`   | `x,y,rays:[{a,d,hit}],color`             | no        | sensor-ray overlay (dashed rays + hit dots) |
+| `clear`   | —                                        | no        | clears committed art only (obstacle layer untouched) |
 
 Curves (`circle`) are decomposed in Python into many small `line` chords, so the frontend
 needs no arc logic.
 
-### Animation engine (`render` in `_ESM`)
+### Animation engine (`build` in `_ESM`)
 
 - An offscreen `base` canvas holds committed art; the visible canvas is redrawn each frame
   as `drawImage(base)` + the in-progress segment + the turtle marker.
-- `step(ts)` is a `requestAnimationFrame` loop. Per event: `durationOf()` gives a duration
+- `step(ts)` is the frame loop, driven by **`setTimeout`** (~16 ms, via `schedule()`) — *not*
+  `requestAnimationFrame`. Notebook webviews (VS Code) stop ticking the compositor when an
+  output goes idle, so a freshly-scheduled rAF after one animation finished never fires and
+  re-runs freeze (tell-tale: clicking *Pause*, which keeps a loop alive, "fixes" re-runs).
+  Don't switch this back to rAF. Per event: `durationOf()` gives a duration
   (0 ⇒ instant; `speed:0` ⇒ instant). Animated events interpolate via `renderProgress()`;
   on completion `commit()` writes to `base` and `endState()` advances the tracked
   `{x,y,heading,visible,pencolor}`. Instant events `commit()` immediately and the loop
   continues within the same frame.
 - `setActiveLine(ev.line)` drives the synced code highlight + autoscroll.
-- `render` returns a cleanup function that cancels the RAF (anywidget calls it on teardown).
+- `build({model, el})` does the work above and returns a cleanup that clears the pending timer.
+- `render` (the anywidget entry point) is a thin wrapper: it `build`s once, then **re-mounts on
+  every model change** (`change:events`, `change:source_lines`, `change:width`, …), tearing
+  down the previous mount each time (changes are coalesced via a microtask). This is essential
+  for re-execution robustness — notebook frontends (esp. VS Code) may create the view *before*
+  the model state has synced, or reuse a view across cell re-runs; reading `events` only once in
+  `render` left the canvas blank/un-animated on the 2nd+ run. Do not move the animation back into
+  a one-shot `render`.
 
 ### Heading semantics (subtle — matches CPython turtle)
 
@@ -147,6 +162,67 @@ needs no arc logic.
 multi-turn spins like `right(720)`). `setheading`/`home` use `_turn_to()`, which rotates
 through the **shortest signed path** (`((to-from+180) % 360) - 180`). Do not "simplify"
 this to absolute from→to or the turtle will over-spin (e.g. `home()` would spin 540°).
+
+### Obstacles & sensing
+
+Obstacles live in Python: registered shapes in `self._obstacles`, the drawn
+`self._trail_segments`, and the canvas border. `add_circle`/`add_segment`/`add_polygon`/
+`add_rectangle` store a shape (wrapped as an `Obstacle`, carrying an optional `label=` and its
+`index`) and emit an `obstacle` event. Sensing is **pure-Python geometry** (module-level
+`_ray_*` / `_*_closest_point` / `_rel_angle` / `_incidence_angle`; geometry helpers map
+`kind` `"trail"`→segment and `"wall"`→polygon). All three queries return `Detection`s —
+`(distance, angle, point, kind, index, obstacle)`, where `obstacle` is the shape hit as an
+`Obstacle` (a `dict` subclass that also exposes its keys as attributes: `.kind`, `.label`,
+`.color`, `.visible`, `.sense`, `.index`, geometry). For a registered shape it **is** the object in
+`self._obstacles`; walls/trails get a synthetic `Obstacle` (`_wall_obstacle`/`_trail_obstacle`,
+`index`/`label` `None`). The flat `kind`/`index` fields are kept as convenience mirrors of
+`obstacle.kind`/`obstacle.index`. `sense` returns a nearest-first list and `nearest` the single
+closest (or `None`), with `angle` the signed **bearing** (+ = left/CCW) to the closest point.
+`distance_ahead` casts a ray along
+the heading and returns the obstacle hit there (or `None`), with `angle` the signed **angle
+of incidence** (0 = head-on, ±90 = grazing — from the travel direction and the contact
+`normal`). A small epsilon means the turtle never senses the point it is standing on. Pass
+`draw=True` to a query to
+*also* emit a `sense` event (the ray overlay, coloured by the `color=` kwarg — default `"red"`,
+run through `_as_color`) — otherwise the queries are side-effect-free.
+
+Each obstacle has a `visible` flag (`add_*(..., visible=False)` for an invisible wall);
+`show_obstacles()`/`hide_obstacles()` toggle them all (emitting `obstacles_visible`).
+Visibility is **rendering-only** — invisible obstacles are still sensed and still collide.
+Independently, each obstacle has a `sense` flag (`add_*(..., sense=False)`): `_scan`/`_ray_ahead`
+skip non-sensing shapes (so they're invisible to `sense`/`nearest`/`distance_ahead`), but they
+are **still drawn and still collide**. The three concerns are orthogonal: `visible` = drawn,
+`sense` = detectable by the queries, collision = always (when `on_collision` is enabled). The
+`sense` filter applies only to registered shapes — walls/trail detectability is governed by each
+query's `walls=`/`trail=` args.
+
+In the frontend, obstacles live on their **own offscreen layer** (`obs`/`octx`), composited
+under the art each frame: `blitBase` draws background → `obs` → `base` (art). `redrawObstacles`
+repaints the layer (only `visible` ones) on `obstacle`/`obstacles_visible`. So `clear` (art
+only) leaves obstacles intact, and `bgcolor` just sets the `bgColor` state repainted each
+frame. In Python, `clear()` keeps `_obstacles` but resets `_trail_segments`; `reset()` clears
+both.
+
+### Collisions (`on_collision`)
+
+`on_collision(handler, stop=True, walls=True, trail=False)` opts into collision detection
+(off until called). By default the turtle **stops at the first obstacle/edge it hits**:
+`_goto` calls `_collisions_along(start, requested)` to find the crossings (module-level
+`_obstacle_hit`/`_seg_hit`/`_circle_hit`, each returning a contact distance `t` + the surface
+`normal` facing the mover), and if any, shortens the move to the nearest contact point before
+emitting it (and returns `False`). `circle` walks chords through `_goto` and breaks its loop
+when `_goto` returns `False`. With `stop=False` the move completes unchanged and the handler
+is notified for *every* crossing, nearest first. `_dispatch_collisions` builds a `Collision`
+(contact `point`/`normal`/`distance`; `angle` = signed angle of incidence (0°=head-on,
+±90°=grazing, via `_incidence_angle` from the travel direction and the contact `normal`); `speed` =
+effective move speed (global × the per-move `speed=` multiplier); the `obstacle` hit (the
+`Obstacle` shape object — `.kind`/`.label`/geometry) and its `index`;
+and the turtle's state — `pos`, `heading`, `isdown`, …) and calls the handler; a `_colliding`
+re-entrancy
+guard lets the handler move the turtle (e.g. to bounce) without re-triggering. **Pure Python,
+no new frontend op.** `_dispatch_collisions` also bumps the public `nr_collisions` counter once
+per dispatched `Collision` (so `stop=True` ⇒ one per colliding move, `stop=False` ⇒ one per
+crossing); `reset()` zeroes it.
 
 ### Source capture for code-sync
 
@@ -168,6 +244,10 @@ Three paths, all idempotent via the `_rendered` flag and `_unhook()`:
 
 `autoshow=False` skips the hook (use for headless inspection/tests).
 
+`_flush` only sends `source_lines` when `show_code` is True — the cell source is the only
+synced content that varies with the cell's *text*, and transmitting it on every (re-)display
+when it's unused was a source of re-render flakiness in VS Code.
+
 ## Conventions & gotchas
 
 - **`width` is the canvas-size trait**, so the pen-width method is `pensize()` (alias
@@ -180,6 +260,38 @@ Three paths, all idempotent via the `_rendered` flag and `_unhook()`:
   `[0,1]` are treated as the 0–1 RGB scale, otherwise 0–255).
 - The per-line highlighter tokenizes one line at a time, so triple-quoted strings spanning
   lines won't be perfectly coloured — acceptable for turtle scripts.
+- **Editing the frontend needs a kernel restart.** `_ESM`/`_CSS` are baked into the `Turtle`
+  class at import and the editable-installed module is cached, so re-running a cell keeps the
+  *old* frontend. Restart the kernel to load `_ESM` edits — not doing so caused a long detour
+  where dormant fixes appeared to "do nothing".
+- `_ESM` has a `TW_DEBUG` flag (default `false`): set it `true` to log the render/build
+  timeline to the browser console and show a per-widget status panel (events count, frames,
+  re-mounts), for diagnosing frontend re-render issues.
+- `Turtle.duration()` returns the total *scheduled* animation time in seconds, summed in Python
+  with the **same** formula the frontend uses (`line`/`move`: `dist/(speed·150)`; `turn`:
+  `|Δ|/(speed·180)`; `speed:0` and all other ops instant). If you ever change `pxPerSec`/
+  `degPerSec` in `_ESM`, update `duration()` to match. *Live* elapsed/remaining time is
+  browser-side only and is **not** synced back to Python — there is no trait for it.
+- `home()` returns to a **configurable** home (default origin, heading 0), stored in
+  `self._home`/`self._home_heading`. Set it with `sethome(x, y, heading=0)` (also accepts an
+  `(x,y[,heading])` tuple) or the `Turtle(home=(x, y[, heading]))` constructor arg.
+  `Turtle(home=...)` also **spawns** the turtle there: `_spawn_at_home()` sets the initial
+  position/heading and, when it isn't the origin, emits a leading `teleport` event so the
+  frontend marker starts there too (the marker `state` otherwise inits to `(0,0)` in `_ESM`,
+  which would strand the marker at the origin for e.g. a lone `dot()`). `reset()` re-spawns at
+  home the same way. `sethome()` by contrast only re-targets `home()` — it does **not** move
+  the turtle.
+- **Public counters** (plain instance attrs, not traits — not synced to the frontend; all start
+  at 0 and are zeroed by `reset()`): `nr_collisions` (see Collisions above) plus `nr_left`,
+  `nr_right`, `nr_sense`, `nr_distance_ahead`, each bumped at the top of the matching method.
+  These count *direct* calls only — there are no internal `self.left/right/sense/distance_ahead`
+  calls (movement/heading helpers go through `_turn_to`/`_goto`, and `nearest` calls `_scan`
+  directly), so nothing double-counts; the `lt`/`rt` aliases count because they *are* `left`/`right`.
+  `total_movement` (float) is the total distance travelled; it accumulates in `_goto` (the single
+  translation funnel) using the *post-truncation* end point, so a collision-shortened move counts
+  only the distance actually travelled, pen-up moves count, and turns add nothing. The
+  construction-time `teleport` (spawn) bypasses `_goto`, so spawning at a custom home is not
+  counted as movement.
 
 ## Adding a new turtle command (recipe)
 
