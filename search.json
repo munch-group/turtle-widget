@@ -2,111 +2,111 @@
   {
     "objectID": "pages/demo.html",
     "href": "pages/demo.html",
-    "title": "Showcase & tests",
+    "title": "Showcase",
     "section": "",
     "text": "An animated Turtle graphics widget for Jupyter, built on anywidget so it renders identically in VS Code, JupyterLab, Notebook 7, and Colab. Each cell below draws something and animates it on an HTML canvas. Pass show_code=True to display the cell’s source beside the canvas and highlight each line in sync with the drawing. Use the Replay/Pause buttons under any canvas.\nfrom turtle_widget import Turtle",
     "crumbs": [
       "Examples",
-      "Showcase & tests"
+      "Showcase"
     ]
   },
   {
     "objectID": "pages/demo.html#the-basics",
     "href": "pages/demo.html#the-basics",
-    "title": "Showcase & tests",
+    "title": "Showcase",
     "section": "1. The basics",
     "text": "1. The basics\nA turtle starts at the centre (0, 0) facing east (heading 0). forward/backward move it, left/right rotate it (degrees, counter-clockwise positive). Here’s a square.\n\nt = Turtle()\nt.speed(6)\nfor _ in range(4):\n    t.forward(120)\n    t.left(90)\n\n\n\n\n\nt = Turtle(show_code=True)\nt.speed(1)\ncolours = [\"red\", \"blue\", \"yellow\", \"brown\", \"black\", \"purple\", \"green\"]\n\nt.penup(); t.left(90); t.forward(200); t.right(90); t.pendown()\nfor i in range(0, 18):\n    t.pencolor(colours[i % 7])\n    t.right(20)\n    t.forward(50)\n\nt.right(180)\nt.home()",
     "crumbs": [
       "Examples",
-      "Showcase & tests"
+      "Showcase"
     ]
   },
   {
     "objectID": "pages/demo.html#synced-code-highlighting-show_codetrue",
     "href": "pages/demo.html#synced-code-highlighting-show_codetrue",
-    "title": "Showcase & tests",
+    "title": "Showcase",
     "section": "2. Synced code highlighting (show_code=True)",
     "text": "2. Synced code highlighting (show_code=True)\nWith show_code=True, the source appears on the right and the active line is highlighted as the animation reaches it.\n\nt = Turtle(show_code=True)\nt.speed(2)\nfor _ in range(4):\n    t.forward(120)\n    t.left(90)\n\n\n\n\n\nt = Turtle(show_code=True)\nt.speed(1)\ncolours = [\"red\", \"blue\", \"yellow\", \"brown\", \"black\", \"purple\", \"green\"]\n\nt.penup(); t.left(90); t.forward(200); t.right(90); t.pendown()\nfor i in range(0, 18):\n    t.pencolor(colours[i % 7])\n    t.right(20)\n    t.forward(50)\n\nt.right(180)\nt.home()",
     "crumbs": [
       "Examples",
-      "Showcase & tests"
+      "Showcase"
     ]
   },
   {
     "objectID": "pages/demo.html#colors-pen-width-fills",
     "href": "pages/demo.html#colors-pen-width-fills",
-    "title": "Showcase & tests",
+    "title": "Showcase",
     "section": "3. Colors, pen width & fills",
     "text": "3. Colors, pen width & fills\nColours accept CSS names (\"gold\"), hex (\"#ff8800\"), or RGB tuples ((0.1, 0.5, 0.9) on the 0–1 scale, or (255, 128, 0) on the 0–255 scale). Wrap a path in begin_fill() / end_fill() to fill it — the fill lands behind the outline, just like real turtle.\n\nt = Turtle()\nt.speed(8)\nt.pensize(3)\nt.pencolor(\"#d2691e\")          # outline\nt.fillcolor((1.0, 0.84, 0.0))  # gold, on the 0-1 RGB scale\nt.begin_fill()\nfor _ in range(5):             # classic 5-point star\n    t.forward(220)\n    t.right(144)\nt.end_fill()",
     "crumbs": [
       "Examples",
-      "Showcase & tests"
+      "Showcase"
     ]
   },
   {
     "objectID": "pages/demo.html#circles-arcs",
     "href": "pages/demo.html#circles-arcs",
-    "title": "Showcase & tests",
+    "title": "Showcase",
     "section": "4. Circles & arcs",
     "text": "4. Circles & arcs\ncircle(radius) draws a full circle to the left of the turtle; a negative radius goes right. circle(radius, extent) draws only part of it. Stacking rotated circles gives a spirograph.\n\nt = Turtle()\nt.speed(10)\npalette = [\"crimson\", \"darkorange\", \"seagreen\", \"royalblue\", \"purple\", \"teal\"]\nfor i in range(12):\n    t.right(5)\n    for i in range(12):    \n        t.pencolor(palette[i % len(palette)])\n        t.circle(90)\n        t.right(30)",
     "crumbs": [
       "Examples",
-      "Showcase & tests"
+      "Showcase"
     ]
   },
   {
     "objectID": "pages/demo.html#dots-stamps-text-jumps",
     "href": "pages/demo.html#dots-stamps-text-jumps",
-    "title": "Showcase & tests",
+    "title": "Showcase",
     "section": "5. Dots, stamps, text & jumps",
     "text": "5. Dots, stamps, text & jumps\npenup() / pendown() lift and drop the pen so you can jump without drawing. dot(size) plants a filled dot, stamp() leaves a copy of the turtle, and write(text) prints a label.\n\nt = Turtle(width=520, height=320)\nt.speed(7)\n\nt.penup(); t.goto(-210, 30); t.pendown()\nfor i, c in enumerate([\"red\", \"orange\", \"green\", \"blue\", \"purple\"]):\n    t.dot(16 + i * 8, c)\n    t.penup(); t.forward(90); t.pendown()\n\nt.penup(); t.goto(-210, 90); t.pendown()\nt.pencolor(\"black\")\nt.write(\"dots grow to the right\", font=(\"sans-serif\", 16, \"normal\"))\n\nt.penup(); t.goto(0, -70); t.setheading(60); t.pendown()\nt.pencolor(\"seagreen\")\nt.stamp()\n\n34",
     "crumbs": [
       "Examples",
-      "Showcase & tests"
+      "Showcase"
     ]
   },
   {
     "objectID": "pages/demo.html#speed-instant-mode",
     "href": "pages/demo.html#speed-instant-mode",
-    "title": "Showcase & tests",
+    "title": "Showcase",
     "section": "6. Speed & instant mode",
     "text": "6. Speed & instant mode\nspeed(1) is slowest, speed(10) is fastest, and speed(0) disables animation entirely — the whole drawing appears at once, which is handy for dense figures. (Word forms also work: \"slowest\", \"slow\", \"normal\", \"fast\", \"fastest\".)\n\nt = Turtle()\nt.speed(0)               # no animation: drawn instantly\n# t.speed(10)\nt.pencolor(\"teal\")\nt.pensize(1)\nfor _ in range(72):\n    t.forward(160)\n    t.left(175)          # a dense star spiral\nt.hideturtle()",
     "crumbs": [
       "Examples",
-      "Showcase & tests"
+      "Showcase"
     ]
   },
   {
     "objectID": "pages/demo.html#reading-turtle-state",
     "href": "pages/demo.html#reading-turtle-state",
-    "title": "Showcase & tests",
+    "title": "Showcase",
     "section": "7. Reading turtle state",
     "text": "7. Reading turtle state\nGetters return the current state without drawing anything: pos(), xcor(), ycor(), heading(), isdown(), isvisible(). (Use autoshow=False when you only want to inspect state and not render a widget.)\n\nprobe = Turtle(autoshow=False)\nprobe.forward(100); probe.left(90); probe.forward(50)\nprint(\"position:\", probe.pos())\nprint(\"heading :\", probe.heading())\nprint(\"pen down:\", probe.isdown())\n\nposition: (100.0, 50.0)\nheading : 90.0\npen down: True",
     "crumbs": [
       "Examples",
-      "Showcase & tests"
+      "Showcase"
     ]
   },
   {
     "objectID": "pages/demo.html#sensing-obstacles",
     "href": "pages/demo.html#sensing-obstacles",
-    "title": "Showcase & tests",
+    "title": "Showcase",
     "section": "8. Sensing obstacles",
     "text": "8. Sensing obstacles\nThe turtle can sense obstacles: registered shapes (add_circle, add_rectangle, add_segment, add_polygon), its own drawn trail, and the canvas edges.\n\ndistance_ahead() casts a ray along the heading and returns the distance to the first obstacle (or None).\nsense(max_distance=...) returns every obstacle within range, nearest first, each with the distance and the signed angle (degrees, + = left) to its closest point.\nnearest() is just the closest one.\n\nPass draw=True to any of them to overlay the sensor rays on the canvas.\n\nfrom turtle_widget import Turtle\n\nt = Turtle()\nt.speed(5)\n\ndef on_hit(c): \n    t.penup(); t.goto(c.point); t.pencolor(\"red\");\n    t.right(180+2*c.angle, speed=0)\n    t.pendown();  \n    t.dot(15) \n    t.pencolor(\"black\")\n    t.forward(c.speed)\n \nt.on_collision(on_hit) \nt.add_circle(120, 60, 35)\nt.add_rectangle(-180, -120, -80, 60)\nt.add_segment(40, -160, 200, -40)\n# t.hide_obstacles()\n# t.show_obstacles()  \n\nfor i in range(300):\n    d = t.distance_ahead(draw=True, trail=False)\n    d.distance\n    for d in t.sense(max_distance=200, draw=True, color='gray'):\n        d.angle\n\n\n\n\n\nfrom turtle_widget import Turtle\n\n\nclass GameEnded(Exception):\n    ...\n    \n\n\ndef run_student_function(fun, salad):\n\n    def on_hit(c): \n\n        x, y = t.position()\n        assert -canvas_size/2 &lt; x &lt; canvas_size/2 and -canvas_size/2 &lt; y &lt; canvas_size/2\n\n        font = (\"sans-serif\", 20, \"normal\")\n        l = c.obstacle.label\n        if l == 'start':\n            return\n        if l == 'end' or t.total_movement &gt;= salad:\n            score = 'NA'\n            if l == 'end':\n                t.goto(canvas_size/2, canvas_size/2)\n                t.pencolor('green')\n                t.dot(2*size)\n                score = t.total_movement + t.nr_collisions + t.nr_right + t.nr_left + t.nr_distance_ahead + t.nr_sense\n\n            t.pencolor('black')\n\n            t.penup()\n            t.pencolor('white')\n            t.add_rectangle(-canvas_size/2, -canvas_size/2, canvas_size/2, canvas_size/2, color='white')\n            t.add_rectangle(-canvas_size/2, -canvas_size/2, canvas_size/2, canvas_size/2, color='white')\n            t.add_rectangle(-canvas_size/2, -canvas_size/2, canvas_size/2, canvas_size/2, color='white')\n            t.add_rectangle(-canvas_size/2, -canvas_size/2, canvas_size/2, canvas_size/2, color='white')\n            t.add_rectangle(-canvas_size/2, -canvas_size/2, canvas_size/2, canvas_size/2, color='white')\n            t.add_rectangle(-canvas_size/2, -canvas_size/2, canvas_size/2, canvas_size/2, color='white')\n            t.pencolor('black')\n\n            line_height = 25\n\n            y = 200    \n            t.goto(-canvas_size/2+20, y)\n            t.write(f\"Time: {t.duration():.3f}\", font=font)\n\n            y -= line_height\n            t.goto(-canvas_size/2+20, y)\n            t.write(f\"Moved: {t.total_movement:.3f}\", font=font)\n\n            y -= line_height\n            t.goto(-canvas_size/2+20, y)\n            t.write(f\"Turns: {t.nr_left + t.nr_right}\", font=font)\n\n            y -= line_height\n            t.goto(-canvas_size/2+20, y)\n            t.write(f\"Dist. ahead: {t.nr_distance_ahead}\", font=font)\n\n            y -= line_height\n            t.goto(-canvas_size/2+20, y)\n            t.write(f\"Sense: {t.nr_sense}\", font=font)\n\n            y -= line_height\n            t.goto(-canvas_size/2+20, y)\n            t.write(f\"Collisions: {t.nr_collisions}\", font=font)\n\n            y -= line_height\n            y -= line_height\n            t.goto(-canvas_size/2+20, y)\n            t.write(f\"Score: {score}\", font=font)\n\n            t.goto(-canvas_size/2+20, y-5)\n            t.pendown()\n            t.goto(-canvas_size/2+20+250, y-5, speed=0.7)\n            t.right(1000)\n\n            raise GameEnded\n\n        t.penup(); \n        t.goto(c.point); \n        t.right(180+2*c.angle, speed=0)\n        t.pendown();  \n        t.pencolor(\"magenta\");\n        t.dot(25) \n        t.pencolor(\"black\")\n        t.forward(c.speed)\n    \n\n    def obstacle_track(t, canvas_size, size, sep, visible=True):\n        c = canvas_size // 2\n        for i in range(-c-(size)//2, c, size+sep):\n            for j in range(-c-(size)//2, c, size+sep):\n                if i &lt; -c+size+sep and j &lt; -c+size+sep:\n                    continue\n                if i &gt; c-2*(size+sep) and j &gt; c-2*(size+sep):\n                    continue\n                t.add_rectangle(i, j, i+size, j+size, visible=visible)\n        t.add_circle(-250, -250, size, color='red', label='start',\n                    sense=False\n                    )\n        t.add_circle(250, 250, size, color='green', label='end', \n                    sense=False\n                    )\n\n    # obstacle_track(t, canvas_size, size, sep, visible=True)\n\n\n\n    canvas_size = 500\n\n\n    # size = 30\n    # sep = 80\n    size = 30\n    sep = 30\n    t = Turtle(canvas_size, home=(-240, -240))\n    t.home()\n    t.left(45, speed=0)\n\n    t.speed(5)\n\n    obstacle_track(t, canvas_size, size, sep, visible=True)\n    t.on_collision(on_hit) \n\n    try:\n        fun(t, salad)\n        t.forward(2*canvas_size)\n    except GameEnded as e:\n        pass\n\ndef student_function(t, salad):\n    while t.total_movement &lt;= salad:\n        # for d in t.sense(max_distance=30, draw=True, color='blue'):\n        #     d.angle\n        d = t.distance_ahead(draw=True, trail=False)\n        if d and d.distance &lt; 60:\n            if d.angle &lt; 0:\n                t.right(10)\n            else:\n                t.left(10)\n        t.forward(5)\n\nrun_student_function(student_function, salad=2000)\n\n\n\n\n\nfrom turtle_widget import Turtle\n\nt = Turtle()\nt.speed(3)\nt.add_circle(120, 0, 40)              # an obstacle dead ahead\n\ndef on_hit(c):                        # mark each contact; motion is unchanged\n    t.penup(); t.goto(c.point); t.pencolor(\"red\"); t.dot(30) \n    # t.left(160) ;\n    t.pencolor('none'); \n    t.forward(2000)\n    # t.goto(c.pos); t.pencolor(\"black\"); t.pendown()\n\nt.on_collision(on_hit)                # canvas edge included by default\nt.forward(4000)                        # zooms through the circle, then off the east edge\n#  The turtle drives straight across (unchanged), then red dots appear where it touched the\n#  circle and the canvas edge. Because you get .normal, a bounce handler is a few lines if\n#  you want one later.",
     "crumbs": [
       "Examples",
-      "Showcase & tests"
+      "Showcase"
     ]
   },
   {
     "objectID": "pages/demo.html#self-test-headless",
     "href": "pages/demo.html#self-test-headless",
-    "title": "Showcase & tests",
+    "title": "Showcase",
     "section": "9. Self-test (headless)",
     "text": "9. Self-test (headless)\nGeometry is computed in Python, so it can be validated without a browser. This cell asserts a few invariants and checks the event stream is JSON-serializable (which is what gets sent to the frontend).\n\nimport json\nfrom turtle_widget import Turtle\n\n# movement + heading\nt = Turtle(autoshow=False)\nt.forward(100); t.left(90); t.forward(100)\nassert abs(t.xcor() - 100) &lt; 1e-9, t.xcor()\nassert abs(t.ycor() - 100) &lt; 1e-9, t.ycor()\nassert round(t.heading() % 360, 6) == 90\n\n# home returns to origin, heading 0\nt.home()\nassert abs(t.xcor()) &lt; 1e-9 and abs(t.ycor()) &lt; 1e-9\nassert round(t.heading() % 360, 6) == 0\n\n# circle returns (approximately) to its start\nc = Turtle(autoshow=False)\nc.begin_fill(); c.circle(60); c.end_fill()\nassert abs(c.xcor()) &lt; 1e-6 and abs(c.ycor()) &lt; 1e-6\nassert any(e[\"op\"] == \"fill\" for e in c._events)\n\n# every event is JSON-serializable and carries a source line + speed\npayload = json.dumps(t._events)\nassert all(\"line\" in e and \"speed\" in e for e in t._events)\n\nprint(\"All self-tests passed.\")\nprint(\"square+home events:\", len(t._events), \"| circle events:\", len(c._events))\n\nAll self-tests passed.\nsquare+home events: 5 | circle events: 23",
     "crumbs": [
       "Examples",
-      "Showcase & tests"
+      "Showcase"
     ]
   },
   {
