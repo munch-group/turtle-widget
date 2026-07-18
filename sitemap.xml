@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://munch-group.github.io/turtle-widget/pages/demo.html</loc>
-    <lastmod>2026-05-23T17:10:36.512Z</lastmod>
-  </url>
-  <url>
-    <loc>https://munch-group.github.io/turtle-widget/api/Turtle.html</loc>
-    <lastmod>2026-05-23T17:10:36.511Z</lastmod>
+    <loc>https://munch-group.github.io/turtle-widget/pages/overview.html</loc>
+    <lastmod>2026-07-18T09:50:57.315Z</lastmod>
   </url>
   <url>
     <loc>https://munch-group.github.io/turtle-widget/api/index.html</loc>
-    <lastmod>2026-05-23T17:10:36.512Z</lastmod>
+    <lastmod>2026-07-18T09:50:57.315Z</lastmod>
   </url>
   <url>
-    <loc>https://munch-group.github.io/turtle-widget/pages/overview.html</loc>
-    <lastmod>2026-05-23T17:10:36.512Z</lastmod>
+    <loc>https://munch-group.github.io/turtle-widget/api/Turtle.html</loc>
+    <lastmod>2026-07-18T09:50:57.314Z</lastmod>
+  </url>
+  <url>
+    <loc>https://munch-group.github.io/turtle-widget/pages/demo.html</loc>
+    <lastmod>2026-07-18T09:50:57.315Z</lastmod>
   </url>
 </urlset>
