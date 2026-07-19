@@ -68,8 +68,11 @@ const TW_DEBUG = false;
 const _twDiag = (typeof window !== "undefined")
   ? (window.__twDiag = window.__twDiag || { renders: 0, builds: 0 })
   : { renders: 0, builds: 0 };
+/** Debug logger gated by TW_DEBUG; a cheap no-op when debugging is off. */
 function twlog(){ if (!TW_DEBUG) return; try { console.log.apply(console, ["[turtle-widget]"].concat([].slice.call(arguments))); } catch (e) {} }
 
+// Vocabulary for the hand-rolled Python syntax highlighter below (no external
+// tokenizer/CDN dependency — see CLAUDE.md "no external/CDN dependencies").
 const KEYWORDS = new Set(["False","None","True","and","as","assert","async","await",
   "break","class","continue","def","del","elif","else","except","finally","for","from",
   "global","if","import","in","is","lambda","nonlocal","not","or","pass","raise","return",
@@ -78,8 +81,18 @@ const BUILTINS = new Set(["print","range","len","int","float","str","list","dict
   "tuple","abs","min","max","sum","enumerate","zip","map","filter","sorted","round",
   "Turtle","reversed","bool"]);
 
+/** HTML-escape a string so raw source text can be injected via innerHTML safely. */
 function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 
+/**
+ * Tokenize and HTML-highlight one line of Python source for the code column.
+ * A single-pass hand-rolled scanner (comment / quoted string / number /
+ * keyword-or-builtin / other), not a real parser — so triple-quoted strings
+ * spanning multiple lines aren't recognized, since each line is tokenized
+ * independently (acceptable for turtle scripts; see CLAUDE.md's per-line
+ * highlighter note). Returns an HTML string with `tw-*` span classes (styled
+ * in `_CSS`).
+ */
 function highlight(line){
   let out = "", i = 0; const n = line.length;
   while (i < n){
@@ -87,11 +100,16 @@ function highlight(line){
     if (c === "#"){ out += '<span class="tw-com">' + esc(line.slice(i)) + "</span>"; break; }
     if (c === '"' || c === "'"){
       const q = c; let j = i + 1, buf = c;
+      // Stop at the next unescaped matching quote; doesn't special-case an
+      // escaped backslash before the quote (e.g. "\\"), fine for typical
+      // turtle scripts (see per-line highlighter caveat above).
       while (j < n){ buf += line[j]; if (line[j] === q && line[j-1] !== "\\"){ j++; break; } j++; }
       out += '<span class="tw-str">' + esc(buf) + "</span>"; i = j; continue;
     }
     if (c >= "0" && c <= "9"){
       let j = i, buf = "";
+      // Permissive digit-run: also swallows ., _ and e/E so floats/exponents/
+      // underscore-separated literals highlight as one token; not a strict grammar.
       while (j < n && /[0-9._eE]/.test(line[j])){ buf += line[j]; j++; }
       out += '<span class="tw-num">' + esc(buf) + "</span>"; i = j; continue;
     }
@@ -108,6 +126,22 @@ function highlight(line){
   return out;
 }
 
+/**
+ * Mount the widget for one render pass: build the DOM (canvas + optional code
+ * column + controls), prime the offscreen buffers, and start the animation.
+ * Called fresh by `render()` on every relevant model change — see that
+ * function's comment for why a one-shot build isn't enough.
+ *
+ * @param {object} args
+ * @param {object} args.model - anywidget model; source of the synced
+ *   traitlets (`width`, `height`, `show_code`, `bg`, `events`, `source_lines`).
+ * @param {HTMLElement} args.el - the widget's output element; cleared and
+ *   repopulated on every call.
+ * @param {number} [args.rid] - the owning `render()` call's id, used only for
+ *   TW_DEBUG log/status-panel labelling.
+ * @returns {function(): void} cleanup — clears the pending frame timer so a
+ *   torn-down/replaced build doesn't keep ticking in the background.
+ */
 function build({ model, el, rid }){
   el.innerHTML = "";
   _twDiag.builds++;
@@ -125,6 +159,9 @@ function build({ model, el, rid }){
 
   const dpr = window.devicePixelRatio || 1;
   const cx = width / 2, cy = height / 2;
+  // Coordinate transform: turtle space has its origin at canvas centre with
+  // +y up; canvas space has its origin top-left with +y down (see CLAUDE.md
+  // "Coordinate system"). Every draw call below goes through TX/TY.
   const TX = x => cx + x;          // turtle coords -> canvas coords (y is up)
   const TY = y => cy - y;
 
@@ -139,6 +176,9 @@ function build({ model, el, rid }){
 
   const canvas = document.createElement("canvas");
   canvas.className = "tw-canvas";
+  // HiDPI: the backing store is `dpr`x the CSS size, and the context below is
+  // scaled by `dpr`, so every draw call afterwards can keep using logical
+  // (CSS) pixel coordinates instead of device pixels.
   canvas.width = width * dpr; canvas.height = height * dpr;
   canvas.style.width = width + "px"; canvas.style.height = height + "px";
   left.appendChild(canvas);
@@ -146,14 +186,17 @@ function build({ model, el, rid }){
   const ctx = canvas.getContext("2d");
   ctx.scale(dpr, dpr);
 
-  // committed (already-drawn) art lives on an offscreen buffer
+  // committed (already-drawn) art lives on an offscreen buffer, same HiDPI treatment
   const base = document.createElement("canvas");
   base.width = width * dpr; base.height = height * dpr;
   const bctx = base.getContext("2d");
   bctx.scale(dpr, dpr);
 
-  // obstacles live on their own layer (composited under the art) so they can be
-  // shown/hidden in one go and survive clear()
+  // Obstacles live on their own offscreen layer, composited under the art each
+  // frame by blitBase() (background -> obs -> base), so obstacles_visible can
+  // toggle them all at once and clear() (which only clears `base`) leaves them
+  // intact — see CLAUDE.md "In the frontend, obstacles live on their own
+  // offscreen layer".
   const obs = document.createElement("canvas");
   obs.width = width * dpr; obs.height = height * dpr;
   const octx = obs.getContext("2d");
@@ -171,6 +214,8 @@ function build({ model, el, rid }){
   bar.appendChild(replayBtn); bar.appendChild(pauseBtn);
   left.appendChild(bar);
 
+  // TW_DEBUG status panel (see the flag's comment at the top of this file): a
+  // small text readout of render/build ids, event count, and animation progress.
   let diagEl = null;
   if (TW_DEBUG){
     diagEl = document.createElement("div");
@@ -178,10 +223,13 @@ function build({ model, el, rid }){
     diagEl.style.cssText = "font:11px/1.45 ui-monospace,monospace;color:#888;margin-top:6px;white-space:pre-wrap;";
     left.appendChild(diagEl);
   }
+  /** Update the TW_DEBUG status line; no-op (diagEl is null) when TW_DEBUG is off. */
   function setDiag(s){ if (diagEl) diagEl.textContent = s; }
   setDiag("render #" + (rid || "?") + " · build #" + bid + " · events " + events.length + " · waiting…");
 
-  // code column
+  // Code column: one .tw-codeline row per source line, syntax-highlighted up
+  // front via highlight(); setActiveLine() below toggles which row is
+  // highlighted as events play. Only built when show_code is on.
   let codeRows = [];
   if (showCode){
     const right = document.createElement("div");
@@ -204,6 +252,12 @@ function build({ model, el, rid }){
     root.appendChild(right);
   }
 
+  /**
+   * Highlight the code row for a 1-based source line number (from `ev.line`,
+   * which `_emit()` injects into every event on the Python side) and
+   * autoscroll it into view if it isn't already visible. No-op when
+   * show_code is off or the event has no meaningful line.
+   */
   function setActiveLine(lineNo){
     if (!showCode || !lineNo) return;
     const target = codeRows[lineNo - 1];
@@ -218,12 +272,22 @@ function build({ model, el, rid }){
   }
 
   // ---- drawing helpers --------------------------------------------------- //
+  /** Fill the whole canvas with the current background colour (mutable via `bgcolor` events). */
   function paintBg(g){ g.save(); g.fillStyle = bgColor; g.fillRect(0,0,width,height); g.restore(); }
 
+  /**
+   * Draw the turtle marker (a small triangular arrowhead) at `(x,y)` pointing
+   * `headingDeg` (turtle convention: 0 = east, increasing counter-clockwise),
+   * onto context `g` — which may be the live `ctx` (idle/mid-animation
+   * marker) or `bctx` (a `stamp` event, baked permanently into committed art).
+   */
   function drawTurtle(g, x, y, headingDeg, color){
     g.save();
     g.translate(TX(x), TY(y));
-    g.rotate(-headingDeg * Math.PI / 180);   // canvas y is flipped
+    // Negate: canvas rotate() is clockwise-positive (y-down), but turtle
+    // heading is counter-clockwise-positive, so a straight heading->rotate
+    // mapping would spin the marker the wrong way (canvas y is flipped).
+    g.rotate(-headingDeg * Math.PI / 180);
     g.beginPath();
     g.moveTo(11, 0); g.lineTo(-8, -7); g.lineTo(-4, 0); g.lineTo(-8, 7);
     g.closePath();
@@ -233,6 +297,7 @@ function build({ model, el, rid }){
     g.restore();
   }
 
+  /** Permanently stroke a completed `line` event onto the committed `base` layer. */
   function commitLine(ev){
     bctx.save();
     bctx.strokeStyle = ev.color || "black";
@@ -245,6 +310,12 @@ function build({ model, el, rid }){
     bctx.restore();
   }
 
+  /**
+   * Draw one obstacle (`ob` is the raw `obstacle` event: shape fields keyed by
+   * `ob.kind` — "segment" / "circle" / "polygon" — plus `color`) onto context
+   * `g`. Circles/polygons get a translucent fill plus an outline; segments
+   * are outline-only. Always draws — visibility is filtered by the caller.
+   */
   function drawObstacle(g, ob){
     g.save();
     const col = ob.color || "#6c6c84";
@@ -265,11 +336,22 @@ function build({ model, el, rid }){
     g.restore();
   }
 
+  /**
+   * Repaint the entire obstacle layer from the `obstacles` array (skipping
+   * any with `visible === false`). Called whenever the set or visibility of
+   * obstacles changes (`obstacle` / `obstacles_visible` events) — cheap
+   * enough to redo wholesale rather than patch incrementally.
+   */
   function redrawObstacles(){
     octx.clearRect(0, 0, width, height);
     for (const o of obstacles) if (o.visible !== false) drawObstacle(octx, o);
   }
 
+  /**
+   * Draw a `sense` event's ray overlay onto `base`: each ray in `ev.rays` is
+   * `{a, d, hit}` (angle in degrees, distance, whether it hit something),
+   * cast from `(ev.x, ev.y)` — dashed line for the ray, solid dot where it hit.
+   */
   function commitSense(ev){
     const col = ev.color || "rgba(220,50,50,0.9)";
     bctx.save();
@@ -286,6 +368,14 @@ function build({ model, el, rid }){
     bctx.restore();
   }
 
+  /**
+   * Apply the permanent, non-animated effect of a completed event: bakes
+   * drawing ops onto `base`/`obs`, or updates non-drawing state (`bgcolor`,
+   * obstacle bookkeeping). Dispatches on `ev.op` — see the event-protocol
+   * table in CLAUDE.md for the full op list. Ops not handled here (color/
+   * width/pen/show/hide/teleport/…) are cosmetic state handled by
+   * applyConfig()/endState() instead, or need no persistent drawing action.
+   */
   function commit(ev){
     switch (ev.op){
       case "line": commitLine(ev); break;
@@ -324,17 +414,36 @@ function build({ model, el, rid }){
   }
 
   // ---- animation engine -------------------------------------------------- //
+  // `state` is the turtle's tracked position/heading/visibility/pen colour as
+  // of the last *completed* event; advanced by endState() and read by
+  // renderProgress()/drawFinal() to draw the marker and interpolate motion.
   const state = { x: 0, y: 0, heading: 0, visible: true, pencolor: "black" };
   let idx = 0, evStart = null, timer = null, paused = false, frameCount = 0;
-  const FRAME_MS = 16;
-  // Drive frames with setTimeout, not requestAnimationFrame: notebook webviews
-  // (VS Code) stop ticking the compositor when an output goes idle, so a fresh
-  // rAF after one animation finished never fires and re-runs sit frozen.
+  const FRAME_MS = 16;   // ~60fps target for the setTimeout-driven frame loop
+  /**
+   * Queue the next frame. Uses `setTimeout`, not `requestAnimationFrame`:
+   * notebook webviews (VS Code) stop ticking the compositor when an output
+   * goes idle, so a freshly-scheduled rAF after one animation finishes never
+   * fires again on re-runs (tell-tale symptom: clicking Pause, which keeps
+   * this timer chain alive via step()'s `if (paused)` branch, "fixes" a
+   * frozen re-run). Do not switch this back to rAF — see CLAUDE.md
+   * "Animation engine".
+   */
   function schedule(){ timer = setTimeout(() => step(performance.now()), FRAME_MS); }
 
+  // Speed -> rate. Default speed is 6 when unset; speed 0 (or negative) means
+  // "instant", encoded as Infinity so durationOf() below divides down to 0.
+  // 150 px/s and 180 deg/s per speed unit — keep in sync with the identical
+  // formula in Turtle.duration() (widget.py) if these ever change.
   function pxPerSec(s){ return (s == null ? 6 : s) <= 0 ? Infinity : s * 150; }
   function degPerSec(s){ return (s == null ? 6 : s) <= 0 ? Infinity : s * 180; }
 
+  /**
+   * Milliseconds an event should take to animate: distance/angle over the
+   * speed-derived rate, or 0 for any op not explicitly handled here — i.e.
+   * all the "instant" ops in the event-protocol table (dot/stamp/write/
+   * teleport/color/…).
+   */
   function durationOf(ev){
     if (ev.op === "line" || ev.op === "move"){
       const d = Math.hypot(ev.x2 - ev.x1, ev.y2 - ev.y1);
@@ -349,6 +458,13 @@ function build({ model, el, rid }){
     return 0;
   }
 
+  /**
+   * Update tracked `state` for cosmetic/config events that have no visual
+   * commit step of their own (contrast with `commit()`, which bakes pixels).
+   * `pen` is intentionally a no-op here: pen up/down is Python-side state
+   * that only decides whether a move is emitted as `line` vs `move` — there
+   * is nothing for the frontend to track.
+   */
   function applyConfig(ev){
     switch (ev.op){
       case "color": state.pencolor = ev.color; break;
@@ -359,6 +475,13 @@ function build({ model, el, rid }){
     }
   }
 
+  /**
+   * Advance tracked `state` to an event's end point once it has fully played
+   * (called after commit()). For `line`/`move`, heading is *derived* from the
+   * travel direction (atan2) rather than trusted from the event, since those
+   * ops carry no heading field of their own; a zero-length move leaves
+   * heading unchanged. `turn`/`teleport` set heading directly from the event.
+   */
   function endState(ev){
     if (ev.op === "line" || ev.op === "move"){
       state.x = ev.x2; state.y = ev.y2;
@@ -375,6 +498,13 @@ function build({ model, el, rid }){
     }
   }
 
+  /**
+   * Redraw the visible canvas from scratch: background, then the obstacle
+   * layer, then committed art — every frame, before the in-progress segment
+   * and turtle marker are drawn on top (by renderProgress()/drawFinal()).
+   * Cheap because `obs`/`base` are pre-rendered bitmaps being blitted, not
+   * replayed stroke-by-stroke.
+   */
   function blitBase(){
     ctx.clearRect(0,0,width,height);
     paintBg(ctx);                                   // background
@@ -382,6 +512,14 @@ function build({ model, el, rid }){
     ctx.drawImage(base, 0,0, width, height);        // committed art
   }
 
+  /**
+   * Draw one in-progress animation frame for event `ev` at progress `p`
+   * (0..1, elapsed/duration). Blits the settled canvas, interpolates the
+   * moving turtle's position/heading (and, for `line`, strokes the partial
+   * segment directly onto the *visible* `ctx` — not `base`, since it isn't
+   * committed yet), draws the marker at the interpolated pose, and syncs the
+   * code highlight to this event's source line.
+   */
   function renderProgress(ev, p){
     blitBase();
     let mx = state.x, my = state.y, mh = state.heading;
@@ -405,11 +543,24 @@ function build({ model, el, rid }){
     setActiveLine(ev.line);
   }
 
+  /**
+   * Draw the fully-settled frame (no in-progress segment): used once the
+   * event queue is drained, and by start() before the loop begins.
+   */
   function drawFinal(){
     blitBase();
     if (state.visible) drawTurtle(ctx, state.x, state.y, state.heading, state.pencolor);
   }
 
+  /**
+   * The frame loop, invoked via schedule()'s setTimeout callback with
+   * `ts = performance.now()`. Drains all zero-duration ("instant") events
+   * synchronously in the `while` loop below so a burst of e.g. `dot()`/
+   * `color()` calls doesn't each wait a frame; the first event with real
+   * duration is rendered at its current progress and, if unfinished, yields
+   * by scheduling another frame and returning. Once the queue is empty, draws
+   * the final frame and stops (`timer = null`) instead of scheduling forever.
+   */
   function step(ts){
     if (paused){ schedule(); return; }
     if (evStart === null) evStart = ts;
@@ -427,6 +578,9 @@ function build({ model, el, rid }){
       renderProgress(ev, p);
       if (p >= 1){
         commit(ev); endState(ev);
+        // Carry the timing remainder into the next event's clock instead of
+        // resetting to `ts`, so a slightly-late frame doesn't compound drift
+        // across a chain of animated events.
         idx++; evStart = ts - (elapsed - dur); continue;
       }
       schedule();
@@ -439,6 +593,13 @@ function build({ model, el, rid }){
             " · DONE in " + frameCount + " frames");
   }
 
+  /**
+   * (Re)initialize all animation/committed state from scratch and begin
+   * playback from event 0. Used both for the initial mount and by the Replay
+   * button — replaying re-derives everything from `events` rather than
+   * snapshotting/restoring, since the events are the only source of truth
+   * (the frontend never computes geometry — see CLAUDE.md architecture).
+   */
   function start(){
     if (timer !== null){ clearTimeout(timer); timer = null; }
     idx = 0; evStart = null; paused = false;
@@ -455,20 +616,30 @@ function build({ model, el, rid }){
 
   replayBtn.addEventListener("click", start);
   pauseBtn.addEventListener("click", () => {
+    // Pausing only stops step() from advancing idx/committing (its `if
+    // (paused)` branch below); schedule() keeps firing every frame, so the
+    // setTimeout chain — and thus future re-runs, per schedule()'s comment
+    // above — stays alive.
     paused = !paused;
     pauseBtn.textContent = paused ? "\u25b6 Resume" : "\u275a\u275a Pause";
   });
 
   start();
 
-  // anywidget cleanup hook
+  // anywidget cleanup hook: called when this build is torn down (by
+  // render()'s remount or on view destroy) so an old build's frame loop
+  // doesn't keep running after a new one has taken over the canvas.
   return () => { if (timer !== null) clearTimeout(timer); };
 }
 
-// Re-mount on any state change, not just once at view creation. Notebook
-// frontends (esp. VS Code) may create a view before the model state has synced,
-// or reuse a view across cell re-executions; rebuilding on change makes the
-// canvas render/animate reliably every time.
+/**
+ * anywidget's entry point: called once per view. Re-mounts on any relevant
+ * model change, not just once at view creation — notebook frontends (esp. VS
+ * Code) may create a view before the model state has synced, or reuse a view
+ * across cell re-executions; rebuilding on change makes the canvas
+ * render/animate reliably every time. Do not move the animation back into a
+ * one-shot render (see CLAUDE.md "Animation engine").
+ */
 function render({ model, el }){
   _twDiag.renders++;
   const rid = _twDiag.renders;
@@ -478,12 +649,22 @@ function render({ model, el }){
         "show_code=" + model.get("show_code"),
         "size=" + model.get("width") + "x" + model.get("height"));
   let inner = null, pending = false, destroyed = false;
+  // Tear down the previous build (if any) and start a fresh one. `inner`
+  // holds the last build()'s returned cleanup closure.
   const remount = () => { if (destroyed) return; if (inner) inner(); inner = build({ model, el, rid }); };
+  // Debounce remounts to one per microtask: traitlets are flushed together
+  // (see CLAUDE.md "flushed once, not streamed per-command"), so several
+  // `change:*` events can fire synchronously for one Python-side update —
+  // without this, that would tear down/rebuild the canvas multiple times.
+  // (This is a distinct closure from the frame-loop `schedule()` inside
+  // build() above — same name, unrelated purpose.)
   const schedule = () => {
     if (pending || destroyed) return;
     pending = true;
     Promise.resolve().then(() => { pending = false; remount(); });   // coalesce burst of changes
   };
+  // The synced traitlets that should trigger a remount — see CLAUDE.md
+  // "State crosses the boundary via synced traitlets".
   const evNames = ["change:events", "change:source_lines", "change:width",
                    "change:height", "change:show_code", "change:bg"];
   const handlers = {};
@@ -500,10 +681,15 @@ function render({ model, el }){
   };
 }
 
+// anywidget module contract: default export with a `render` function.
 export default { render };
 """
 
 _CSS = r"""
+/* Styles for the DOM built in _ESM's build(): .tw-root > .tw-left (canvas +
+   controls, plus the TW_DEBUG panel when enabled) and, when show_code is on,
+   .tw-right (the code column). Kept inline here rather than an external
+   stylesheet, per the "no external/CDN dependencies" constraint (CLAUDE.md). */
 .tw-root { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
 .tw-left { display: inline-block; }
@@ -518,10 +704,12 @@ _CSS = r"""
 .tw-code { font-family: ui-monospace, SFMono-Regular, "Cascadia Code", Menlo, monospace;
   font-size: 12.5px; line-height: 1.55; padding: 8px 0; white-space: pre; }
 .tw-codeline { display: flex; padding: 0 12px; }
+/* Toggled by setActiveLine() in _ESM to track the animation's current source line. */
 .tw-codeline.tw-active { background: #fff3b0; }
 .tw-ln { display: inline-block; width: 2.2em; text-align: right; margin-right: 12px;
   color: #9a9aa6; user-select: none; }
 .tw-src { color: #24292f; }
+/* tw-kw/tw-bi/tw-str/tw-com/tw-num: token classes emitted by highlight() in _ESM. */
 .tw-kw  { color: #cf222e; }
 .tw-bi  { color: #8250df; }
 .tw-str { color: #0a7d2c; }
