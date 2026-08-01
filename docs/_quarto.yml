@@ -93,4 +93,60 @@ quartodoc:
       desc: |
         The animated turtle-graphics drawing widget.
       contents:
-        - Turtle
+        - name: Turtle
+          # Explicit allowlist, not `include_inherited: true`: Turtle's public API now
+          # includes `show` (inherited from the internal Canvas base -- see CLAUDE.md
+          # "Canvas vs Turtle"), but a blanket include_inherited would also pull in
+          # dozens of unrelated public methods from anywidget/ipywidgets/traitlets
+          # (close, open, observe, hold_trait_notifications, ...). Add any new public
+          # method here (alongside its numpy-style docstring) so it doesn't silently
+          # drop out of the reference the way `show` did when it moved to Canvas.
+          members:
+            - add_circle
+            - add_polygon
+            - add_rectangle
+            - add_segment
+            - backward
+            - begin_fill
+            - bgcolor
+            - circle
+            - clear
+            - color
+            - distance_ahead
+            - dot
+            - duration
+            - end_fill
+            - fillcolor
+            - forward
+            - goto
+            - heading
+            - hide_obstacles
+            - hideturtle
+            - home
+            - isdown
+            - isvisible
+            - left
+            - nearest
+            - new_turtle
+            - on_collision
+            - other_turtle
+            - pencolor
+            - pendown
+            - pensize
+            - penup
+            - position
+            - reset
+            - right
+            - sense
+            - setheading
+            - sethome
+            - setx
+            - sety
+            - show
+            - show_obstacles
+            - showturtle
+            - speed
+            - stamp
+            - write
+            - xcor
+            - ycor

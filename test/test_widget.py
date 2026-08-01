@@ -221,11 +221,18 @@ def test_events_json_serializable_with_line_and_speed():
     assert all("line" in e and "speed" in e for e in t._events)
 
 
-def test_reset_clears_state_and_events():
+def test_reset_on_solo_turtle_still_wipes_its_own_canvas():
+    # reset() is defined in terms of "wipe canvas-level state only when this turtle
+    # IS its own canvas" (self._canvas is self) -- true for every solo turtle, so the
+    # common single-turtle case is unchanged: a completely fresh canvas, same as
+    # before this widget supported sharing one. (See test/test_multi_turtle.py for
+    # the shared-canvas case, where reset() must NOT wipe another turtle's history --
+    # that's the whole reason for the "is self" condition.)
     t = _t()
     t.forward(100); t.left(90); t.pensize(5)
     t.reset()
-    assert t._events == []
+    assert len(t._events) == 1                     # prior events are gone...
+    assert t._events[0]["op"] == "teleport"         # ...replaced by just the new teleport
     assert t.pos() == (0.0, 0.0)
     assert t.heading() == 0.0
     assert t.pensize() == 1

@@ -414,10 +414,18 @@ function build({ model, el, rid }){
   }
 
   // ---- animation engine -------------------------------------------------- //
-  // `state` is the turtle's tracked position/heading/visibility/pen colour as
-  // of the last *completed* event; advanced by endState() and read by
-  // renderProgress()/drawFinal() to draw the marker and interpolate motion.
-  const state = { x: 0, y: 0, heading: 0, visible: true, pencolor: "black" };
+  // `states` tracks each turtle's position/heading/visibility/pen colour as of
+  // the last *completed* event, keyed by the event's `turtle` id (stamped by
+  // Turtle._emit -- see CLAUDE.md "Event protocol"); advanced by endState() and
+  // read by renderProgress()/drawFinal() to draw markers and interpolate motion.
+  // A Map (not a plain object) so turtle ids stay their original type (numbers)
+  // instead of being coerced to string keys.
+  const states = new Map();
+  function stateFor(tid){
+    let s = states.get(tid);
+    if (!s){ s = { x: 0, y: 0, heading: 0, visible: true, pencolor: "black" }; states.set(tid, s); }
+    return s;
+  }
   let idx = 0, evStart = null, timer = null, paused = false, frameCount = 0;
   const FRAME_MS = 16;   // ~60fps target for the setTimeout-driven frame loop
   /**
@@ -466,6 +474,7 @@ function build({ model, el, rid }){
    * is nothing for the frontend to track.
    */
   function applyConfig(ev){
+    const state = stateFor(ev.turtle);
     switch (ev.op){
       case "color": state.pencolor = ev.color; break;
       case "pen": break;
@@ -483,6 +492,7 @@ function build({ model, el, rid }){
    * heading unchanged. `turn`/`teleport` set heading directly from the event.
    */
   function endState(ev){
+    const state = stateFor(ev.turtle);
     if (ev.op === "line" || ev.op === "move"){
       state.x = ev.x2; state.y = ev.y2;
       if (ev.x2 !== ev.x1 || ev.y2 !== ev.y1)
@@ -513,15 +523,32 @@ function build({ model, el, rid }){
   }
 
   /**
+   * Draw every *other* known turtle's last-settled marker (skipping `activeTid`,
+   * which the caller draws itself, possibly mid-interpolation). Only one turtle's
+   * event animates at a time (see CLAUDE.md "Animation engine" / "No simultaneous
+   * animation"), so without this, every other turtle's marker would vanish for the
+   * duration of the active one's move.
+   */
+  function drawIdleTurtles(activeTid){
+    for (const [tid, s] of states){
+      if (tid === activeTid) continue;
+      if (s.visible) drawTurtle(ctx, s.x, s.y, s.heading, s.pencolor);
+    }
+  }
+
+  /**
    * Draw one in-progress animation frame for event `ev` at progress `p`
-   * (0..1, elapsed/duration). Blits the settled canvas, interpolates the
-   * moving turtle's position/heading (and, for `line`, strokes the partial
-   * segment directly onto the *visible* `ctx` — not `base`, since it isn't
-   * committed yet), draws the marker at the interpolated pose, and syncs the
-   * code highlight to this event's source line.
+   * (0..1, elapsed/duration). Blits the settled canvas, draws every idle
+   * turtle's settled marker, interpolates the moving turtle's (`ev.turtle`'s)
+   * position/heading (and, for `line`, strokes the partial segment directly
+   * onto the *visible* `ctx` — not `base`, since it isn't committed yet), draws
+   * its marker at the interpolated pose, and syncs the code highlight to this
+   * event's source line.
    */
   function renderProgress(ev, p){
     blitBase();
+    drawIdleTurtles(ev.turtle);
+    const state = stateFor(ev.turtle);
     let mx = state.x, my = state.y, mh = state.heading;
     if (ev.op === "line" || ev.op === "move"){
       mx = ev.x1 + (ev.x2 - ev.x1) * p;
@@ -544,12 +571,14 @@ function build({ model, el, rid }){
   }
 
   /**
-   * Draw the fully-settled frame (no in-progress segment): used once the
-   * event queue is drained, and by start() before the loop begins.
+   * Draw the fully-settled frame (no in-progress segment): every known
+   * turtle's last-settled marker. Used once the event queue is drained, and
+   * by start() before the loop begins (when `states` is still empty, so this
+   * just blits the background/obstacles/art with no markers on top).
    */
   function drawFinal(){
     blitBase();
-    if (state.visible) drawTurtle(ctx, state.x, state.y, state.heading, state.pencolor);
+    for (const [, s] of states) if (s.visible) drawTurtle(ctx, s.x, s.y, s.heading, s.pencolor);
   }
 
   /**
@@ -604,11 +633,10 @@ function build({ model, el, rid }){
     if (timer !== null){ clearTimeout(timer); timer = null; }
     idx = 0; evStart = null; paused = false;
     pauseBtn.textContent = "\u275a\u275a Pause";
-    state.x = 0; state.y = 0; state.heading = 0; state.visible = true; state.pencolor = "black";
+    states.clear();
     obstacles = []; bgColor = model.get("bg") || "white";
     bctx.clearRect(0,0,width,height); octx.clearRect(0,0,width,height);
-    blitBase();
-    if (state.visible) drawTurtle(ctx, 0, 0, 0, "black");
+    drawFinal();   // nothing known yet (states is empty); step() below fills in reality
     twlog("build #" + bid + " animation START:", "events=" + events.length);
     setDiag("render #" + (rid || "?") + " · build #" + bid + " · events " + events.length + " · animating…");
     step(performance.now());
@@ -691,7 +719,7 @@ _CSS = r"""
    .tw-right (the code column). Kept inline here rather than an external
    stylesheet, per the "no external/CDN dependencies" constraint (CLAUDE.md). */
 .tw-root { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  margin-top: 8px; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
 .tw-left { display: inline-block; }
 .tw-canvas { background: #fff; border: 1px solid #d0d0d8; border-radius: 8px;
   box-shadow: 0 1px 4px rgba(0,0,0,.08); display: block; }
@@ -940,15 +968,158 @@ def _obstacle_hit(ob, ax, ay, ux, uy, max_t):
 
 
 # --------------------------------------------------------------------------- #
-# The widget                                                                  #
+# The canvas + the widget                                                     #
 # --------------------------------------------------------------------------- #
 
-class Turtle(anywidget.AnyWidget):
+class Canvas(anywidget.AnyWidget):
+    """The widget half of a turtle: the canvas, its synced traits, and the display
+    lifecycle (source capture, autoshow, ``show()``/``_repr_mimebundle_``).
+
+    Not meant to be instantiated on its own. ``Turtle(Canvas)`` so a bare ``Turtle()``
+    is simultaneously a turtle and the canvas it draws on (``self._canvas = self``);
+    other turtles join that same canvas via :func:`Turtle.new_turtle` /
+    :func:`Turtle.other_turtle`, which point their own ``_canvas`` at this one instead
+    of constructing a canvas of their own.
+
+    Parameters
+    ----------
+    width, height : int, optional
+        Canvas size in pixels. Default 500.
+    show_code : bool, optional
+        If True, show the cell source beside the canvas and highlight the active line
+        in sync with the animation. Default False.
+    code : str, optional
+        Source to display instead of the captured cell source.
+    autoshow : bool, optional
+        If True (default), display the widget automatically at the end of the cell.
+    bg : str, optional
+        Canvas background colour. Default ``"white"``.
+    """
+
+    _esm = _ESM
+    _css = _CSS
+
+    events = traitlets.List().tag(sync=True)
+    source_lines = traitlets.List().tag(sync=True)
+    show_code = traitlets.Bool(False).tag(sync=True)
+    width = traitlets.Int(500).tag(sync=True)
+    height = traitlets.Int(500).tag(sync=True)
+    bg = traitlets.Unicode("white").tag(sync=True)
+
+    def __init__(self, width=500, height=500, show_code=False,
+                 code=None, autoshow=True, bg="white"):
+        super().__init__()
+        self.width = int(width)
+        self.height = int(height)
+        self.show_code = bool(show_code)
+        self.bg = bg
+
+        self._events = []
+        self._obstacles = []       # shared "world" state: every turtle on this
+        self._trail_segments = []  # canvas registers/draws into the same lists
+        self._cur_file = None
+        self._explicit_code = code
+        self._next_turtle_id = 0
+
+        self._rendered = False
+        self._hook = None
+        if autoshow:
+            self._register_autoshow()
+
+    def _new_turtle_id(self):
+        """Return a fresh id (0, 1, 2, ...) for a turtle joining this canvas.
+
+        Stamped onto every event by ``Turtle._emit`` so the frontend can track each
+        turtle's marker independently (see CLAUDE.md "Event protocol").
+        """
+        tid = self._next_turtle_id
+        self._next_turtle_id += 1
+        return tid
+
+    # -- display / source --------------------------------------------------- #
+    def _get_source(self):
+        if self._explicit_code is not None:
+            return self._explicit_code.splitlines()
+        if self._cur_file:
+            lines = linecache.getlines(self._cur_file)
+            if lines:
+                return [ln.rstrip("\n") for ln in lines]
+        return []
+
+    def _flush(self):
+        # set source_lines first so the frontend has it before events trigger render.
+        # Only transmit the cell source when it is actually shown: the captured source
+        # is the *only* content that varies with the cell's text, and sending it over
+        # the comm on every (re-)display when show_code is off is both wasteful and a
+        # source of frontend re-render flakiness on cell re-execution.
+        self.source_lines = self._get_source() if self.show_code else []
+        self.events = list(self._events)
+
+    def show(self):
+        """Flush the recorded commands and display the widget now.
+
+        Returns
+        -------
+        Canvas
+            This canvas (a plain ``Turtle()`` returns itself, to allow chaining).
+        """
+        self._unhook()
+        self._flush()
+        self._rendered = True
+        _ipy_display(self)
+        return self
+
+    def _repr_mimebundle_(self, **kwargs):
+        # called when the turtle is the last expression / passed to display()
+        self._unhook()
+        self._flush()
+        self._rendered = True
+        return super()._repr_mimebundle_(**kwargs)
+
+    # automatic display at end-of-cell so the bare example "just works"
+    def _register_autoshow(self):
+        ip = get_ipython()
+        if ip is None:
+            return
+
+        def _cb(*a, **k):
+            self._unhook()
+            if not self._rendered:
+                self._flush()
+                self._rendered = True
+                _ipy_display(self)
+
+        self._hook = _cb
+        try:
+            ip.events.register("post_run_cell", _cb)
+        except Exception:
+            self._hook = None
+
+    def _unhook(self):
+        if self._hook is not None:
+            ip = get_ipython()
+            try:
+                ip.events.unregister("post_run_cell", self._hook)
+            except Exception:
+                pass
+            self._hook = None
+
+
+# --------------------------------------------------------------------------- #
+# The turtle                                                                  #
+# --------------------------------------------------------------------------- #
+
+class Turtle(Canvas):
     """An animated, turtle-compatible drawing widget for Jupyter notebooks.
 
     Turtle commands are recorded in Python as a stream of events and replayed as a
     canvas animation below the cell. The widget displays itself automatically at the
     end of the cell; you can also call ``show()`` or evaluate the turtle to display it.
+
+    A plain ``Turtle()`` is both a turtle and the canvas it draws on. Other turtles can
+    join that same canvas with :func:`new_turtle` (preferred) or :func:`other_turtle`,
+    so two or more turtles can draw on, and sense each other's trail on, one shared
+    canvas — see those methods' docstrings.
 
     Parameters
     ----------
@@ -992,24 +1163,20 @@ class Turtle(anywidget.AnyWidget):
         travelled; turns contribute nothing. Starts at 0.0, reset by :func:`reset`.
     """
 
-    _esm = _ESM
-    _css = _CSS
-
-    events = traitlets.List().tag(sync=True)
-    source_lines = traitlets.List().tag(sync=True)
-    show_code = traitlets.Bool(False).tag(sync=True)
-    width = traitlets.Int(500).tag(sync=True)
-    height = traitlets.Int(500).tag(sync=True)
-    bg = traitlets.Unicode("white").tag(sync=True)
-
     def __init__(self, width=500, height=500, show_code=False,
                  code=None, autoshow=True, bg="white", home=None):
-        super().__init__()
-        self.width = int(width)
-        self.height = int(height)
-        self.show_code = bool(show_code)
-        self.bg = bg
+        super().__init__(width=width, height=height, show_code=show_code,
+                          code=code, autoshow=autoshow, bg=bg)
+        self._canvas = self
+        self._turtle_id = self._canvas._new_turtle_id()
+        self._init_turtle_state(home=home)
 
+    def _init_turtle_state(self, home=None):
+        """Set up this turtle's own state (position/heading/pen/.../counters) --
+        everything ``Canvas.__init__`` doesn't already cover. Split out from
+        ``__init__`` so :func:`new_turtle` can build a turtle that joins another
+        canvas without constructing (and immediately discarding) a ``Canvas`` of
+        its own."""
         # turtle state (in turtle coordinates: origin at centre, +y is up)
         self._x = 0.0
         self._y = 0.0
@@ -1025,8 +1192,6 @@ class Turtle(anywidget.AnyWidget):
         self._visible = True
         self._filling = False
         self._fillpath = []
-        self._obstacles = []
-        self._trail_segments = []
         self._collision_cb = None
         self._collision_stop = True
         self._collision_walls = True
@@ -1039,25 +1204,97 @@ class Turtle(anywidget.AnyWidget):
         self.nr_sense = 0            # calls to sense()
         self.nr_distance_ahead = 0   # calls to distance_ahead()
         self.total_movement = 0.0    # total distance travelled (pen up or down)
-
-        self._events = []
         self._cur_line = None
-        self._cur_file = None
-        self._explicit_code = code
-
-        self._rendered = False
-        self._hook = None
         if home is not None:
             self.sethome(*home)
             self._spawn_at_home()
-        if autoshow:
-            self._register_autoshow()
+
+    # -- canvas sharing ------------------------------------------------------ #
+    def new_turtle(self, color=None, home=None):
+        """Create a new turtle that shares this turtle's canvas.
+
+        The new turtle draws on the same canvas as this one — the same committed
+        art, obstacles, and (once drawn) sensed trail are shared — and animates by
+        taking its turn in the shared event stream, in program order (there is no
+        simultaneous animation of multiple turtles; see CLAUDE.md "Animation engine" /
+        "No simultaneous animation"). Unlike plain ``Turtle()``, this never constructs
+        a canvas of its own — no extra widget/comm is created and immediately discarded.
+
+        Parameters
+        ----------
+        color : str or tuple, optional
+            If given, sets the new turtle's pen colour (see :func:`pencolor`) — a
+            convenient way to tell turtles on a shared canvas apart at a glance.
+        home : tuple of float, optional
+            The new turtle's home — see the ``home`` parameter of :class:`Turtle`.
+            Defaults to the origin, independent of where this turtle currently is.
+
+        Returns
+        -------
+        Turtle
+            The new turtle, already sharing this canvas.
+
+        See Also
+        --------
+        other_turtle : join an *already-constructed* Turtle to this canvas instead.
+        """
+        # cls.__new__(cls) (not cls(...)) deliberately skips Canvas/AnyWidget/Widget
+        # __init__ entirely -- HasTraits.__new__ still runs (so e.g. t.width reads a
+        # harmless class-default 500, per the dead-trait-value caveat on other_turtle
+        # below), but Widget.__init__'s self.open() -- which is what actually creates
+        # a comm and messages the frontend -- never runs, so no comm is ever opened.
+        # Uses type(self), not the literal Turtle, so a subclass's new_turtle() still
+        # returns an instance of that subclass rather than a plain Turtle.
+        cls = type(self)
+        t = cls.__new__(cls)
+        t._canvas = self._canvas
+        t._turtle_id = t._canvas._new_turtle_id()
+        t._init_turtle_state(home=home)
+        if color is not None:
+            t.pencolor(color)
+        return t
+
+    def other_turtle(self, turtle):
+        """Join an already-constructed turtle to this turtle's canvas.
+
+        Use this when you already have a standalone ``Turtle()`` (e.g. one built by
+        someone else's code) that should draw on this canvas instead of its own.
+        Prefer :func:`new_turtle` when you are creating the turtle yourself — it
+        never builds (and discards) a canvas of its own the way joining an
+        already-constructed ``Turtle()`` does here.
+
+        Parameters
+        ----------
+        turtle : Turtle
+            The turtle to join to this canvas. Its autoshow hook is unregistered so
+            it no longer tries to display its own (now unused) canvas. Its position,
+            heading, and other turtle-level state are unchanged.
+
+        Returns
+        -------
+        Turtle
+            The joined turtle (the same object passed in), for convenience.
+
+        Notes
+        -----
+        After joining, canvas-level trait access on ``turtle`` (``.width``,
+        ``.height``, ``.show_code``, ``.bg``, ``.events``, ``.source_lines``)
+        reflects its own now-unused canvas, not the one it actually draws on — use
+        ``turtle._canvas.width`` etc. for the real values. This is the tradeoff of
+        reusing an already-built turtle; :func:`new_turtle` avoids it by never
+        building a canvas in the first place.
+        """
+        turtle._canvas = self._canvas
+        turtle._turtle_id = turtle._canvas._new_turtle_id()
+        turtle._unhook()
+        return turtle
 
     # -- emission ----------------------------------------------------------- #
     def _emit(self, **ev):
         ev.setdefault("line", self._cur_line)
         ev.setdefault("speed", self._speed * self._speed_scale)
-        self._events.append(ev)
+        ev.setdefault("turtle", self._turtle_id)
+        self._canvas._events.append(ev)
 
     @contextlib.contextmanager
     def _scaled(self, mult):
@@ -1088,7 +1325,7 @@ class Turtle(anywidget.AnyWidget):
         if self._pendown:
             self._emit(op="line", x1=x1, y1=y1, x2=x, y2=y,
                        color=self._pencolor, width=self._pensize)
-            self._trail_segments.append((x1, y1, x, y))
+            self._canvas._trail_segments.append((x1, y1, x, y))
         else:
             self._emit(op="move", x1=x1, y1=y1, x2=x, y2=y)
         self._x, self._y = x, y
@@ -1307,12 +1544,16 @@ class Turtle(anywidget.AnyWidget):
         return self
 
     def _spawn_at_home(self):
-        """Place the turtle at its home position with no animation. If home isn't the
-        origin, emit a leading ``teleport`` event so the frontend marker also starts there
-        (its marker state otherwise initialises to the origin)."""
+        """Place the turtle at its home position with no animation. Emits a leading
+        ``teleport`` event if this actually changes the turtle's position/heading --
+        at construction time that means "home isn't the origin" (the frontend marker
+        otherwise initialises to (0,0,0)); at reset() time it means "home differs from
+        wherever this turtle was a moment ago" -- so the frontend marker snaps there
+        too either way."""
+        old = (self._x, self._y, self._heading)
         self._x, self._y = self._home
         self._heading = self._home_heading
-        if (self._x, self._y, self._heading) != (0.0, 0.0, 0.0):
+        if (self._x, self._y, self._heading) != old:
             self._emit(op="teleport", x=self._x, y=self._y, heading=self._heading)
 
     def sethome(self, x, y=None, heading=0):
@@ -1615,7 +1856,7 @@ class Turtle(anywidget.AnyWidget):
         """
         self._emit(op="stamp", x=self._x, y=self._y,
                    heading=self._heading, color=self._pencolor)
-        return len(self._events)
+        return len(self._canvas._events)
 
     @_records
     def write(self, text, align="left", font=("sans-serif", 14, "normal")):
@@ -1687,40 +1928,53 @@ class Turtle(anywidget.AnyWidget):
             when called with no arguments.
         """
         if not args:
-            return self.bg
-        self.bg = _as_color(args[0] if len(args) == 1 else tuple(args))
-        self._emit(op="bgcolor", color=self.bg)
+            return self._canvas.bg
+        self._canvas.bg = _as_color(args[0] if len(args) == 1 else tuple(args))
+        self._emit(op="bgcolor", color=self._canvas.bg)
         return self
 
     @_records
     def clear(self):
         """Clear the drawing and the sensed trail from the canvas.
 
-        Registered obstacles are kept (they are redrawn); the turtle's position,
-        heading and pen are unchanged.
+        On a canvas shared with other turtles (see :func:`new_turtle`), this clears
+        the *whole* canvas — every turtle's drawn art and sensed trail, not just this
+        turtle's — since once art is drawn it is baked into one shared bitmap, with
+        no way to erase only one turtle's pixels from it. Registered obstacles are
+        kept (they are redrawn); every turtle's position, heading and pen are
+        unchanged.
 
         Returns
         -------
         Turtle
             This turtle, to allow method chaining.
         """
-        self._trail_segments = []
+        self._canvas._trail_segments = []
         self._emit(op="clear")
         return self
 
     @_records
     def reset(self):
-        """Clear the drawing and reset the turtle to its initial state.
+        """Reset this turtle to its initial state and return it to (its) home.
+
+        Resets *this* turtle's position, heading, pen, colours, fill state,
+        visibility and counters. On a canvas shared with other turtles (see
+        :func:`new_turtle`), the shared drawing/obstacles/trail are left alone —
+        unlike :func:`clear`, which wipes them for everyone — so resetting your
+        turtle can't erase someone else's maze or trail. A solo turtle (the common
+        case, and every turtle before this widget supported sharing a canvas) also
+        gets a clean slate: its event history, registered obstacles and sensed
+        trail are cleared too, exactly as before.
 
         Returns
         -------
         Turtle
             This turtle, to allow method chaining.
         """
-        self._events = []
-        self._obstacles = []
-        self._trail_segments = []
-        self._x = self._y = self._heading = 0.0
+        if self._canvas is self:
+            self._canvas._events = []
+            self._canvas._obstacles = []
+            self._canvas._trail_segments = []
         self._pendown = True
         self._pencolor = self._fillcolor = "black"
         self._pensize = 1
@@ -1730,7 +1984,7 @@ class Turtle(anywidget.AnyWidget):
         self.nr_collisions = 0
         self.nr_left = self.nr_right = self.nr_sense = self.nr_distance_ahead = 0
         self.total_movement = 0.0
-        self._spawn_at_home()    # return to home (re-emits teleport if home != origin)
+        self._spawn_at_home()    # returns to home, emitting a teleport if that moves it
         return self
 
     @_records
@@ -1783,7 +2037,7 @@ class Turtle(anywidget.AnyWidget):
         updates each frame — ask if you want that.)
         """
         total = 0.0
-        for ev in self._events:
+        for ev in self._canvas._events:
             speed = ev.get("speed")
             v = 6 if speed is None else speed
             if v <= 0:
@@ -1863,13 +2117,13 @@ class Turtle(anywidget.AnyWidget):
         ob["visible"] = bool(visible)
         ob["sense"] = bool(sense)
         ob["label"] = label
-        ob["index"] = len(self._obstacles)
+        ob["index"] = len(self._canvas._obstacles)
         obstacle = Obstacle(ob)
-        self._obstacles.append(obstacle)
+        self._canvas._obstacles.append(obstacle)
         self._emit(op="obstacle", **obstacle)
 
     def _wall_obstacle(self):
-        w, h = self.width / 2.0, self.height / 2.0
+        w, h = self._canvas.width / 2.0, self._canvas.height / 2.0
         return Obstacle(kind="wall", points=[[-w, -h], [w, -h], [w, h], [-w, h]],
                         color=None, visible=True, sense=True, label=None, index=None)
 
@@ -2013,14 +2267,14 @@ class Turtle(anywidget.AnyWidget):
         """Make all registered obstacles visible.
 
         Visibility is purely cosmetic — hidden obstacles are still sensed and still
-        collide. Affects every obstacle added so far.
+        collide. Affects every obstacle added so far (by any turtle on this canvas).
 
         Returns
         -------
         Turtle
             This turtle, to allow method chaining.
         """
-        for ob in self._obstacles:
+        for ob in self._canvas._obstacles:
             ob["visible"] = True
         self._emit(op="obstacles_visible", visible=True)
         return self
@@ -2030,14 +2284,15 @@ class Turtle(anywidget.AnyWidget):
         """Hide all registered obstacles from view.
 
         Visibility is purely cosmetic — hidden obstacles are still sensed and still
-        collide (they become invisible walls). Affects every obstacle added so far.
+        collide (they become invisible walls). Affects every obstacle added so far
+        (by any turtle on this canvas).
 
         Returns
         -------
         Turtle
             This turtle, to allow method chaining.
         """
-        for ob in self._obstacles:
+        for ob in self._canvas._obstacles:
             ob["visible"] = False
         self._emit(op="obstacles_visible", visible=False)
         return self
@@ -2052,7 +2307,7 @@ class Turtle(anywidget.AnyWidget):
                 dets.append(Detection(d, _rel_angle(qx, qy, px, py, hd), (qx, qy),
                                        obstacle["kind"], obstacle["index"], obstacle))
 
-        for ob in self._obstacles:
+        for ob in self._canvas._obstacles:
             if not ob.get("sense", True):
                 continue
             qx, qy = _obstacle_closest_point(ob, px, py)
@@ -2063,9 +2318,9 @@ class Turtle(anywidget.AnyWidget):
             qx, qy = _obstacle_closest_point(wall, px, py)
             consider(qx, qy, wall)
 
-        if trail and self._trail_segments:
+        if trail and self._canvas._trail_segments:
             best = None
-            for seg in self._trail_segments:
+            for seg in self._canvas._trail_segments:
                 qx, qy = _seg_closest_point(px, py, *seg)
                 d = math.hypot(qx - px, qy - py)
                 if d > _SENSE_EPS and (best is None or d < best[0]):
@@ -2081,14 +2336,14 @@ class Turtle(anywidget.AnyWidget):
         rad = math.radians(self._heading)
         dx, dy = math.cos(rad), math.sin(rad)
         best = None                                    # (t, normal, obstacle)
-        for ob in self._obstacles:
+        for ob in self._canvas._obstacles:
             if not ob.get("sense", True):
                 continue
             h = _obstacle_hit(ob, px, py, dx, dy, math.inf)
             if h is not None and (best is None or h[0] < best[0]):
                 best = (h[0], h[1], ob)
         if trail:
-            for x1, y1, x2, y2 in self._trail_segments:
+            for x1, y1, x2, y2 in self._canvas._trail_segments:
                 h = _seg_hit(px, py, dx, dy, x1, y1, x2, y2, math.inf)
                 if h is not None and (best is None or h[0] < best[0]):
                     best = (h[0], h[1], self._trail_obstacle(x1, y1, x2, y2))
@@ -2138,7 +2393,7 @@ class Turtle(anywidget.AnyWidget):
         det = self._ray_ahead(max_distance, walls, trail)
         if draw:
             length = det.distance if det is not None else (
-                max_distance if max_distance is not None else max(self.width, self.height))
+                max_distance if max_distance is not None else max(self._canvas.width, self._canvas.height))
             self._emit(op="sense", x=self._x, y=self._y, color=_as_color(color),
                        rays=[{"a": self._heading, "d": length, "hit": det is not None}])
         return det
@@ -2282,7 +2537,7 @@ class Turtle(anywidget.AnyWidget):
             return []
         ux, uy = dx / length, dy / length
         hits = []
-        for ob in self._obstacles:
+        for ob in self._canvas._obstacles:
             h = _obstacle_hit(ob, ax, ay, ux, uy, length)
             if h is not None:
                 hits.append((h[0], (ax + h[0] * ux, ay + h[0] * uy), h[1], ob))
@@ -2292,7 +2547,7 @@ class Turtle(anywidget.AnyWidget):
             if h is not None:
                 hits.append((h[0], (ax + h[0] * ux, ay + h[0] * uy), h[1], wall))
         if self._collision_trail:
-            for x1, y1, x2, y2 in self._trail_segments:
+            for x1, y1, x2, y2 in self._canvas._trail_segments:
                 h = _seg_hit(ax, ay, ux, uy, x1, y1, x2, y2, length)
                 if h is not None:
                     hits.append((h[0], (ax + h[0] * ux, ay + h[0] * uy), h[1],
@@ -2317,71 +2572,3 @@ class Turtle(anywidget.AnyWidget):
                                                  distance=t, pos=end, angle=angle, **snap))
         finally:
             self._colliding = False
-
-    # -- display / source --------------------------------------------------- #
-    def _get_source(self):
-        if self._explicit_code is not None:
-            return self._explicit_code.splitlines()
-        if self._cur_file:
-            lines = linecache.getlines(self._cur_file)
-            if lines:
-                return [ln.rstrip("\n") for ln in lines]
-        return []
-
-    def _flush(self):
-        # set source_lines first so the frontend has it before events trigger render.
-        # Only transmit the cell source when it is actually shown: the captured source
-        # is the *only* content that varies with the cell's text, and sending it over
-        # the comm on every (re-)display when show_code is off is both wasteful and a
-        # source of frontend re-render flakiness on cell re-execution.
-        self.source_lines = self._get_source() if self.show_code else []
-        self.events = list(self._events)
-
-    def show(self):
-        """Flush the recorded commands and display the widget now.
-
-        Returns
-        -------
-        Turtle
-            This turtle.
-        """
-        self._unhook()
-        self._flush()
-        self._rendered = True
-        _ipy_display(self)
-        return self
-
-    def _repr_mimebundle_(self, **kwargs):
-        # called when the turtle is the last expression / passed to display()
-        self._unhook()
-        self._flush()
-        self._rendered = True
-        return super()._repr_mimebundle_(**kwargs)
-
-    # automatic display at end-of-cell so the bare example "just works"
-    def _register_autoshow(self):
-        ip = get_ipython()
-        if ip is None:
-            return
-
-        def _cb(*a, **k):
-            self._unhook()
-            if not self._rendered:
-                self._flush()
-                self._rendered = True
-                _ipy_display(self)
-
-        self._hook = _cb
-        try:
-            ip.events.register("post_run_cell", _cb)
-        except Exception:
-            self._hook = None
-
-    def _unhook(self):
-        if self._hook is not None:
-            ip = get_ipython()
-            try:
-                ip.events.unregister("post_run_cell", self._hook)
-            except Exception:
-                pass
-            self._hook = None

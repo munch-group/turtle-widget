@@ -46,6 +46,24 @@ and fills (`pencolor`/`fillcolor`/`begin_fill`/`end_fill`), and markers/text
 (`dot`/`stamp`/`write`). Note that the pen-width method is `pensize()` (the name `width` is
 the canvas-size trait).
 
+## Multiple turtles
+
+Two or more turtles can share one canvas — different colours, a race, one sensing the
+other's trail:
+
+```python
+from turtle_widget import Turtle
+
+t1 = Turtle()
+t2 = t1.new_turtle(color="red")
+t1.forward(100)
+t2.forward(60)
+```
+
+`t1.new_turtle(...)` creates a turtle that draws on `t1`'s canvas instead of building one
+of its own. Each turtle keeps its own position, heading, and pen; commands still animate
+in the order you write them, one at a time — there is no simultaneous animation.
+
 ## Documentation
 
 Full docs and a guided showcase live at

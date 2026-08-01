@@ -18,6 +18,11 @@ Turtle commands are recorded in Python as a stream of events and replayed as a
 canvas animation below the cell. The widget displays itself automatically at the
 end of the cell; you can also call ``show()`` or evaluate the turtle to display it.
 
+A plain ``Turtle()`` is both a turtle and the canvas it draws on. Other turtles can
+join that same canvas with :func:`new_turtle` (preferred) or :func:`other_turtle`,
+so two or more turtles can draw on, and sense each other's trail on, one shared
+canvas — see those methods' docstrings.
+
 ## Parameters {.doc-section .doc-section-parameters}
 
 <code>[**width**]{.parameter-name} [:]{.parameter-annotation-sep} [[int](`int`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [500]{.parameter-default}</code>
@@ -95,13 +100,15 @@ end of the cell; you can also call ``show()`` or evaluate the turtle to display 
 | [isvisible](#turtle_widget.Turtle.isvisible) | Return whether the turtle marker is visible. |
 | [left](#turtle_widget.Turtle.left) | Turn the turtle counter-clockwise by ``angle`` degrees. |
 | [nearest](#turtle_widget.Turtle.nearest) | The single nearest obstacle within range, or ``None``. |
+| [new_turtle](#turtle_widget.Turtle.new_turtle) | Create a new turtle that shares this turtle's canvas. |
 | [on_collision](#turtle_widget.Turtle.on_collision) | Register a hook fired when a move runs into an obstacle. |
+| [other_turtle](#turtle_widget.Turtle.other_turtle) | Join an already-constructed turtle to this turtle's canvas. |
 | [pencolor](#turtle_widget.Turtle.pencolor) | Get or set the pen (outline) colour. |
 | [pendown](#turtle_widget.Turtle.pendown) | Lower the pen so subsequent moves draw. |
 | [pensize](#turtle_widget.Turtle.pensize) | Get or set the pen width. |
 | [penup](#turtle_widget.Turtle.penup) | Lift the pen so subsequent moves do not draw. |
 | [position](#turtle_widget.Turtle.position) | Return the current position. |
-| [reset](#turtle_widget.Turtle.reset) | Clear the drawing and reset the turtle to its initial state. |
+| [reset](#turtle_widget.Turtle.reset) | Reset this turtle to its initial state and return it to (its) home. |
 | [right](#turtle_widget.Turtle.right) | Turn the turtle clockwise by ``angle`` degrees. |
 | [sense](#turtle_widget.Turtle.sense) | Detect all obstacles within range, with the bearing to each. |
 | [setheading](#turtle_widget.Turtle.setheading) | Turn the turtle to face an absolute heading. |
@@ -428,8 +435,12 @@ turtle_widget.Turtle.clear()
 
 Clear the drawing and the sensed trail from the canvas.
 
-Registered obstacles are kept (they are redrawn); the turtle's position,
-heading and pen are unchanged.
+On a canvas shared with other turtles (see :func:`new_turtle`), this clears
+the *whole* canvas — every turtle's drawn art and sensed trail, not just this
+turtle's — since once art is drawn it is baked into one shared bitmap, with
+no way to erase only one turtle's pixels from it. Registered obstacles are
+kept (they are redrawn); every turtle's position, heading and pen are
+unchanged.
 
 #### Returns {.doc-section .doc-section-returns}
 
@@ -669,7 +680,8 @@ turtle_widget.Turtle.hide_obstacles()
 Hide all registered obstacles from view.
 
 Visibility is purely cosmetic — hidden obstacles are still sensed and still
-collide (they become invisible walls). Affects every obstacle added so far.
+collide (they become invisible walls). Affects every obstacle added so far
+(by any turtle on this canvas).
 
 #### Returns {.doc-section .doc-section-returns}
 
@@ -814,6 +826,41 @@ detection.
 
 :   The nearest detection (see ``sense``), or ``None`` if nothing is within range.
 
+### new_turtle { #turtle_widget.Turtle.new_turtle }
+
+```python
+turtle_widget.Turtle.new_turtle(color=None, home=None)
+```
+
+Create a new turtle that shares this turtle's canvas.
+
+The new turtle draws on the same canvas as this one — the same committed
+art, obstacles, and (once drawn) sensed trail are shared — and animates by
+taking its turn in the shared event stream, in program order (there is no
+simultaneous animation of multiple turtles; see CLAUDE.md "Animation engine" /
+"No simultaneous animation"). Unlike plain ``Turtle()``, this never constructs
+a canvas of its own — no extra widget/comm is created and immediately discarded.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+<code>[**color**]{.parameter-name} [:]{.parameter-annotation-sep} [[str](`str`) or [tuple](`tuple`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [None]{.parameter-default}</code>
+
+:   If given, sets the new turtle's pen colour (see :func:`pencolor`) — a convenient way to tell turtles on a shared canvas apart at a glance.
+
+<code>[**home**]{.parameter-name} [:]{.parameter-annotation-sep} [tuple of float]{.parameter-annotation} [ = ]{.parameter-default-sep} [None]{.parameter-default}</code>
+
+:   The new turtle's home — see the ``home`` parameter of :class:`Turtle`. Defaults to the origin, independent of where this turtle currently is.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+
+:   The new turtle, already sharing this canvas.
+
+#### See Also {.doc-section .doc-section-see-also}
+
+other_turtle : join an *already-constructed* Turtle to this canvas instead.
+
 ### on_collision { #turtle_widget.Turtle.on_collision }
 
 ```python
@@ -868,6 +915,41 @@ animation speed of the move (global ``speed()`` × the move's ``speed=`` multipl
 and the turtle's state — ``pos``, ``heading``, ``isdown``, ``isvisible``, ``pencolor``,
 ``pensize``. The handler's own moves do not re-trigger collisions, so it can move the
 turtle freely (e.g. to bounce or back away).
+
+### other_turtle { #turtle_widget.Turtle.other_turtle }
+
+```python
+turtle_widget.Turtle.other_turtle(turtle)
+```
+
+Join an already-constructed turtle to this turtle's canvas.
+
+Use this when you already have a standalone ``Turtle()`` (e.g. one built by
+someone else's code) that should draw on this canvas instead of its own.
+Prefer :func:`new_turtle` when you are creating the turtle yourself — it
+never builds (and discards) a canvas of its own the way joining an
+already-constructed ``Turtle()`` does here.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+<code>[**turtle**]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+
+:   The turtle to join to this canvas. Its autoshow hook is unregistered so it no longer tries to display its own (now unused) canvas. Its position, heading, and other turtle-level state are unchanged.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+
+:   The joined turtle (the same object passed in), for convenience.
+
+#### Notes {.doc-section .doc-section-notes}
+
+After joining, canvas-level trait access on ``turtle`` (``.width``,
+``.height``, ``.show_code``, ``.bg``, ``.events``, ``.source_lines``)
+reflects its own now-unused canvas, not the one it actually draws on — use
+``turtle._canvas.width`` etc. for the real values. This is the tradeoff of
+reusing an already-built turtle; :func:`new_turtle` avoids it by never
+building a canvas in the first place.
 
 ### pencolor { #turtle_widget.Turtle.pencolor }
 
@@ -961,7 +1043,16 @@ Return the current position.
 turtle_widget.Turtle.reset()
 ```
 
-Clear the drawing and reset the turtle to its initial state.
+Reset this turtle to its initial state and return it to (its) home.
+
+Resets *this* turtle's position, heading, pen, colours, fill state,
+visibility and counters. On a canvas shared with other turtles (see
+:func:`new_turtle`), the shared drawing/obstacles/trail are left alone —
+unlike :func:`clear`, which wipes them for everyone — so resetting your
+turtle can't erase someone else's maze or trail. A solo turtle (the common
+case, and every turtle before this widget supported sharing a canvas) also
+gets a clean slate: its event history, registered obstacles and sensed
+trail are cleared too, exactly as before.
 
 #### Returns {.doc-section .doc-section-returns}
 
@@ -1162,9 +1253,9 @@ Flush the recorded commands and display the widget now.
 
 #### Returns {.doc-section .doc-section-returns}
 
-<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Canvas](`turtle_widget.widget.Canvas`)]{.parameter-annotation}</code>
 
-:   This turtle.
+:   This canvas (a plain ``Turtle()`` returns itself, to allow chaining).
 
 ### show_obstacles { #turtle_widget.Turtle.show_obstacles }
 
@@ -1175,7 +1266,7 @@ turtle_widget.Turtle.show_obstacles()
 Make all registered obstacles visible.
 
 Visibility is purely cosmetic — hidden obstacles are still sensed and still
-collide. Affects every obstacle added so far.
+collide. Affects every obstacle added so far (by any turtle on this canvas).
 
 #### Returns {.doc-section .doc-section-returns}
 

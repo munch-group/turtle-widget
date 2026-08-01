@@ -52,8 +52,12 @@ turtle_widget.Turtle.left py:function 1 api/Turtle.html#turtle_widget.Turtle.lef
 turtle_widget.widget.Turtle.left py:function 1 api/Turtle.html#turtle_widget.Turtle.left turtle_widget.Turtle.left
 turtle_widget.Turtle.nearest py:function 1 api/Turtle.html#turtle_widget.Turtle.nearest -
 turtle_widget.widget.Turtle.nearest py:function 1 api/Turtle.html#turtle_widget.Turtle.nearest turtle_widget.Turtle.nearest
+turtle_widget.Turtle.new_turtle py:function 1 api/Turtle.html#turtle_widget.Turtle.new_turtle -
+turtle_widget.widget.Turtle.new_turtle py:function 1 api/Turtle.html#turtle_widget.Turtle.new_turtle turtle_widget.Turtle.new_turtle
 turtle_widget.Turtle.on_collision py:function 1 api/Turtle.html#turtle_widget.Turtle.on_collision -
 turtle_widget.widget.Turtle.on_collision py:function 1 api/Turtle.html#turtle_widget.Turtle.on_collision turtle_widget.Turtle.on_collision
+turtle_widget.Turtle.other_turtle py:function 1 api/Turtle.html#turtle_widget.Turtle.other_turtle -
+turtle_widget.widget.Turtle.other_turtle py:function 1 api/Turtle.html#turtle_widget.Turtle.other_turtle turtle_widget.Turtle.other_turtle
 turtle_widget.Turtle.pencolor py:function 1 api/Turtle.html#turtle_widget.Turtle.pencolor -
 turtle_widget.widget.Turtle.pencolor py:function 1 api/Turtle.html#turtle_widget.Turtle.pencolor turtle_widget.Turtle.pencolor
 turtle_widget.Turtle.pendown py:function 1 api/Turtle.html#turtle_widget.Turtle.pendown -
@@ -79,7 +83,7 @@ turtle_widget.widget.Turtle.setx py:function 1 api/Turtle.html#turtle_widget.Tur
 turtle_widget.Turtle.sety py:function 1 api/Turtle.html#turtle_widget.Turtle.sety -
 turtle_widget.widget.Turtle.sety py:function 1 api/Turtle.html#turtle_widget.Turtle.sety turtle_widget.Turtle.sety
 turtle_widget.Turtle.show py:function 1 api/Turtle.html#turtle_widget.Turtle.show -
-turtle_widget.widget.Turtle.show py:function 1 api/Turtle.html#turtle_widget.Turtle.show turtle_widget.Turtle.show
+turtle_widget.widget.Canvas.show py:function 1 api/Turtle.html#turtle_widget.Turtle.show turtle_widget.Turtle.show
 turtle_widget.Turtle.show_obstacles py:function 1 api/Turtle.html#turtle_widget.Turtle.show_obstacles -
 turtle_widget.widget.Turtle.show_obstacles py:function 1 api/Turtle.html#turtle_widget.Turtle.show_obstacles turtle_widget.Turtle.show_obstacles
 turtle_widget.Turtle.showturtle py:function 1 api/Turtle.html#turtle_widget.Turtle.showturtle -

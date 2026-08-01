@@ -23,8 +23,9 @@ see *Template conversion* below.
 
 The widget is the `turtle_widget` package under `src/`:
 
-- `src/turtle_widget/widget.py` — the whole widget: the Python `Turtle` class + the
-  embedded `_ESM`/`_CSS` frontend strings. (`_esm`/`_css` on the class just alias those
+- `src/turtle_widget/widget.py` — the whole widget: `Canvas` (the widget/display half)
+  and `Turtle(Canvas)` (the drawing half — see "Canvas vs Turtle") + the embedded
+  `_ESM`/`_CSS` frontend strings. (`_esm`/`_css` on `Canvas` just alias those
   module-level strings, which is why the JS check below reads `m._ESM` off the module.)
 - `src/turtle_widget/__init__.py` — re-exports the public API (`from .widget import Turtle`).
 - `docs/pages/demo.ipynb` — showcase + tests (formerly `turtle_demo.ipynb`); each cell
@@ -87,8 +88,8 @@ deps: `anywidget` (0.11.x), `nodejs` (20–22), `jupyter`/`ipython`, `quarto`, `
 Two layers with a thin, explicit contract between them:
 
 1. **Python (`Turtle`)** owns all geometry and turtle state. Each public method updates
-   internal state and appends one or more JSON-serializable *events* to `self._events`.
-   No drawing logic lives in Python.
+   internal state and appends one or more JSON-serializable *events* to
+   `self._canvas._events`. No drawing logic lives in Python.
 2. **Frontend (`_ESM`)** is a dumb playback engine. It never computes turtle geometry; it
    only interpolates and renders the events it receives. This is why the animation can
    never drift from real `turtle` behaviour.
@@ -96,6 +97,49 @@ Two layers with a thin, explicit contract between them:
 State crosses the boundary via synced traitlets: `events`, `source_lines`, `show_code`,
 `width`, `height`, `bg`. They are flushed once (see *Display lifecycle*), not streamed
 per-command.
+
+### Canvas vs Turtle
+
+`Canvas(anywidget.AnyWidget)` owns the widget half: `_esm`/`_css`, the six synced traits
+above, the `_events` list (plus `_obstacles`/`_trail_segments` — shared "world" state,
+see "Obstacles & sensing"), and the display lifecycle (`_flush`, `_get_source`, `show`,
+`_repr_mimebundle_`, autoshow). `Turtle(Canvas)` owns the turtle half: position, heading,
+home, pen, colour, speed, visibility, fill state, the collision *configuration* flags
+(`_collision_stop`/`_walls`/`_trail`/`_cb`), and the public counters. A bare `t =
+Turtle()` sets `self._canvas = self` in `__init__`, so it is simultaneously a turtle and
+the canvas it draws on — the zero-ceremony single-turtle path (`t = Turtle()`) is
+unchanged; there is no separate "make a screen, then populate it" step.
+
+Multiple turtles share a canvas by pointing `_canvas` at the same object instead of at
+themselves:
+
+    t1 = Turtle()
+    t2 = t1.new_turtle(color="red")     # preferred: never builds a canvas of its own
+    t3 = t1.other_turtle(Turtle())      # joins an already-constructed Turtle instead
+
+`new_turtle()` builds the new turtle via `cls.__new__(cls)` rather than `Turtle(...)`,
+skipping `Canvas`/`AnyWidget`/`Widget.__init__` entirely — `HasTraits.__new__` still runs
+(so e.g. `t2.width` reads a harmless class-default `500`), but `Widget.__init__`'s
+`self.open()` — which is what actually creates a comm and messages the frontend — never
+runs, so no comm is ever opened for a turtle that will never display itself.
+`other_turtle(existing_turtle)` instead joins a `Turtle()` that was already fully
+constructed (so it *did* build, and now discards, a real widget/comm of its own) and
+unhooks its autoshow. Both leave the joined turtle's own canvas-level trait access dead
+(`t2.width`/`.height`/`.show_code`/`.bg`/`.events`/`.source_lines` reflect its own unused
+canvas, not the one it actually draws on — use `t2._canvas.width` etc. for the real
+values); this is deliberately left undocumented-away rather than proxied, since
+traitlets' descriptor machinery makes per-instance proxying fragile for little benefit.
+Prefer `new_turtle()` in docs/examples; `other_turtle()` exists for joining a turtle
+someone else's code already constructed.
+
+Each turtle gets a small per-canvas sequential id (`self._turtle_id`, assigned by
+`Canvas._new_turtle_id()` when it is constructed *or joined* — joining always assigns a
+fresh id, since a turtle keeps whatever id it had on its previous canvas otherwise,
+which could collide with another turtle already on the new one). `_emit()` stamps this
+onto every event (see "Event protocol").
+
+Only one turtle's event animates at a time, by design — see "No simultaneous animation"
+under "Animation engine" below.
 
 ### Coordinate system
 
@@ -107,14 +151,18 @@ scaling both the visible and offscreen canvases by `devicePixelRatio`.
 ### Event protocol
 
 Every event is a dict with an `op` plus op-specific fields. `_emit()` injects `line`
-(1-based source line for highlighting) and `speed` (0–10) into *every* event.
+(1-based source line for highlighting), `speed` (0–10), and `turtle` (the emitting
+turtle's per-canvas id, from `Canvas._new_turtle_id()` — see "Canvas vs Turtle" below)
+into *every* event. The frontend keys its per-turtle tracked state (`states`, a `Map`)
+by this id, so each turtle's marker/pen-colour/visibility is tracked independently
+even though every turtle's events share one flat stream, replayed in program order.
 
 | `op`      | fields                                   | animated? | notes |
 |-----------|------------------------------------------|-----------|-------|
 | `line`    | `x1,y1,x2,y2,color,width`                | yes       | pen-down move; animated stroke |
 | `move`    | `x1,y1,x2,y2`                            | yes       | pen-up travel; marker only |
 | `turn`    | `x,y,from,to`                            | yes       | rotation; spins exactly `to-from` |
-| `teleport`| `x,y,heading`                            | no        | instant marker placement, no drawing; emitted as the first event when the turtle spawns away from the origin (`home=`) |
+| `teleport`| `x,y,heading`                            | no        | instant marker placement, no drawing; emitted when a turtle spawns away from the origin (`home=`) or when `reset()` moves it back to a home that differs from where it just was |
 | `dot`     | `x,y,size,color`                         | no        | filled dot |
 | `stamp`   | `x,y,heading,color`                      | no        | turtle-shaped mark |
 | `write`   | `x,y,text,color,align,font`              | no        | `font` is a CSS font string |
@@ -124,10 +172,10 @@ Every event is a dict with an `op` plus op-specific fields. `_emit()` injects `l
 | `pen`     | `down:bool`                              | no        | pen up/down (state only) |
 | `show`/`hide` | —                                    | no        | marker visibility |
 | `bgcolor` | `color`                                  | no        | repaints background behind art |
-| `obstacle`| `kind` + shape fields + `color`,`visible`,`sense`,`label`,`index`| no | registered obstacle (circle/segment/polygon); `label` is metadata (not drawn); drawn on the obstacle layer if `visible`; `sense=False` hides it from the sensing queries only |
+| `obstacle`| `kind` + shape fields + `color`,`visible`,`sense`,`label`,`index`| no | registered obstacle (circle/segment/polygon), shared canvas-wide (any turtle can register one, every turtle senses/collides with it); `label` is metadata (not drawn); drawn on the obstacle layer if `visible`; `sense=False` hides it from the sensing queries only |
 | `obstacles_visible` | `visible:bool`                 | no        | show/hide *all* obstacles at once |
 | `sense`   | `x,y,rays:[{a,d,hit}],color`             | no        | sensor-ray overlay (dashed rays + hit dots) |
-| `clear`   | —                                        | no        | clears committed art only (obstacle layer untouched) |
+| `clear`   | —                                        | no        | clears committed art **for the whole canvas** — every turtle's drawing, not just the caller's (obstacle layer untouched); see `Turtle.clear`'s docstring |
 
 Curves (`circle`) are decomposed in Python into many small `line` chords, so the frontend
 needs no arc logic.
@@ -135,16 +183,24 @@ needs no arc logic.
 ### Animation engine (`build` in `_ESM`)
 
 - An offscreen `base` canvas holds committed art; the visible canvas is redrawn each frame
-  as `drawImage(base)` + the in-progress segment + the turtle marker.
+  as `drawImage(base)` + the in-progress segment + every turtle's marker.
 - `step(ts)` is the frame loop, driven by **`setTimeout`** (~16 ms, via `schedule()`) — *not*
   `requestAnimationFrame`. Notebook webviews (VS Code) stop ticking the compositor when an
   output goes idle, so a freshly-scheduled rAF after one animation finished never fires and
   re-runs freeze (tell-tale: clicking *Pause*, which keeps a loop alive, "fixes" re-runs).
   Don't switch this back to rAF. Per event: `durationOf()` gives a duration
   (0 ⇒ instant; `speed:0` ⇒ instant). Animated events interpolate via `renderProgress()`;
-  on completion `commit()` writes to `base` and `endState()` advances the tracked
-  `{x,y,heading,visible,pencolor}`. Instant events `commit()` immediately and the loop
-  continues within the same frame.
+  on completion `commit()` writes to `base` and `endState()` advances the tracked per-turtle
+  `{x,y,heading,visible,pencolor}` (`states`, a `Map` keyed by `ev.turtle` — see `stateFor()`).
+  Instant events `commit()` immediately and the loop continues within the same frame.
+- **No simultaneous animation.** `step()` walks one flat event array with one cursor and one
+  clock; each event's duration fully elapses before the next begins. With a shared stream
+  (multiple turtles on one canvas), events land in the order the statements ran, so turtles
+  animate by taking turns in program order — cheap, and matches this widget's pedagogical
+  goal that code runs top to bottom. `renderProgress()`/`drawFinal()` draw every *other* known
+  turtle's last-settled marker each frame (`drawIdleTurtles()`) so an idle turtle doesn't
+  vanish while another one's move animates. Concurrent timelines would need a rewrite of
+  `step`/`durationOf` to track one clock per turtle — not planned.
 - `setActiveLine(ev.line)` drives the synced code highlight + autoscroll.
 - `build({model, el})` does the work above and returns a cleanup that clears the pending timer.
 - `render` (the anywidget entry point) is a thin wrapper: it `build`s once, then **re-mounts on
@@ -165,16 +221,21 @@ this to absolute from→to or the turtle will over-spin (e.g. `home()` would spi
 
 ### Obstacles & sensing
 
-Obstacles live in Python: registered shapes in `self._obstacles`, the drawn
-`self._trail_segments`, and the canvas border. `add_circle`/`add_segment`/`add_polygon`/
-`add_rectangle` store a shape (wrapped as an `Obstacle`, carrying an optional `label=` and its
-`index`) and emit an `obstacle` event. Sensing is **pure-Python geometry** (module-level
+Obstacles live in Python, at the **canvas** level (shared "world" state — every turtle
+drawing on a canvas senses/collides with every other turtle's obstacles and trail, the
+one genuinely new capability from supporting multiple turtles): registered shapes in
+`self._canvas._obstacles`, the drawn `self._canvas._trail_segments`, and the canvas
+border (`_wall_obstacle()`, sized from `self._canvas.width`/`height`, not `self.width`/
+`height` — those are dead on a joined turtle, see "Canvas vs Turtle"). `add_circle`/
+`add_segment`/`add_polygon`/`add_rectangle` store a shape (wrapped as an `Obstacle`,
+carrying an optional `label=` and its `index`) and emit an `obstacle` event. Sensing is
+**pure-Python geometry** (module-level
 `_ray_*` / `_*_closest_point` / `_rel_angle` / `_incidence_angle`; geometry helpers map
 `kind` `"trail"`→segment and `"wall"`→polygon). All three queries return `Detection`s —
 `(distance, angle, point, kind, index, obstacle)`, where `obstacle` is the shape hit as an
 `Obstacle` (a `dict` subclass that also exposes its keys as attributes: `.kind`, `.label`,
 `.color`, `.visible`, `.sense`, `.index`, geometry). For a registered shape it **is** the object in
-`self._obstacles`; walls/trails get a synthetic `Obstacle` (`_wall_obstacle`/`_trail_obstacle`,
+`self._canvas._obstacles`; walls/trails get a synthetic `Obstacle` (`_wall_obstacle`/`_trail_obstacle`,
 `index`/`label` `None`). The flat `kind`/`index` fields are kept as convenience mirrors of
 `obstacle.kind`/`obstacle.index`. `sense` returns a nearest-first list and `nearest` the single
 closest (or `None`), with `angle` the signed **bearing** (+ = left/CCW) to the closest point.
@@ -200,8 +261,19 @@ In the frontend, obstacles live on their **own offscreen layer** (`obs`/`octx`),
 under the art each frame: `blitBase` draws background → `obs` → `base` (art). `redrawObstacles`
 repaints the layer (only `visible` ones) on `obstacle`/`obstacles_visible`. So `clear` (art
 only) leaves obstacles intact, and `bgcolor` just sets the `bgColor` state repainted each
-frame. In Python, `clear()` keeps `_obstacles` but resets `_trail_segments`; `reset()` clears
-both.
+frame.
+
+In Python, `clear()` always resets `self._canvas._trail_segments` (keeping
+`_obstacles`) — deliberately whole-canvas, since once art is committed to the shared
+`base` bitmap there is no way to erase only one turtle's pixels from it (see the `clear`
+row in "Event protocol"). `reset()`, by contrast, wipes canvas-level state
+(`_events`/`_obstacles`/`_trail_segments`) only when `self._canvas is self` — i.e. only
+for a turtle that *is* its own canvas (the common, single-turtle case, unchanged from
+before this widget supported sharing one). A turtle joined to another's canvas resets
+only its own position/heading/pen/colours/fill/counters and re-spawns at home (emitting
+a `teleport` if that actually moves it — see `_spawn_at_home`), leaving the shared
+drawing, obstacles and trail alone: resetting your turtle shouldn't erase someone else's
+maze or trail.
 
 ### Collisions (`on_collision`)
 
@@ -233,7 +305,10 @@ the correct line. `code="..."` overrides the captured source.
 
 ### Display lifecycle
 
-Three paths, all idempotent via the `_rendered` flag and `_unhook()`:
+All of this lives on `Canvas` (see "Canvas vs Turtle"), not `Turtle` — a joined turtle
+(`new_turtle`/`other_turtle`) is unhooked and never goes through this itself; only the
+canvas-owning turtle displays. Three paths, all idempotent via the `_rendered` flag and
+`_unhook()`:
 
 - **Auto** (default): `_register_autoshow()` installs a one-shot `post_run_cell` IPython
   hook that flushes traitlets and `display()`s the widget at end of cell — so the bare
@@ -275,14 +350,19 @@ when it's unused was a source of re-render flakiness in VS Code.
 - `home()` returns to a **configurable** home (default origin, heading 0), stored in
   `self._home`/`self._home_heading`. Set it with `sethome(x, y, heading=0)` (also accepts an
   `(x,y[,heading])` tuple) or the `Turtle(home=(x, y[, heading]))` constructor arg.
-  `Turtle(home=...)` also **spawns** the turtle there: `_spawn_at_home()` sets the initial
-  position/heading and, when it isn't the origin, emits a leading `teleport` event so the
-  frontend marker starts there too (the marker `state` otherwise inits to `(0,0)` in `_ESM`,
-  which would strand the marker at the origin for e.g. a lone `dot()`). `reset()` re-spawns at
-  home the same way. `sethome()` by contrast only re-targets `home()` — it does **not** move
+  `Turtle(home=...)` also **spawns** the turtle there via `_spawn_at_home()`, and `reset()`
+  re-spawns at home the same way. `_spawn_at_home()` sets the position/heading and emits a
+  `teleport` event whenever that actually *changes* them (comparing against wherever the
+  turtle was a moment ago, captured before the overwrite) — at construction that means "home
+  isn't the origin" (a turtle's marker otherwise inits lazily to `(0,0,0)` the first time
+  `_ESM`'s `states` Map sees its id, which would strand it at the origin for e.g. a lone
+  `dot()`); at `reset()` it means "home differs from wherever this turtle just was", so the
+  marker visibly snaps back rather than silently updating Python-side state the frontend
+  never hears about. `sethome()` by contrast only re-targets `home()` — it does **not** move
   the turtle.
-- **Public counters** (plain instance attrs, not traits — not synced to the frontend; all start
-  at 0 and are zeroed by `reset()`): `nr_collisions` (see Collisions above) plus `nr_left`,
+- **Public counters** (plain instance attrs, not traits — not synced to the frontend; per
+  turtle, so a joined turtle's counters are independent of the canvas-owning turtle's; all
+  start at 0 and are zeroed by `reset()`): `nr_collisions` (see Collisions above) plus `nr_left`,
   `nr_right`, `nr_sense`, `nr_distance_ahead`, each bumped at the top of the matching method.
   These count *direct* calls only — there are no internal `self.left/right/sense/distance_ahead`
   calls (movement/heading helpers go through `_turn_to`/`_goto`, and `nearest` calls `_scan`
@@ -298,18 +378,27 @@ when it's unused was a source of re-render flakiness in VS Code.
 1. Add a method decorated with `@_records` and give it a numpy-style docstring; update
    internal turtle state.
 2. `self._emit(op="...", ...)` with **absolute** coordinates. Do not duplicate `line`/
-   `speed` — `_emit` adds them.
+   `speed`/`turtle` — `_emit` adds them.
 3. If the command should call another recorded method internally, factor the logic into a
    private helper (like `_turn_to` / `_goto`) and call that — calling the decorated method
    would overwrite `_cur_line` with the wrong frame and break highlighting.
-4. Handle the new `op` in `_ESM`: add to `durationOf`/`renderProgress` if animated, and to
-   `commit`/`endState`/`applyConfig` as needed.
-5. Update the event-protocol table above.
+4. If the command reads or mutates "world" state shared by every turtle on a canvas
+   (obstacles, the drawn trail) or canvas-level traits (`width`/`height`/`bg`/...), go
+   through `self._canvas` rather than `self` — see "Canvas vs Turtle". Bare `self.width`
+   etc. is silently wrong for a joined turtle (it reads that turtle's own dead trait, not
+   the canvas it draws on).
+5. Handle the new `op` in `_ESM`: add to `durationOf`/`renderProgress` if animated, and to
+   `commit`/`endState`/`applyConfig` as needed (use `stateFor(ev.turtle)` for any per-turtle
+   tracked state, not a bare local).
+6. Update the event-protocol table above.
 
 ## Testing approach
 
 - Geometry is deterministic and headless-testable: `Turtle(autoshow=False)`, run commands,
   assert `pos()/heading()`, and `json.dumps(t._events)` to confirm serializability. These
   assertions belong in `test/` (port the demo's final self-test cell there).
+- `test/test_multi_turtle.py` is the regression net for two-or-more turtles sharing a
+  canvas (`new_turtle()`/`other_turtle()`, cross-turtle sensing/collision, `reset()`/`clear()`
+  scoping) — same headless style as the other `test/test_*.py` files.
 - Validate the frontend parses with `node --check` on the extracted `_ESM`.
 - Visual smoke test: run `docs/pages/demo.ipynb`.
