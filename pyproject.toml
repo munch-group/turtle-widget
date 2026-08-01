@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "turtle-widget"
-version = "1.0.1"
+version = "1.0.2"
 description = "An animated, turtle-compatible drawing widget for Jupyter notebooks"
 authors = [
     {name = "Kasper Munch", email = "kaspermunch@birc.au.dk"}
