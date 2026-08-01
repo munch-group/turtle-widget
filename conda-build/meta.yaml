@@ -16,13 +16,14 @@ build:
 
 requirements:
   host:
-    - python
+    - python {{ pyproject.get("project").get("requires-python") }}
     - pip
-    - setuptools>=65.0    
+    - setuptools>=65.0
   run:  # your library dependencies
+    - python {{ pyproject.get("project").get("requires-python") }}
     {% for dep in pyproject.get("project").get("dependencies") %}
     - {{ dep.lower() }}
-    {% endfor %}  
+    {% endfor %}
 
 channels:  # channels for your library dependencies
   - conda-forge
