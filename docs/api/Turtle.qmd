@@ -95,6 +95,7 @@ canvas — see those methods' docstrings.
 | [heading](#turtle_widget.Turtle.heading) | Return the current heading in degrees. |
 | [hide_obstacles](#turtle_widget.Turtle.hide_obstacles) | Hide all registered obstacles from view. |
 | [hideturtle](#turtle_widget.Turtle.hideturtle) | Hide the turtle marker. |
+| [hitbox](#turtle_widget.Turtle.hitbox) | Get or set this turtle's hitbox radius. |
 | [home](#turtle_widget.Turtle.home) | Move the turtle to its home position and turn to the home heading. |
 | [isdown](#turtle_widget.Turtle.isdown) | Return whether the pen is down. |
 | [isvisible](#turtle_widget.Turtle.isvisible) | Return whether the turtle marker is visible. |
@@ -477,6 +478,7 @@ turtle_widget.Turtle.distance_ahead(
     trail=True,
     draw=False,
     color='red',
+    turtles=True,
 )
 ```
 
@@ -507,6 +509,10 @@ Increments ``nr_distance_ahead``.
 <code>[**color**]{.parameter-name} [:]{.parameter-annotation-sep} [[str](`str`) or [tuple](`tuple`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [\'red\']{.parameter-default}</code>
 
 :   Colour of the drawn ray, used only when ``draw=True``. Default ``"red"``; accepts a CSS colour string or an ``(r, g, b)`` tuple.
+
+<code>[**turtles**]{.parameter-name} [:]{.parameter-annotation-sep} [[bool](`bool`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [True]{.parameter-default}</code>
+
+:   Include other turtles on this canvas that have a :func:`hitbox` set. Default True (harmless if no other turtle has one).
 
 #### Returns {.doc-section .doc-section-returns}
 
@@ -703,6 +709,37 @@ Hide the turtle marker.
 
 :   This turtle, to allow method chaining.
 
+### hitbox { #turtle_widget.Turtle.hitbox }
+
+```python
+turtle_widget.Turtle.hitbox(*args)
+```
+
+Get or set this turtle's hitbox radius.
+
+A turtle with a hitbox behaves as an invisible circular obstacle *to other
+turtles* sharing its canvas: ``sense``/``distance_ahead``/``nearest``/
+``on_collision``'s ``turtles=`` option detects/collides with it there. It has
+no effect on how *this* turtle senses or collides with ordinary obstacles,
+walls, or trails -- those are unaffected by a turtle's own hitbox.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+<code>[***args**]{.parameter-name} [:]{.parameter-annotation-sep} []{.parameter-annotation} [ = ]{.parameter-default-sep} [()]{.parameter-default}</code>
+
+:   A single radius (float or ``None``), centred on the turtle's current position (it moves with the turtle). ``None`` (the default, and the initial state) disables it -- this turtle is invisible to every other turtle's ``turtles=True`` queries. If omitted entirely, returns the current radius instead of setting it.
+
+#### Notes {.doc-section .doc-section-notes}
+
+Like the collision configuration set by :func:`on_collision`, the hitbox is a
+standing policy rather than drawing state: :func:`reset` does not clear it.
+
+#### Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`) or [float](`float`) or None]{.parameter-annotation}</code>
+
+:   This turtle when setting (to allow chaining), or the current hitbox radius when called with no arguments.
+
 ### home { #turtle_widget.Turtle.home }
 
 ```python
@@ -790,6 +827,7 @@ turtle_widget.Turtle.nearest(
     trail=True,
     draw=False,
     color='red',
+    turtles=True,
 )
 ```
 
@@ -819,6 +857,10 @@ detection.
 <code>[**color**]{.parameter-name} [:]{.parameter-annotation-sep} [[str](`str`) or [tuple](`tuple`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [\'red\']{.parameter-default}</code>
 
 :   Colour of the drawn ray, used only when ``draw=True``. Default ``"red"``; accepts a CSS colour string or an ``(r, g, b)`` tuple.
+
+<code>[**turtles**]{.parameter-name} [:]{.parameter-annotation-sep} [[bool](`bool`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [True]{.parameter-default}</code>
+
+:   Include other turtles on this canvas that have a :func:`hitbox` set. Default True (harmless if no other turtle has one).
 
 #### Returns {.doc-section .doc-section-returns}
 
@@ -864,7 +906,13 @@ other_turtle : join an *already-constructed* Turtle to this canvas instead.
 ### on_collision { #turtle_widget.Turtle.on_collision }
 
 ```python
-turtle_widget.Turtle.on_collision(handler, stop=True, walls=True, trail=False)
+turtle_widget.Turtle.on_collision(
+    handler,
+    stop=True,
+    walls=True,
+    trail=False,
+    turtles=False,
+)
 ```
 
 Register a hook fired when a move runs into an obstacle.
@@ -894,6 +942,10 @@ Each reported collision also increments the turtle's ``nr_collisions`` counter.
 
 :   Also collide with the turtle's own drawn path (self-collision). Default False.
 
+<code>[**turtles**]{.parameter-name} [:]{.parameter-annotation-sep} [[bool](`bool`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [False]{.parameter-default}</code>
+
+:   Also collide with other turtles on this canvas that have a :func:`hitbox` set (a turtle with no hitbox is never collided with). Default False — like ``trail``, this is a separate opt-in from ``walls``/regular obstacles, since reacting to another turtle is a different kind of behaviour than reacting to the scenery.
+
 #### Returns {.doc-section .doc-section-returns}
 
 <code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[Turtle](`turtle_widget.widget.Turtle`)]{.parameter-annotation}</code>
@@ -904,9 +956,10 @@ Each reported collision also increments the turtle's ``nr_collisions`` counter.
 
 Each ``Collision`` carries the contact ``point`` (x, y); the ``obstacle`` that was hit
 (an ``Obstacle`` exposing ``.kind`` —
-``"circle"``/``"segment"``/``"polygon"``/``"wall"``/``"trail"`` — plus ``.label`` and its
-geometry); its ``index`` among registered obstacles (else ``None``); the unit surface
-``normal`` at the contact,
+``"circle"``/``"segment"``/``"polygon"``/``"wall"``/``"trail"``/``"turtle"`` — plus
+``.label`` and its geometry; for ``"turtle"``, ``.turtle`` is the actual other
+``Turtle`` instance that was hit); its ``index`` among registered obstacles (else
+``None``); the unit surface ``normal`` at the contact,
 facing back toward the turtle (reflect a direction ``d`` with ``d - 2*(d·n)*n`` to
 bounce); the ``distance`` travelled into the move; ``angle``, the signed angle of
 incidence in degrees (0 = a head-on, perpendicular hit; ±90 = a grazing hit parallel to
@@ -1096,6 +1149,7 @@ turtle_widget.Turtle.sense(
     trail=True,
     draw=False,
     color='red',
+    turtles=True,
 )
 ```
 
@@ -1130,11 +1184,15 @@ call this method).
 
 :   Colour of the drawn rays, used only when ``draw=True``. Default ``"red"``; accepts a CSS colour string or an ``(r, g, b)`` tuple.
 
+<code>[**turtles**]{.parameter-name} [:]{.parameter-annotation-sep} [[bool](`bool`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [True]{.parameter-default}</code>
+
+:   Include other turtles on this canvas that have a :func:`hitbox` set. Default True (harmless if no other turtle has one).
+
 #### Returns {.doc-section .doc-section-returns}
 
 <code>[]{.parameter-name} [:]{.parameter-annotation-sep} [list of Detection]{.parameter-annotation}</code>
 
-:   Detections sorted nearest-first. Each ``Detection`` has fields ``distance``, ``angle`` (degrees), ``point`` (x, y), ``obstacle`` (the shape hit — an ``Obstacle`` exposing ``.kind``/``.label``/geometry), ``kind`` (one of ``"circle"``, ``"segment"``, ``"polygon"``, ``"wall"``, ``"trail"``) and ``index`` (position among registered obstacles, else ``None``).
+:   Detections sorted nearest-first. Each ``Detection`` has fields ``distance``, ``angle`` (degrees), ``point`` (x, y), ``obstacle`` (the shape hit — an ``Obstacle`` exposing ``.kind``/``.label``/geometry), ``kind`` (one of ``"circle"``, ``"segment"``, ``"polygon"``, ``"wall"``, ``"trail"``, ``"turtle"``) and ``index`` (position among registered obstacles, else ``None``).
 
 ### setheading { #turtle_widget.Turtle.setheading }
 

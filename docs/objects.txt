@@ -42,6 +42,8 @@ turtle_widget.Turtle.hide_obstacles py:function 1 api/Turtle.html#turtle_widget.
 turtle_widget.widget.Turtle.hide_obstacles py:function 1 api/Turtle.html#turtle_widget.Turtle.hide_obstacles turtle_widget.Turtle.hide_obstacles
 turtle_widget.Turtle.hideturtle py:function 1 api/Turtle.html#turtle_widget.Turtle.hideturtle -
 turtle_widget.widget.Turtle.hideturtle py:function 1 api/Turtle.html#turtle_widget.Turtle.hideturtle turtle_widget.Turtle.hideturtle
+turtle_widget.Turtle.hitbox py:function 1 api/Turtle.html#turtle_widget.Turtle.hitbox -
+turtle_widget.widget.Turtle.hitbox py:function 1 api/Turtle.html#turtle_widget.Turtle.hitbox turtle_widget.Turtle.hitbox
 turtle_widget.Turtle.home py:function 1 api/Turtle.html#turtle_widget.Turtle.home -
 turtle_widget.widget.Turtle.home py:function 1 api/Turtle.html#turtle_widget.Turtle.home turtle_widget.Turtle.home
 turtle_widget.Turtle.isdown py:function 1 api/Turtle.html#turtle_widget.Turtle.isdown -

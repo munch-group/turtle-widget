@@ -803,18 +803,19 @@ Collision = collections.namedtuple(
 
 
 class Obstacle(dict):
-    """A registered obstacle (or a synthetic ``wall``/``trail`` surface) as carried by
-    ``Detection.obstacle`` / ``Collision.obstacle``. Behaves as a dict of its fields and also
+    """A registered obstacle (or a synthetic ``wall``/``trail``/``turtle`` surface) as carried
+    by ``Detection.obstacle`` / ``Collision.obstacle``. Behaves as a dict of its fields and also
     exposes them as attributes: ``kind`` (``"circle"``/``"segment"``/``"polygon"``/``"wall"``/
-    ``"trail"``), ``label`` (or ``None``), ``color``, ``visible`` (drawn?), ``sense``
+    ``"trail"``/``"turtle"``), ``label`` (or ``None``), ``color``, ``visible`` (drawn?), ``sense``
     (detectable by ``distance_ahead``/``sense``/``nearest``?), ``index`` (position among
-    registered obstacles, else ``None``), and geometry (``x``/``y``/``r``,
+    registered obstacles, else ``None``), ``turtle`` (the other ``Turtle`` this obstacle
+    represents, for ``kind == "turtle"``; ``None`` otherwise), and geometry (``x``/``y``/``r``,
     ``x1``/``y1``/``x2``/``y2``, or ``points``)."""
     def __getattr__(self, name):
         try:
             return self[name]
         except KeyError:
-            if name in ("label", "index", "color", "visible"):
+            if name in ("label", "index", "color", "visible", "turtle"):
                 return None
             raise AttributeError(name)
 
@@ -882,7 +883,7 @@ def _polygon_edges(points):
 def _obstacle_closest_point(ob, px, py):
     """Closest point on an obstacle dict to ``(px,py)``."""
     kind = ob["kind"]
-    if kind == "circle":
+    if kind in ("circle", "turtle"):
         return _circle_closest_point(px, py, ob["x"], ob["y"], ob["r"])
     if kind in ("segment", "trail"):
         return _seg_closest_point(px, py, ob["x1"], ob["y1"], ob["x2"], ob["y2"])
@@ -898,7 +899,7 @@ def _obstacle_closest_point(ob, px, py):
 def _obstacle_ray_t(ob, ox, oy, dx, dy, eps):
     """Nearest forward intersection distance of a unit ray with an obstacle, or None."""
     kind = ob["kind"]
-    if kind == "circle":
+    if kind in ("circle", "turtle"):
         return _ray_circle_t(ox, oy, dx, dy, ob["x"], ob["y"], ob["r"], eps)
     if kind in ("segment", "trail"):
         t = _ray_segment_t(ox, oy, dx, dy, ob["x1"], ob["y1"], ob["x2"], ob["y2"])
@@ -955,7 +956,7 @@ def _circle_hit(ax, ay, ux, uy, cx, cy, r, max_t):
 def _obstacle_hit(ob, ax, ay, ux, uy, max_t):
     """``(t, normal)`` for the nearest contact of the ray with an obstacle dict, else ``None``."""
     kind = ob["kind"]
-    if kind == "circle":
+    if kind in ("circle", "turtle"):
         return _circle_hit(ax, ay, ux, uy, ob["x"], ob["y"], ob["r"], max_t)
     if kind in ("segment", "trail"):
         return _seg_hit(ax, ay, ux, uy, ob["x1"], ob["y1"], ob["x2"], ob["y2"], max_t)
@@ -1017,6 +1018,7 @@ class Canvas(anywidget.AnyWidget):
         self._events = []
         self._obstacles = []       # shared "world" state: every turtle on this
         self._trail_segments = []  # canvas registers/draws into the same lists
+        self._turtles = []         # every turtle sharing this canvas (see _join_turtle)
         self._cur_file = None
         self._explicit_code = code
         self._next_turtle_id = 0
@@ -1035,6 +1037,15 @@ class Canvas(anywidget.AnyWidget):
         tid = self._next_turtle_id
         self._next_turtle_id += 1
         return tid
+
+    def _join_turtle(self, turtle):
+        """Assign ``turtle`` a fresh id and register it on this canvas.
+
+        The registry (``self._turtles``) is what lets a turtle find every *other*
+        turtle sharing its canvas -- see ``Turtle._other_turtle_obstacles``.
+        """
+        turtle._turtle_id = self._new_turtle_id()
+        self._turtles.append(turtle)
 
     # -- display / source --------------------------------------------------- #
     def _get_source(self):
@@ -1168,7 +1179,7 @@ class Turtle(Canvas):
         super().__init__(width=width, height=height, show_code=show_code,
                           code=code, autoshow=autoshow, bg=bg)
         self._canvas = self
-        self._turtle_id = self._canvas._new_turtle_id()
+        self._canvas._join_turtle(self)
         self._init_turtle_state(home=home)
 
     def _init_turtle_state(self, home=None):
@@ -1196,7 +1207,9 @@ class Turtle(Canvas):
         self._collision_stop = True
         self._collision_walls = True
         self._collision_trail = False
+        self._collision_turtles = False
         self._colliding = False
+        self._hitbox = None       # circle radius other turtles can sense/collide with; None = off
         # public counters, all zeroed by reset()
         self.nr_collisions = 0       # collisions reported while on_collision is active
         self.nr_left = 0             # calls to left()
@@ -1248,7 +1261,7 @@ class Turtle(Canvas):
         cls = type(self)
         t = cls.__new__(cls)
         t._canvas = self._canvas
-        t._turtle_id = t._canvas._new_turtle_id()
+        t._canvas._join_turtle(t)
         t._init_turtle_state(home=home)
         if color is not None:
             t.pencolor(color)
@@ -1285,7 +1298,7 @@ class Turtle(Canvas):
         building a canvas in the first place.
         """
         turtle._canvas = self._canvas
-        turtle._turtle_id = turtle._canvas._new_turtle_id()
+        turtle._canvas._join_turtle(turtle)
         turtle._unhook()
         return turtle
 
@@ -2132,6 +2145,20 @@ class Turtle(Canvas):
         return Obstacle(kind="trail", x1=x1, y1=y1, x2=x2, y2=y2,
                         color=None, visible=True, sense=True, label=None, index=None)
 
+    @staticmethod
+    def _turtle_obstacle(turtle):
+        return Obstacle(kind="turtle", x=turtle._x, y=turtle._y, r=turtle._hitbox,
+                        color=None, visible=False, sense=True, label=None, index=None,
+                        turtle=turtle)
+
+    def _other_turtle_obstacles(self):
+        """Synthetic circle obstacles for every other turtle sharing this canvas that
+        has a hitbox set (see :func:`hitbox`) -- computed fresh from each turtle's
+        *current* position, unlike registered obstacles. Used by the ``turtles=``
+        option of ``sense``/``distance_ahead``/``nearest``/``on_collision``."""
+        return [self._turtle_obstacle(t) for t in self._canvas._turtles
+                if t is not self and t._hitbox is not None]
+
     @_records
     def add_circle(self, x, y, radius, color=None, visible=True, label=None, sense=True):
         """Register a circular obstacle and draw it.
@@ -2297,7 +2324,42 @@ class Turtle(Canvas):
         self._emit(op="obstacles_visible", visible=False)
         return self
 
-    def _scan(self, max_distance, walls, trail):
+    def hitbox(self, *args):
+        """Get or set this turtle's hitbox radius.
+
+        A turtle with a hitbox behaves as an invisible circular obstacle *to other
+        turtles* sharing its canvas: ``sense``/``distance_ahead``/``nearest``/
+        ``on_collision``'s ``turtles=`` option detects/collides with it there. It has
+        no effect on how *this* turtle senses or collides with ordinary obstacles,
+        walls, or trails -- those are unaffected by a turtle's own hitbox.
+
+        Parameters
+        ----------
+        *args
+            A single radius (float or ``None``), centred on the turtle's current position
+            (it moves with the turtle). ``None`` (the default, and the initial state)
+            disables it -- this turtle is invisible to every other turtle's
+            ``turtles=True`` queries. If omitted entirely, returns the current radius
+            instead of setting it.
+
+        Notes
+        -----
+        Like the collision configuration set by :func:`on_collision`, the hitbox is a
+        standing policy rather than drawing state: :func:`reset` does not clear it.
+
+        Returns
+        -------
+        Turtle or float or None
+            This turtle when setting (to allow chaining), or the current hitbox radius
+            when called with no arguments.
+        """
+        if not args:
+            return self._hitbox
+        radius = args[0]
+        self._hitbox = None if radius is None else float(radius)
+        return self
+
+    def _scan(self, max_distance, walls, trail, turtles):
         px, py, hd = self._x, self._y, self._heading
         dets = []
 
@@ -2328,10 +2390,15 @@ class Turtle(Canvas):
             if best is not None:
                 consider(best[1], best[2], self._trail_obstacle(*best[3]))
 
+        if turtles:
+            for tob in self._other_turtle_obstacles():
+                qx, qy = _obstacle_closest_point(tob, px, py)
+                consider(qx, qy, tob)
+
         dets.sort(key=lambda D: D.distance)
         return dets
 
-    def _ray_ahead(self, max_distance, walls, trail):
+    def _ray_ahead(self, max_distance, walls, trail, turtles):
         px, py = self._x, self._y
         rad = math.radians(self._heading)
         dx, dy = math.cos(rad), math.sin(rad)
@@ -2352,6 +2419,11 @@ class Turtle(Canvas):
             h = _obstacle_hit(wall, px, py, dx, dy, math.inf)
             if h is not None and (best is None or h[0] < best[0]):
                 best = (h[0], h[1], wall)
+        if turtles:
+            for tob in self._other_turtle_obstacles():
+                h = _obstacle_hit(tob, px, py, dx, dy, math.inf)
+                if h is not None and (best is None or h[0] < best[0]):
+                    best = (h[0], h[1], tob)
         if best is None or (max_distance is not None and best[0] > max_distance):
             return None
         t, normal, obstacle = best
@@ -2360,7 +2432,8 @@ class Turtle(Canvas):
                          angle=_incidence_angle(dx, dy, normal[0], normal[1]))
 
     @_records
-    def distance_ahead(self, max_distance=None, walls=True, trail=True, draw=False, color="red"):
+    def distance_ahead(self, max_distance=None, walls=True, trail=True, draw=False, color="red",
+                       turtles=True):
         """Sense the nearest obstacle straight ahead.
 
         Casts a ray from the turtle along its current heading and returns the first
@@ -2380,6 +2453,9 @@ class Turtle(Canvas):
         color : str or tuple, optional
             Colour of the drawn ray, used only when ``draw=True``. Default ``"red"``;
             accepts a CSS colour string or an ``(r, g, b)`` tuple.
+        turtles : bool, optional
+            Include other turtles on this canvas that have a :func:`hitbox` set.
+            Default True (harmless if no other turtle has one).
 
         Returns
         -------
@@ -2390,7 +2466,7 @@ class Turtle(Canvas):
             or ``None`` if nothing is within range.
         """
         self.nr_distance_ahead += 1
-        det = self._ray_ahead(max_distance, walls, trail)
+        det = self._ray_ahead(max_distance, walls, trail, turtles)
         if draw:
             length = det.distance if det is not None else (
                 max_distance if max_distance is not None else max(self._canvas.width, self._canvas.height))
@@ -2399,7 +2475,8 @@ class Turtle(Canvas):
         return det
 
     @_records
-    def sense(self, max_distance=None, walls=True, trail=True, draw=False, color="red"):
+    def sense(self, max_distance=None, walls=True, trail=True, draw=False, color="red",
+             turtles=True):
         """Detect all obstacles within range, with the bearing to each.
 
         For every obstacle whose closest point lies within ``max_distance`` of
@@ -2423,6 +2500,9 @@ class Turtle(Canvas):
         color : str or tuple, optional
             Colour of the drawn rays, used only when ``draw=True``. Default ``"red"``;
             accepts a CSS colour string or an ``(r, g, b)`` tuple.
+        turtles : bool, optional
+            Include other turtles on this canvas that have a :func:`hitbox` set.
+            Default True (harmless if no other turtle has one).
 
         Returns
         -------
@@ -2430,11 +2510,11 @@ class Turtle(Canvas):
             Detections sorted nearest-first. Each ``Detection`` has fields
             ``distance``, ``angle`` (degrees), ``point`` (x, y), ``obstacle`` (the shape hit —
             an ``Obstacle`` exposing ``.kind``/``.label``/geometry), ``kind`` (one of
-            ``"circle"``, ``"segment"``, ``"polygon"``, ``"wall"``, ``"trail"``)
+            ``"circle"``, ``"segment"``, ``"polygon"``, ``"wall"``, ``"trail"``, ``"turtle"``)
             and ``index`` (position among registered obstacles, else ``None``).
         """
         self.nr_sense += 1
-        dets = self._scan(max_distance, walls, trail)
+        dets = self._scan(max_distance, walls, trail, turtles)
         if draw:
             self._emit(op="sense", x=self._x, y=self._y, color=_as_color(color),
                        rays=[{"a": self._heading + D.angle, "d": D.distance, "hit": True}
@@ -2442,7 +2522,8 @@ class Turtle(Canvas):
         return dets
 
     @_records
-    def nearest(self, max_distance=None, walls=True, trail=True, draw=False, color="red"):
+    def nearest(self, max_distance=None, walls=True, trail=True, draw=False, color="red",
+               turtles=True):
         """The single nearest obstacle within range, or ``None``.
 
         A convenience wrapper around :func:`sense` returning only the closest
@@ -2462,6 +2543,9 @@ class Turtle(Canvas):
         color : str or tuple, optional
             Colour of the drawn ray, used only when ``draw=True``. Default ``"red"``;
             accepts a CSS colour string or an ``(r, g, b)`` tuple.
+        turtles : bool, optional
+            Include other turtles on this canvas that have a :func:`hitbox` set.
+            Default True (harmless if no other turtle has one).
 
         Returns
         -------
@@ -2469,7 +2553,7 @@ class Turtle(Canvas):
             The nearest detection (see ``sense``), or ``None`` if nothing is
             within range.
         """
-        dets = self._scan(max_distance, walls, trail)
+        dets = self._scan(max_distance, walls, trail, turtles)
         result = dets[0] if dets else None
         if draw and result is not None:
             self._emit(op="sense", x=self._x, y=self._y, color=_as_color(color),
@@ -2477,7 +2561,7 @@ class Turtle(Canvas):
                               "d": result.distance, "hit": True}])
         return result
 
-    def on_collision(self, handler, stop=True, walls=True, trail=False):
+    def on_collision(self, handler, stop=True, walls=True, trail=False, turtles=False):
         """Register a hook fired when a move runs into an obstacle.
 
         Collision detection is **opt-in** — calling this enables it; until then moves are
@@ -2500,6 +2584,11 @@ class Turtle(Canvas):
             Treat the canvas border as an obstacle. Default True.
         trail : bool, optional
             Also collide with the turtle's own drawn path (self-collision). Default False.
+        turtles : bool, optional
+            Also collide with other turtles on this canvas that have a :func:`hitbox` set
+            (a turtle with no hitbox is never collided with). Default False — like ``trail``,
+            this is a separate opt-in from ``walls``/regular obstacles, since reacting to
+            another turtle is a different kind of behaviour than reacting to the scenery.
 
         Returns
         -------
@@ -2510,9 +2599,10 @@ class Turtle(Canvas):
         -----
         Each ``Collision`` carries the contact ``point`` (x, y); the ``obstacle`` that was hit
         (an ``Obstacle`` exposing ``.kind`` —
-        ``"circle"``/``"segment"``/``"polygon"``/``"wall"``/``"trail"`` — plus ``.label`` and its
-        geometry); its ``index`` among registered obstacles (else ``None``); the unit surface
-        ``normal`` at the contact,
+        ``"circle"``/``"segment"``/``"polygon"``/``"wall"``/``"trail"``/``"turtle"`` — plus
+        ``.label`` and its geometry; for ``"turtle"``, ``.turtle`` is the actual other
+        ``Turtle`` instance that was hit); its ``index`` among registered obstacles (else
+        ``None``); the unit surface ``normal`` at the contact,
         facing back toward the turtle (reflect a direction ``d`` with ``d - 2*(d·n)*n`` to
         bounce); the ``distance`` travelled into the move; ``angle``, the signed angle of
         incidence in degrees (0 = a head-on, perpendicular hit; ±90 = a grazing hit parallel to
@@ -2526,6 +2616,7 @@ class Turtle(Canvas):
         self._collision_stop = bool(stop)
         self._collision_walls = bool(walls)
         self._collision_trail = bool(trail)
+        self._collision_turtles = bool(turtles)
         return self
 
     def _collisions_along(self, ax, ay, bx, by):
@@ -2552,6 +2643,11 @@ class Turtle(Canvas):
                 if h is not None:
                     hits.append((h[0], (ax + h[0] * ux, ay + h[0] * uy), h[1],
                                  self._trail_obstacle(x1, y1, x2, y2)))
+        if self._collision_turtles:
+            for tob in self._other_turtle_obstacles():
+                h = _obstacle_hit(tob, ax, ay, ux, uy, length)
+                if h is not None:
+                    hits.append((h[0], (ax + h[0] * ux, ay + h[0] * uy), h[1], tob))
         hits.sort(key=lambda r: r[0])
         return hits
 

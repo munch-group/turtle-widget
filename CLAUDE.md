@@ -101,11 +101,12 @@ per-command.
 ### Canvas vs Turtle
 
 `Canvas(anywidget.AnyWidget)` owns the widget half: `_esm`/`_css`, the six synced traits
-above, the `_events` list (plus `_obstacles`/`_trail_segments` — shared "world" state,
-see "Obstacles & sensing"), and the display lifecycle (`_flush`, `_get_source`, `show`,
-`_repr_mimebundle_`, autoshow). `Turtle(Canvas)` owns the turtle half: position, heading,
-home, pen, colour, speed, visibility, fill state, the collision *configuration* flags
-(`_collision_stop`/`_walls`/`_trail`/`_cb`), and the public counters. A bare `t =
+above, the `_events` list (plus `_obstacles`/`_trail_segments`/`_turtles` — shared "world"
+state, see "Obstacles & sensing" / "Turtles as obstacles"), and the display lifecycle
+(`_flush`, `_get_source`, `show`, `_repr_mimebundle_`, autoshow). `Turtle(Canvas)` owns
+the turtle half: position, heading, home, pen, colour, speed, visibility, fill state, the
+collision *configuration* flags (`_collision_stop`/`_walls`/`_trail`/`_turtles`/`_cb`),
+`_hitbox`, and the public counters. A bare `t =
 Turtle()` sets `self._canvas = self` in `__init__`, so it is simultaneously a turtle and
 the canvas it draws on — the zero-ceremony single-turtle path (`t = Turtle()`) is
 unchanged; there is no separate "make a screen, then populate it" step.
@@ -133,9 +134,11 @@ Prefer `new_turtle()` in docs/examples; `other_turtle()` exists for joining a tu
 someone else's code already constructed.
 
 Each turtle gets a small per-canvas sequential id (`self._turtle_id`, assigned by
-`Canvas._new_turtle_id()` when it is constructed *or joined* — joining always assigns a
-fresh id, since a turtle keeps whatever id it had on its previous canvas otherwise,
-which could collide with another turtle already on the new one). `_emit()` stamps this
+`Canvas._join_turtle()`, called from all three construction/joining paths above — joining
+always assigns a fresh id, since a turtle keeps whatever id it had on its previous canvas
+otherwise, which could collide with another turtle already on the new one).
+`_join_turtle()` also appends the turtle to `Canvas._turtles`, the registry a turtle
+consults to find its canvas-mates (see "Turtles as obstacles"). `_emit()` stamps the id
 onto every event (see "Event protocol").
 
 Only one turtle's event animates at a time, by design — see "No simultaneous animation"
@@ -275,10 +278,43 @@ a `teleport` if that actually moves it — see `_spawn_at_home`), leaving the sh
 drawing, obstacles and trail alone: resetting your turtle shouldn't erase someone else's
 maze or trail.
 
+### Turtles as obstacles (`hitbox`)
+
+A turtle can opt in to being sensed/collided with by *other* turtles: `hitbox(radius)`
+sets `self._hitbox` (`None` by default — invisible to this mechanism entirely). It is
+purely a Python-side concept — no rendering, no event, hence "invisible" — and it is
+**one-directional by construction**: it only governs how *other* turtles perceive *this*
+turtle; it has no effect on how this turtle senses/collides with ordinary obstacles,
+walls, or trail (those remain point-based, exactly as before `hitbox` existed).
+
+`Canvas._turtles` (populated by `Canvas._join_turtle`, called from `Turtle.__init__`,
+`new_turtle`, and `other_turtle` — the same three places that assign a `_turtle_id`) is
+the registry that lets a turtle enumerate its canvas-mates.
+`Turtle._other_turtle_obstacles()` maps every *other* turtle on the canvas with a
+non-`None` hitbox to a synthetic `Obstacle(kind="turtle", x=t._x, y=t._y, r=t._hitbox,
+turtle=t)`, computed **fresh at query time** (never stored in `_canvas._obstacles`) since
+a turtle's position changes every move, unlike a registered obstacle. `kind="turtle"` is
+handled by reusing the circle geometry: `_obstacle_closest_point`/`_obstacle_ray_t`/
+`_obstacle_hit` all treat `("circle", "turtle")` identically (same precedent as `"wall"`
+reusing polygon geometry and `"trail"` reusing segment geometry). `Obstacle.turtle`
+(defaulted to `None` like `.label`/`.index`) is the actual other `Turtle` instance for a
+`"turtle"`-kind hit, so a handler can tell *which* turtle it sensed/hit.
+
+`sense`/`distance_ahead`/`nearest` take a `turtles=True` parameter (default on — harmless
+if no other turtle has set a hitbox) that folds `_other_turtle_obstacles()` into `_scan`/
+`_ray_ahead` alongside the existing obstacle/wall/trail sources. `on_collision` takes
+`turtles=False` (default off, like `trail`) setting `self._collision_turtles`, checked by
+`_collisions_along` as a wholly separate pass — never merged into the same per-obstacle
+loop as walls/registered obstacles, so a hitbox can never be confused for inflating a
+turtle's boundary against ordinary scenery. Like the other `on_collision` config flags,
+`_hitbox` and `_collision_turtles` are **not** reset by `reset()` — they are standing
+policy, not drawing state.
+
 ### Collisions (`on_collision`)
 
-`on_collision(handler, stop=True, walls=True, trail=False)` opts into collision detection
-(off until called). By default the turtle **stops at the first obstacle/edge it hits**:
+`on_collision(handler, stop=True, walls=True, trail=False, turtles=False)` opts into
+collision detection (off until called). By default the turtle **stops at the first
+obstacle/edge it hits**:
 `_goto` calls `_collisions_along(start, requested)` to find the crossings (module-level
 `_obstacle_hit`/`_seg_hit`/`_circle_hit`, each returning a contact distance `t` + the surface
 `normal` facing the mover), and if any, shortens the move to the nearest contact point before
@@ -288,11 +324,13 @@ is notified for *every* crossing, nearest first. `_dispatch_collisions` builds a
 (contact `point`/`normal`/`distance`; `angle` = signed angle of incidence (0°=head-on,
 ±90°=grazing, via `_incidence_angle` from the travel direction and the contact `normal`); `speed` =
 effective move speed (global × the per-move `speed=` multiplier); the `obstacle` hit (the
-`Obstacle` shape object — `.kind`/`.label`/geometry) and its `index`;
+`Obstacle` shape object — `.kind`/`.label`/geometry, plus `.turtle` for a `"turtle"` hit) and
+its `index`;
 and the turtle's state — `pos`, `heading`, `isdown`, …) and calls the handler; a `_colliding`
 re-entrancy
 guard lets the handler move the turtle (e.g. to bounce) without re-triggering. **Pure Python,
-no new frontend op.** `_dispatch_collisions` also bumps the public `nr_collisions` counter once
+no new frontend op** (this holds for turtle-hitbox collisions too — see "Turtles as obstacles"
+above). `_dispatch_collisions` also bumps the public `nr_collisions` counter once
 per dispatched `Collision` (so `stop=True` ⇒ one per colliding move, `stop=False` ⇒ one per
 crossing); `reset()` zeroes it.
 

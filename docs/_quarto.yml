@@ -122,6 +122,7 @@ quartodoc:
             - heading
             - hide_obstacles
             - hideturtle
+            - hitbox
             - home
             - isdown
             - isvisible

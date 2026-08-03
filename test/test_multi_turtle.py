@@ -195,3 +195,118 @@ def test_joined_turtle_canvas_traits_are_dead_use_canvas_instead():
     assert t1.width == 300 and t1.height == 200
     assert t2._canvas.width == 300 and t2._canvas.height == 200   # the real, shared canvas
     assert t2.width == 500 and t2.height == 500                    # t2's own dead defaults
+
+
+# -- turtles as obstacles (hitbox) -------------------------------------------- #
+
+def test_hitbox_defaults_to_none():
+    t = _t()
+    assert t.hitbox() is None
+
+
+def test_hitbox_get_and_set():
+    t = _t()
+    assert t.hitbox(20) is t                # chainable
+    assert t.hitbox() == 20
+    t.hitbox(None)                          # disables it again
+    assert t.hitbox() is None
+
+
+def test_turtle_with_no_hitbox_is_invisible_to_others():
+    t1 = _t()
+    t2 = t1.new_turtle()
+    t2.penup(); t2.goto(100, 0); t2.pendown()
+    assert t1.distance_ahead(walls=False, trail=False) is None
+    assert t1.sense(walls=False, trail=False) == []
+    assert t1.nearest(walls=False, trail=False) is None
+
+
+def test_turtle_hitbox_detected_by_distance_ahead():
+    t1 = _t()
+    t2 = t1.new_turtle()
+    t2.penup(); t2.goto(100, 0); t2.pendown()
+    t2.hitbox(20)
+    d = t1.distance_ahead(walls=False, trail=False)
+    assert d is not None
+    assert d.kind == "turtle"
+    assert d.obstacle.turtle is t2
+    assert d.distance == pytest.approx(80)          # 100 - hitbox radius
+
+
+def test_turtle_hitbox_detected_by_sense_and_nearest():
+    t1 = _t()
+    t2 = t1.new_turtle()
+    t2.penup(); t2.goto(0, 50); t2.pendown()
+    t2.hitbox(10)
+    dets = t1.sense(walls=False, trail=False)
+    assert len(dets) == 1 and dets[0].kind == "turtle" and dets[0].obstacle.turtle is t2
+    nearest = t1.nearest(walls=False, trail=False)
+    assert nearest.obstacle.turtle is t2
+
+
+def test_turtles_false_excludes_hitboxes_even_if_set():
+    t1 = _t()
+    t2 = t1.new_turtle()
+    t2.penup(); t2.goto(100, 0); t2.pendown()
+    t2.hitbox(20)
+    assert t1.distance_ahead(walls=False, trail=False, turtles=False) is None
+    assert t1.sense(walls=False, trail=False, turtles=False) == []
+
+
+def test_hitbox_does_not_make_a_turtle_sense_itself():
+    t1 = _t()
+    t1.hitbox(50)                                    # only turtle around; has its own hitbox
+    assert t1.distance_ahead(walls=False, trail=False) is None
+    assert t1.sense(walls=False, trail=False) == []
+
+
+def test_hitbox_does_not_affect_this_turtles_own_collisions_with_obstacles():
+    # A turtle's hitbox only governs how *other* turtles see it -- it must not change
+    # how this turtle collides with ordinary obstacles/walls/trail.
+    def stop_position(hitbox_radius):
+        t = _t()
+        t.add_circle(50, 0, 10)                      # surface at x=40
+        if hitbox_radius is not None:
+            t.hitbox(hitbox_radius)
+        t.on_collision(lambda c: None, walls=False)
+        t.forward(100)
+        return t.xcor()
+
+    assert stop_position(None) == pytest.approx(40)
+    assert stop_position(30) == pytest.approx(40)    # identical regardless of own hitbox
+
+
+def test_on_collision_turtles_defaults_to_off():
+    t1 = _t()
+    t2 = t1.new_turtle()
+    t2.penup(); t2.goto(100, 0); t2.pendown()
+    t2.hitbox(20)
+    hits = []
+    t1.on_collision(lambda c: hits.append(c), walls=False)   # turtles= omitted -> False
+    t1.forward(200)
+    assert hits == []
+    assert t1.xcor() == pytest.approx(200)           # passes straight through
+
+
+def test_on_collision_turtles_true_stops_at_the_other_turtles_hitbox():
+    t1 = _t()
+    t2 = t1.new_turtle()
+    t2.penup(); t2.goto(100, 0); t2.pendown()
+    t2.hitbox(20)
+    hits = []
+    t1.on_collision(lambda c: hits.append(c), walls=False, turtles=True)
+    t1.forward(200)
+    assert len(hits) == 1
+    assert hits[0].obstacle.kind == "turtle"
+    assert hits[0].obstacle.turtle is t2
+    assert t1.xcor() == pytest.approx(80)
+    assert t1.nr_collisions == 1                     # same counter as any other collision kind
+
+
+def test_hitbox_and_collision_turtles_flag_survive_reset():
+    t = _t()
+    t.hitbox(15)
+    t.on_collision(lambda c: None, turtles=True)
+    t.reset()
+    assert t.hitbox() == 15                          # standing policy, not drawing state
+    assert t._collision_turtles is True
