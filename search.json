@@ -44,7 +44,7 @@
     "href": "api/index.html",
     "title": "Function reference",
     "section": "",
-    "text": "The animated turtle-graphics drawing widget.\n\n\n\nTurtle\nAn animated, turtle-compatible drawing widget for Jupyter notebooks.",
+    "text": "The animated turtle-graphics drawing widget.\n\n\n\nTurtle\nAn animated, turtle-compatible drawing widget for Jupyter notebooks.\n\n\n\n\n\n\nReusable game harnesses students drive with their own strategy functions.\n\n\n\nrun_obstacle_course\nRun a maze-navigation game and return the outcome.\n\n\nrun_gladiator\nRun a step-based, alternating gladiator duel and return the outcome.",
     "crumbs": [
       "Function reference"
     ]
@@ -57,6 +57,104 @@
     "text": "The animated turtle-graphics drawing widget.\n\n\n\nTurtle\nAn animated, turtle-compatible drawing widget for Jupyter notebooks.",
     "crumbs": [
       "Function reference"
+    ]
+  },
+  {
+    "objectID": "api/index.html#games",
+    "href": "api/index.html#games",
+    "title": "Function reference",
+    "section": "",
+    "text": "Reusable game harnesses students drive with their own strategy functions.\n\n\n\nrun_obstacle_course\nRun a maze-navigation game and return the outcome.\n\n\nrun_gladiator\nRun a step-based, alternating gladiator duel and return the outcome.",
+    "crumbs": [
+      "Function reference"
+    ]
+  },
+  {
+    "objectID": "api/run_obstacle_course.html",
+    "href": "api/run_obstacle_course.html",
+    "title": "run_obstacle_course",
+    "section": "",
+    "text": "turtle_widget.run_obstacle_course(\n    strategy,\n    *,\n    move_budget=2000,\n    canvas_size=500,\n    obstacle_size=30,\n    obstacle_sep=30,\n    maze=True,\n    start=None,\n    end=None,\n    home=None,\n    speed=5,\n    show_scoreboard=True,\n    autoshow=True,\n)\nRun a maze-navigation game and return the outcome.\nBuilds a canvas with a red start marker, a green end marker, and (unless maze=False) a grid of small square obstacles between them, spawns a turtle at start facing end, and hands control to strategy. The game ends the instant the turtle reaches end (a win) or its total movement exceeds move_budget (a loss); either way run_obstacle_course returns a :class:ObstacleCourseResult.\n\n\n\nstrategy : callable\n\nCalled once as strategy(turtle, move_budget). Typically a loop that drives the turtle with ordinary commands (forward, left/right, distance_ahead, sense, …) until it reaches end or gives up.\n\nmove_budget : float = 2000\n\nMovement cap (turtle units), passed through to strategy as a hint and also enforced by the harness itself – so even a non-terminating strategy (e.g. while True: ...) is safely stopped once it crosses this cap. Default 2000.\n\ncanvas_size : int = 500\n\nSide length of the (square) canvas. Default 500.\n\nobstacle_size : float = 30\n\nSize of each maze cell and the gap between cells. Default 30, 30.\n\nobstacle_sep : float = 30\n\nSize of each maze cell and the gap between cells. Default 30, 30.\n\nmaze : bool = True\n\nIf True (default), fill the arena with a grid of square obstacles between start and end. If False, only the start/end markers and the canvas edges are present – a gentle first exercise, and a deterministic setup for tests.\n\nstart : tuple of float = None\n\nCentres of the start/end markers. Default to opposite corners of the canvas.\n\nend : tuple of float = None\n\nCentres of the start/end markers. Default to opposite corners of the canvas.\n\nhome : tuple of float = None\n\nWhere the turtle spawns, as (x, y, heading). Defaults to a point a short, fixed distance in from start, facing end – close enough that, with the default obstacle_size, it lands inside the start marker itself; the turtle’s first move harmlessly exits through it (see Notes).\n\nspeed : int = 5\n\nTurtle drawing speed. Default 5.\n\nshow_scoreboard : bool = True\n\nIf True (default), clear the drawn trail (the maze obstacles stay visible) and write a summary on the canvas when the game ends. Set False for silent/headless runs.\n\nautoshow : bool = True\n\nPassed straight through to the internal Turtle. Default True; pass False for headless use such as tests.\n\n\n\n\n\n\n : ObstacleCourseResult\n\nThe outcome – see its field descriptions for details.\n\n\n\n\n\nStart and end are registered with sense=False (invisible to distance_ahead/sense/nearest, so a strategy’s own sensing isn’t confused by the goal) but remain fully collidable – on_collision is never filtered by sense. The handler tells them apart from ordinary maze cells via Collision.obstacle.label (\"start\"/\"end\"/None); a \"start\" hit is ignored, so the turtle spawning inside it (the default home) is harmless. The score, set only on a win, is total_movement + nr_collisions + nr_right + nr_left + nr_distance_ahead + nr_sense – lower is better.",
+    "crumbs": [
+      "Games",
+      "run_obstacle_course"
+    ]
+  },
+  {
+    "objectID": "api/run_obstacle_course.html#parameters",
+    "href": "api/run_obstacle_course.html#parameters",
+    "title": "run_obstacle_course",
+    "section": "",
+    "text": "strategy : callable\n\nCalled once as strategy(turtle, move_budget). Typically a loop that drives the turtle with ordinary commands (forward, left/right, distance_ahead, sense, …) until it reaches end or gives up.\n\nmove_budget : float = 2000\n\nMovement cap (turtle units), passed through to strategy as a hint and also enforced by the harness itself – so even a non-terminating strategy (e.g. while True: ...) is safely stopped once it crosses this cap. Default 2000.\n\ncanvas_size : int = 500\n\nSide length of the (square) canvas. Default 500.\n\nobstacle_size : float = 30\n\nSize of each maze cell and the gap between cells. Default 30, 30.\n\nobstacle_sep : float = 30\n\nSize of each maze cell and the gap between cells. Default 30, 30.\n\nmaze : bool = True\n\nIf True (default), fill the arena with a grid of square obstacles between start and end. If False, only the start/end markers and the canvas edges are present – a gentle first exercise, and a deterministic setup for tests.\n\nstart : tuple of float = None\n\nCentres of the start/end markers. Default to opposite corners of the canvas.\n\nend : tuple of float = None\n\nCentres of the start/end markers. Default to opposite corners of the canvas.\n\nhome : tuple of float = None\n\nWhere the turtle spawns, as (x, y, heading). Defaults to a point a short, fixed distance in from start, facing end – close enough that, with the default obstacle_size, it lands inside the start marker itself; the turtle’s first move harmlessly exits through it (see Notes).\n\nspeed : int = 5\n\nTurtle drawing speed. Default 5.\n\nshow_scoreboard : bool = True\n\nIf True (default), clear the drawn trail (the maze obstacles stay visible) and write a summary on the canvas when the game ends. Set False for silent/headless runs.\n\nautoshow : bool = True\n\nPassed straight through to the internal Turtle. Default True; pass False for headless use such as tests.",
+    "crumbs": [
+      "Games",
+      "run_obstacle_course"
+    ]
+  },
+  {
+    "objectID": "api/run_obstacle_course.html#returns",
+    "href": "api/run_obstacle_course.html#returns",
+    "title": "run_obstacle_course",
+    "section": "",
+    "text": ": ObstacleCourseResult\n\nThe outcome – see its field descriptions for details.",
+    "crumbs": [
+      "Games",
+      "run_obstacle_course"
+    ]
+  },
+  {
+    "objectID": "api/run_obstacle_course.html#notes",
+    "href": "api/run_obstacle_course.html#notes",
+    "title": "run_obstacle_course",
+    "section": "",
+    "text": "Start and end are registered with sense=False (invisible to distance_ahead/sense/nearest, so a strategy’s own sensing isn’t confused by the goal) but remain fully collidable – on_collision is never filtered by sense. The handler tells them apart from ordinary maze cells via Collision.obstacle.label (\"start\"/\"end\"/None); a \"start\" hit is ignored, so the turtle spawning inside it (the default home) is harmless. The score, set only on a win, is total_movement + nr_collisions + nr_right + nr_left + nr_distance_ahead + nr_sense – lower is better.",
+    "crumbs": [
+      "Games",
+      "run_obstacle_course"
+    ]
+  },
+  {
+    "objectID": "api/run_gladiator.html",
+    "href": "api/run_gladiator.html",
+    "title": "run_gladiator",
+    "section": "",
+    "text": "turtle_widget.run_gladiator(\n    strategy_a,\n    strategy_b,\n    *,\n    max_rounds=500,\n    canvas_size=500,\n    hitbox_radius=15,\n    arena_margin=60,\n    homes=None,\n    colors=('blue', 'red'),\n    speed=6,\n    show_scoreboard=True,\n    autoshow=True,\n)\nRun a step-based, alternating gladiator duel and return the outcome.\nTwo turtles share one canvas, spawned on opposite walls facing each other. Each round, strategy_a(a, b) is called, then strategy_b(b, a) – each call should perform one bounded action (e.g. sense, maybe turn, move a short step), not loop to completion. After each call the harness checks whether that turtle’s move rammed the other’s hitbox; the first to do so wins. Running out of max_rounds without a ram is a draw.\n\n\n\nstrategy_a : callable\n\nEach called as strategy(me, opponent) once per round.\n\nstrategy_b : callable\n\nEach called as strategy(me, opponent) once per round.\n\nmax_rounds : int = 500\n\nRound cap before a draw is declared. 0 ends immediately in a draw without calling either strategy – useful for inspecting the initial arena. Default 500.\n\ncanvas_size : int = 500\n\nSide length of the (square) shared canvas. Default 500.\n\nhitbox_radius : float = 15\n\nCollision radius for both turtles – see :func:Turtle.hitbox. Default 15.\n\narena_margin : float = 60\n\nDistance from each side wall to that turtle’s default home, when homes is not given. Must satisfy 0 &lt; arena_margin &lt; canvas_size / 2. Default 60.\n\nhomes : tuple of two (x, y, heading) tuples = None\n\nExplicit spawn points, overriding the auto-computed opposite-walls, facing-each-other default.\n\ncolors : tuple of two (str or None) = ('blue', 'red')\n\nPen colours for A and B, for telling them apart. Default (\"blue\", \"red\").\n\nspeed : int = 6\n\nTurtle drawing speed. Default 6.\n\nshow_scoreboard : bool = True\n\nIf True (default), write the outcome on the canvas when the duel ends.\n\nautoshow : bool = True\n\nPassed straight through to the internal turtles. Default True; pass False for headless use such as tests.\n\n\n\n\n\n\n : GladiatorResult\n\nThe outcome – see its field descriptions for details.\n\n\n\n\n\nBoth turtles get on_collision(handler, walls=True, turtles=True). A wall hit (obstacle.kind == \"wall\") truncates that turtle’s move to the arena boundary – a wasted action – but does not end the duel; only obstacle.kind == \"turtle\" does. Neither turtle collides with drawn trail.",
+    "crumbs": [
+      "Games",
+      "run_gladiator"
+    ]
+  },
+  {
+    "objectID": "api/run_gladiator.html#parameters",
+    "href": "api/run_gladiator.html#parameters",
+    "title": "run_gladiator",
+    "section": "",
+    "text": "strategy_a : callable\n\nEach called as strategy(me, opponent) once per round.\n\nstrategy_b : callable\n\nEach called as strategy(me, opponent) once per round.\n\nmax_rounds : int = 500\n\nRound cap before a draw is declared. 0 ends immediately in a draw without calling either strategy – useful for inspecting the initial arena. Default 500.\n\ncanvas_size : int = 500\n\nSide length of the (square) shared canvas. Default 500.\n\nhitbox_radius : float = 15\n\nCollision radius for both turtles – see :func:Turtle.hitbox. Default 15.\n\narena_margin : float = 60\n\nDistance from each side wall to that turtle’s default home, when homes is not given. Must satisfy 0 &lt; arena_margin &lt; canvas_size / 2. Default 60.\n\nhomes : tuple of two (x, y, heading) tuples = None\n\nExplicit spawn points, overriding the auto-computed opposite-walls, facing-each-other default.\n\ncolors : tuple of two (str or None) = ('blue', 'red')\n\nPen colours for A and B, for telling them apart. Default (\"blue\", \"red\").\n\nspeed : int = 6\n\nTurtle drawing speed. Default 6.\n\nshow_scoreboard : bool = True\n\nIf True (default), write the outcome on the canvas when the duel ends.\n\nautoshow : bool = True\n\nPassed straight through to the internal turtles. Default True; pass False for headless use such as tests.",
+    "crumbs": [
+      "Games",
+      "run_gladiator"
+    ]
+  },
+  {
+    "objectID": "api/run_gladiator.html#returns",
+    "href": "api/run_gladiator.html#returns",
+    "title": "run_gladiator",
+    "section": "",
+    "text": ": GladiatorResult\n\nThe outcome – see its field descriptions for details.",
+    "crumbs": [
+      "Games",
+      "run_gladiator"
+    ]
+  },
+  {
+    "objectID": "api/run_gladiator.html#notes",
+    "href": "api/run_gladiator.html#notes",
+    "title": "run_gladiator",
+    "section": "",
+    "text": "Both turtles get on_collision(handler, walls=True, turtles=True). A wall hit (obstacle.kind == \"wall\") truncates that turtle’s move to the arena boundary – a wasted action – but does not end the duel; only obstacle.kind == \"turtle\" does. Neither turtle collides with drawn trail.",
+    "crumbs": [
+      "Games",
+      "run_gladiator"
     ]
   },
   {
@@ -118,8 +216,8 @@
     "objectID": "pages/demo.html#the-basics",
     "href": "pages/demo.html#the-basics",
     "title": "Showcase",
-    "section": "1. The basics",
-    "text": "1. The basics\nA turtle starts at the centre (0, 0) facing east (heading 0). forward/backward move it, left/right rotate it (degrees, counter-clockwise positive). Here’s a square.\n\nt = Turtle()\nt.speed(6)\nfor _ in range(4):\n    t.forward(120)\n    t.left(90)\n\n\n\n\n\nt = Turtle(show_code=True)\nt.speed(1)\ncolours = [\"red\", \"blue\", \"yellow\", \"brown\", \"black\", \"purple\", \"green\"]\n\nt.penup(); t.left(90); t.forward(200); t.right(90); t.pendown()\nfor i in range(0, 18):\n    t.pencolor(colours[i % 7])\n    t.right(20)\n    t.forward(50)\n\nt.right(180)\nt.home()",
+    "section": "The basics",
+    "text": "The basics\nA turtle starts at the centre (0, 0) facing east (heading 0). forward/backward move it, left/right rotate it (degrees, counter-clockwise positive). Here’s a square.\n\nt = Turtle()\nt.speed(6)\nfor _ in range(4):\n    t.forward(120)\n    t.left(90)\n\n\n\n\n\nt = Turtle(show_code=True)\nt.speed(1)\ncolours = [\"red\", \"blue\", \"yellow\", \"brown\", \"black\", \"purple\", \"green\"]\n\nt.penup(); t.left(90); t.forward(200); t.right(90); t.pendown()\nfor i in range(0, 18):\n    t.pencolor(colours[i % 7])\n    t.right(20)\n    t.forward(50)\n\nt.right(180)\nt.home()",
     "crumbs": [
       "Examples",
       "Showcase"
@@ -129,8 +227,8 @@
     "objectID": "pages/demo.html#synced-code-highlighting-show_codetrue",
     "href": "pages/demo.html#synced-code-highlighting-show_codetrue",
     "title": "Showcase",
-    "section": "2. Synced code highlighting (show_code=True)",
-    "text": "2. Synced code highlighting (show_code=True)\nWith show_code=True, the source appears on the right and the active line is highlighted as the animation reaches it.\n\nt = Turtle(show_code=True)\nt.speed(2)\nfor _ in range(4):\n    t.forward(120)\n    t.left(90)\n\n\n\n\n\nt = Turtle(show_code=True)\nt.speed(1)\ncolours = [\"red\", \"blue\", \"yellow\", \"brown\", \"black\", \"purple\", \"green\"]\n\nt.penup(); t.left(90); t.forward(200); t.right(90); t.pendown()\nfor i in range(0, 18):\n    t.pencolor(colours[i % 7])\n    t.right(20)\n    t.forward(50)\n\nt.right(180)\nt.home()",
+    "section": "Synced code highlighting (show_code=True)",
+    "text": "Synced code highlighting (show_code=True)\nWith show_code=True, the source appears on the right and the active line is highlighted as the animation reaches it.\n\nt = Turtle(show_code=True)\nt.speed(2)\nfor _ in range(4):\n    t.forward(120)\n    t.left(90)\n\n\n\n\n\nt = Turtle(show_code=True)\nt.speed(1)\ncolours = [\"red\", \"blue\", \"yellow\", \"brown\", \"black\", \"purple\", \"green\"]\n\nt.penup(); t.left(90); t.forward(200); t.right(90); t.pendown()\nfor i in range(0, 18):\n    t.pencolor(colours[i % 7])\n    t.right(20)\n    t.forward(50)\n\nt.right(180)\nt.home()",
     "crumbs": [
       "Examples",
       "Showcase"
@@ -140,8 +238,8 @@
     "objectID": "pages/demo.html#colors-pen-width-fills",
     "href": "pages/demo.html#colors-pen-width-fills",
     "title": "Showcase",
-    "section": "3. Colors, pen width & fills",
-    "text": "3. Colors, pen width & fills\nColours accept CSS names (\"gold\"), hex (\"#ff8800\"), or RGB tuples ((0.1, 0.5, 0.9) on the 0–1 scale, or (255, 128, 0) on the 0–255 scale). Wrap a path in begin_fill() / end_fill() to fill it — the fill lands behind the outline, just like real turtle.\n\nt = Turtle()\nt.speed(8)\nt.pensize(3)\nt.pencolor(\"#d2691e\")          # outline\nt.fillcolor((1.0, 0.84, 0.0))  # gold, on the 0-1 RGB scale\nt.begin_fill()\nfor _ in range(5):             # classic 5-point star\n    t.forward(220)\n    t.right(144)\nt.end_fill()",
+    "section": "Colors, pen width & fills",
+    "text": "Colors, pen width & fills\nColours accept CSS names (\"gold\"), hex (\"#ff8800\"), or RGB tuples ((0.1, 0.5, 0.9) on the 0–1 scale, or (255, 128, 0) on the 0–255 scale). Wrap a path in begin_fill() / end_fill() to fill it — the fill lands behind the outline, just like real turtle.\n\nt = Turtle()\nt.speed(8)\nt.pensize(3)\nt.pencolor(\"#d2691e\")          # outline\nt.fillcolor((1.0, 0.84, 0.0))  # gold, on the 0-1 RGB scale\nt.begin_fill()\nfor _ in range(5):             # classic 5-point star\n    t.forward(220)\n    t.right(144)\nt.end_fill()",
     "crumbs": [
       "Examples",
       "Showcase"
@@ -151,8 +249,8 @@
     "objectID": "pages/demo.html#circles-arcs",
     "href": "pages/demo.html#circles-arcs",
     "title": "Showcase",
-    "section": "4. Circles & arcs",
-    "text": "4. Circles & arcs\ncircle(radius) draws a full circle to the left of the turtle; a negative radius goes right. circle(radius, extent) draws only part of it. Stacking rotated circles gives a spirograph.\n\nt = Turtle()\nt.speed(10)\npalette = [\"crimson\", \"darkorange\", \"seagreen\", \"royalblue\", \"purple\", \"teal\"]\nfor i in range(12):\n    t.right(5)\n    for i in range(12):    \n        t.pencolor(palette[i % len(palette)])\n        t.circle(90)\n        t.right(30)",
+    "section": "Circles & arcs",
+    "text": "Circles & arcs\ncircle(radius) draws a full circle to the left of the turtle; a negative radius goes right. circle(radius, extent) draws only part of it. Stacking rotated circles gives a spirograph.\n\nt = Turtle()\nt.speed(10)\npalette = [\"crimson\", \"darkorange\", \"seagreen\", \"royalblue\", \"purple\", \"teal\"]\nfor i in range(12):\n    t.right(5)\n    for i in range(12):    \n        t.pencolor(palette[i % len(palette)])\n        t.circle(90)\n        t.right(30)",
     "crumbs": [
       "Examples",
       "Showcase"
@@ -162,8 +260,8 @@
     "objectID": "pages/demo.html#dots-stamps-text-jumps",
     "href": "pages/demo.html#dots-stamps-text-jumps",
     "title": "Showcase",
-    "section": "5. Dots, stamps, text & jumps",
-    "text": "5. Dots, stamps, text & jumps\npenup() / pendown() lift and drop the pen so you can jump without drawing. dot(size) plants a filled dot, stamp() leaves a copy of the turtle, and write(text) prints a label.\n\nt = Turtle(width=520, height=320)\nt.speed(7)\n\nt.penup(); t.goto(-210, 30); t.pendown()\nfor i, c in enumerate([\"red\", \"orange\", \"green\", \"blue\", \"purple\"]):\n    t.dot(16 + i * 8, c)\n    t.penup(); t.forward(90); t.pendown()\n\nt.penup(); t.goto(-210, 90); t.pendown()\nt.pencolor(\"black\")\nt.write(\"dots grow to the right\", font=(\"sans-serif\", 16, \"normal\"))\n\nt.penup(); t.goto(0, -70); t.setheading(60); t.pendown()\nt.pencolor(\"seagreen\")\nt.stamp()\n\n34",
+    "section": "Dots, stamps, text & jumps",
+    "text": "Dots, stamps, text & jumps\npenup() / pendown() lift and drop the pen so you can jump without drawing. dot(size) plants a filled dot, stamp() leaves a copy of the turtle, and write(text) prints a label.\n\nt = Turtle(width=520, height=320)\nt.speed(7)\n\nt.penup(); t.goto(-210, 30); t.pendown()\nfor i, c in enumerate([\"red\", \"orange\", \"green\", \"blue\", \"purple\"]):\n    t.dot(16 + i * 8, c)\n    t.penup(); t.forward(90); t.pendown()\n\nt.penup(); t.goto(-210, 90); t.pendown()\nt.pencolor(\"black\")\nt.write(\"dots grow to the right\", font=(\"sans-serif\", 16, \"normal\"))\n\nt.penup(); t.goto(0, -70); t.setheading(60); t.pendown()\nt.pencolor(\"seagreen\")\nt.stamp()\n\n34",
     "crumbs": [
       "Examples",
       "Showcase"
@@ -173,8 +271,8 @@
     "objectID": "pages/demo.html#speed-instant-mode",
     "href": "pages/demo.html#speed-instant-mode",
     "title": "Showcase",
-    "section": "6. Speed & instant mode",
-    "text": "6. Speed & instant mode\nspeed(1) is slowest, speed(10) is fastest, and speed(0) disables animation entirely — the whole drawing appears at once, which is handy for dense figures. (Word forms also work: \"slowest\", \"slow\", \"normal\", \"fast\", \"fastest\".)\n\nt = Turtle()\nt.speed(0)               # no animation: drawn instantly\n# t.speed(10)\nt.pencolor(\"teal\")\nt.pensize(1)\nfor _ in range(72):\n    t.forward(160)\n    t.left(175)          # a dense star spiral\nt.hideturtle()",
+    "section": "Speed & instant mode",
+    "text": "Speed & instant mode\nspeed(1) is slowest, speed(10) is fastest, and speed(0) disables animation entirely — the whole drawing appears at once, which is handy for dense figures. (Word forms also work: \"slowest\", \"slow\", \"normal\", \"fast\", \"fastest\".)\n\nt = Turtle()\nt.speed(0)               # no animation: drawn instantly\n# t.speed(10)\nt.pencolor(\"teal\")\nt.pensize(1)\nfor _ in range(72):\n    t.forward(160)\n    t.left(175)          # a dense star spiral\nt.hideturtle()",
     "crumbs": [
       "Examples",
       "Showcase"
@@ -184,8 +282,8 @@
     "objectID": "pages/demo.html#reading-turtle-state",
     "href": "pages/demo.html#reading-turtle-state",
     "title": "Showcase",
-    "section": "7. Reading turtle state",
-    "text": "7. Reading turtle state\nGetters return the current state without drawing anything: pos(), xcor(), ycor(), heading(), isdown(), isvisible(). (Use autoshow=False when you only want to inspect state and not render a widget.)\n\nprobe = Turtle(autoshow=False)\nprobe.forward(100); probe.left(90); probe.forward(50)\nprint(\"position:\", probe.pos())\nprint(\"heading :\", probe.heading())\nprint(\"pen down:\", probe.isdown())\n\nposition: (100.0, 50.0)\nheading : 90.0\npen down: True",
+    "section": "Reading turtle state",
+    "text": "Reading turtle state\nGetters return the current state without drawing anything: pos(), xcor(), ycor(), heading(), isdown(), isvisible(). (Use autoshow=False when you only want to inspect state and not render a widget.)\n\nprobe = Turtle(autoshow=False)\nprobe.forward(100); probe.left(90); probe.forward(50)\nprint(\"position:\", probe.pos())\nprint(\"heading :\", probe.heading())\nprint(\"pen down:\", probe.isdown())\n\nposition: (100.0, 50.0)\nheading : 90.0\npen down: True",
     "crumbs": [
       "Examples",
       "Showcase"
@@ -195,8 +293,8 @@
     "objectID": "pages/demo.html#sensing-obstacles",
     "href": "pages/demo.html#sensing-obstacles",
     "title": "Showcase",
-    "section": "8. Sensing obstacles",
-    "text": "8. Sensing obstacles\nThe turtle can sense obstacles: registered shapes (add_circle, add_rectangle, add_segment, add_polygon), its own drawn trail, and the canvas edges.\n\ndistance_ahead() casts a ray along the heading and returns the distance to the first obstacle (or None).\nsense(max_distance=...) returns every obstacle within range, nearest first, each with the distance and the signed angle (degrees, + = left) to its closest point.\nnearest() is just the closest one.\n\nPass draw=True to any of them to overlay the sensor rays on the canvas.\n\nfrom turtle_widget import Turtle\n\nt = Turtle()\nt.speed(5)\n\ndef on_hit(c): \n    t.penup(); t.goto(c.point); t.pencolor(\"red\");\n    t.right(180+2*c.angle, speed=0)\n    t.pendown();  \n    t.dot(15) \n    t.pencolor(\"black\")\n    t.forward(c.speed)\n \nt.on_collision(on_hit) \nt.add_circle(120, 60, 35)\nt.add_rectangle(-180, -120, -80, 60)\nt.add_segment(40, -160, 200, -40)\n# t.hide_obstacles()\n# t.show_obstacles()  \n\nfor i in range(300):\n    d = t.distance_ahead(draw=True, trail=False)\n    d.distance\n    for d in t.sense(max_distance=200, draw=True, color='gray'):\n        d.angle\n\n\n\n\n\nfrom turtle_widget import Turtle\n\n\nclass GameEnded(Exception):\n    ...\n    \n\n\ndef run_student_function(fun, salad):\n\n    def on_hit(c): \n\n        x, y = t.position()\n        assert -canvas_size/2 &lt; x &lt; canvas_size/2 and -canvas_size/2 &lt; y &lt; canvas_size/2\n\n        font = (\"sans-serif\", 20, \"normal\")\n        l = c.obstacle.label\n        if l == 'start':\n            return\n        if l == 'end' or t.total_movement &gt;= salad:\n            score = 'NA'\n            if l == 'end':\n                t.goto(canvas_size/2, canvas_size/2)\n                t.pencolor('green')\n                t.dot(2*size)\n                score = t.total_movement + t.nr_collisions + t.nr_right + t.nr_left + t.nr_distance_ahead + t.nr_sense\n\n            t.pencolor('black')\n\n            t.penup()\n            t.pencolor('white')\n            t.add_rectangle(-canvas_size/2, -canvas_size/2, canvas_size/2, canvas_size/2, color='white')\n            t.add_rectangle(-canvas_size/2, -canvas_size/2, canvas_size/2, canvas_size/2, color='white')\n            t.add_rectangle(-canvas_size/2, -canvas_size/2, canvas_size/2, canvas_size/2, color='white')\n            t.add_rectangle(-canvas_size/2, -canvas_size/2, canvas_size/2, canvas_size/2, color='white')\n            t.add_rectangle(-canvas_size/2, -canvas_size/2, canvas_size/2, canvas_size/2, color='white')\n            t.add_rectangle(-canvas_size/2, -canvas_size/2, canvas_size/2, canvas_size/2, color='white')\n            t.pencolor('black')\n\n            line_height = 25\n\n            y = 200    \n            t.goto(-canvas_size/2+20, y)\n            t.write(f\"Time: {t.duration():.3f}\", font=font)\n\n            y -= line_height\n            t.goto(-canvas_size/2+20, y)\n            t.write(f\"Moved: {t.total_movement:.3f}\", font=font)\n\n            y -= line_height\n            t.goto(-canvas_size/2+20, y)\n            t.write(f\"Turns: {t.nr_left + t.nr_right}\", font=font)\n\n            y -= line_height\n            t.goto(-canvas_size/2+20, y)\n            t.write(f\"Dist. ahead: {t.nr_distance_ahead}\", font=font)\n\n            y -= line_height\n            t.goto(-canvas_size/2+20, y)\n            t.write(f\"Sense: {t.nr_sense}\", font=font)\n\n            y -= line_height\n            t.goto(-canvas_size/2+20, y)\n            t.write(f\"Collisions: {t.nr_collisions}\", font=font)\n\n            y -= line_height\n            y -= line_height\n            t.goto(-canvas_size/2+20, y)\n            t.write(f\"Score: {score}\", font=font)\n\n            t.goto(-canvas_size/2+20, y-5)\n            t.pendown()\n            t.goto(-canvas_size/2+20+250, y-5, speed=0.7)\n            t.right(1000)\n\n            raise GameEnded\n\n        t.penup(); \n        t.goto(c.point); \n        t.right(180+2*c.angle, speed=0)\n        t.pendown();  \n        t.pencolor(\"magenta\");\n        t.dot(25) \n        t.pencolor(\"black\")\n        t.forward(c.speed)\n    \n\n    def obstacle_track(t, canvas_size, size, sep, visible=True):\n        c = canvas_size // 2\n        for i in range(-c-(size)//2, c, size+sep):\n            for j in range(-c-(size)//2, c, size+sep):\n                if i &lt; -c+size+sep and j &lt; -c+size+sep:\n                    continue\n                if i &gt; c-2*(size+sep) and j &gt; c-2*(size+sep):\n                    continue\n                t.add_rectangle(i, j, i+size, j+size, visible=visible)\n        t.add_circle(-250, -250, size, color='red', label='start',\n                    sense=False\n                    )\n        t.add_circle(250, 250, size, color='green', label='end', \n                    sense=False\n                    )\n\n    # obstacle_track(t, canvas_size, size, sep, visible=True)\n\n\n\n    canvas_size = 500\n\n\n    # size = 30\n    # sep = 80\n    size = 30\n    sep = 30\n    t = Turtle(canvas_size, home=(-240, -240))\n    t.home()\n    t.left(45, speed=0)\n\n    t.speed(5)\n\n    obstacle_track(t, canvas_size, size, sep, visible=True)\n    t.on_collision(on_hit) \n\n    try:\n        fun(t, salad)\n        t.forward(2*canvas_size)\n    except GameEnded as e:\n        pass\n\ndef student_function(t, salad):\n    while t.total_movement &lt;= salad:\n        # for d in t.sense(max_distance=30, draw=True, color='blue'):\n        #     d.angle\n        d = t.distance_ahead(draw=True, trail=False)\n        if d and d.distance &lt; 60:\n            if d.angle &lt; 0:\n                t.right(10)\n            else:\n                t.left(10)\n        t.forward(5)\n\nrun_student_function(student_function, salad=2000)\n\n\n\n\n\nfrom turtle_widget import Turtle\n\nt = Turtle()\nt.speed(3)\nt.add_circle(120, 0, 40)              # an obstacle dead ahead\n\ndef on_hit(c):                        # mark each contact; motion is unchanged\n    t.penup(); t.goto(c.point); t.pencolor(\"red\"); t.dot(30) \n    # t.left(160) ;\n    t.pencolor('none'); \n    t.forward(2000)\n    # t.goto(c.pos); t.pencolor(\"black\"); t.pendown()\n\nt.on_collision(on_hit)                # canvas edge included by default\nt.forward(4000)                        # zooms through the circle, then off the east edge\n#  The turtle drives straight across (unchanged), then red dots appear where it touched the\n#  circle and the canvas edge. Because you get .normal, a bounce handler is a few lines if\n#  you want one later.",
+    "section": "Sensing obstacles",
+    "text": "Sensing obstacles\nThe turtle can sense obstacles: registered shapes (add_circle, add_rectangle, add_segment, add_polygon), its own drawn trail, and the canvas edges.\n\ndistance_ahead() casts a ray along the heading and returns the distance to the first obstacle (or None).\nsense(max_distance=...) returns every obstacle within range, nearest first, each with the distance and the signed angle (degrees, + = left) to its closest point.\nnearest() is just the closest one.\n\nPass draw=True to any of them to overlay the sensor rays on the canvas.\n\nfrom turtle_widget import Turtle\n\nt = Turtle()\nt.speed(5)\n\ndef on_hit(c): \n    t.penup(); t.goto(c.point); t.pencolor(\"red\");\n    t.right(180+2*c.angle, speed=0)\n    t.pendown();  \n    t.dot(15) \n    t.pencolor(\"black\")\n    t.forward(c.speed)\n \nt.on_collision(on_hit) \nt.add_circle(120, 60, 35)\nt.add_rectangle(-180, -120, -80, 60)\nt.add_segment(40, -160, 200, -40)\n# t.hide_obstacles()\n# t.show_obstacles()  \n\nfor i in range(300):\n    d = t.distance_ahead(draw=True, trail=False)\n    d.distance\n    for d in t.sense(max_distance=200, draw=True, color='gray'):\n        d.angle",
     "crumbs": [
       "Examples",
       "Showcase"
@@ -206,8 +304,8 @@
     "objectID": "pages/demo.html#multiple-turtles",
     "href": "pages/demo.html#multiple-turtles",
     "title": "Showcase",
-    "section": "9. Multiple turtles",
-    "text": "9. Multiple turtles\nTwo or more turtles can share one canvas: t1.new_turtle(color=...) creates a turtle that draws on t1’s canvas instead of building one of its own. Each turtle keeps its own position, heading and pen, but they animate on one shared timeline, taking turns in the order their commands run.\n\nt1 = Turtle()\nt1.speed(6)\nt2 = t1.new_turtle(color=\"red\")\n\nfor _ in range(4):\n    t1.forward(100)\n    t1.left(90)\n    t2.forward(60)\n    t2.left(90)\n\n\n\n\nBecause they share a canvas, two turtles can also build a single drawing together — here t2 mirrors every move t1 makes (same distance, the opposite turn), so the two independent paths combine into one symmetric star.\n\nt1 = Turtle()\nt1.speed(6)\nt2 = t1.new_turtle(color=\"deeppink\")\n\nfor _ in range(24):\n    t1.forward(80)\n    t1.left(150)\n    t2.forward(80)\n    t2.right(150)",
+    "section": "Multiple turtles",
+    "text": "Multiple turtles\nTwo or more turtles can share one canvas: t1.new_turtle(color=...) creates a turtle that draws on t1’s canvas instead of building one of its own. Each turtle keeps its own position, heading and pen, but they animate on one shared timeline, taking turns in the order their commands run.\n\nt1 = Turtle()\nt1.speed(6)\nt2 = t1.new_turtle(color=\"red\")\n\nfor _ in range(4):\n    t1.forward(100)\n    t1.left(90)\n    t2.forward(60)\n    t2.left(90)\n\n\n\n\nBecause they share a canvas, two turtles can also build a single drawing together — here t2 mirrors every move t1 makes (same distance, the opposite turn), so the two independent paths combine into one symmetric star.\n\nt1 = Turtle()\nt1.speed(6)\nt2 = t1.new_turtle(color=\"deeppink\")\n\nfor _ in range(24):\n    t1.forward(80)\n    t1.left(150)\n    t2.forward(80)\n    t2.right(150)",
     "crumbs": [
       "Examples",
       "Showcase"
@@ -217,8 +315,8 @@
     "objectID": "pages/demo.html#turtles-as-obstacles-hitbox",
     "href": "pages/demo.html#turtles-as-obstacles-hitbox",
     "title": "Showcase",
-    "section": "10. Turtles as obstacles (hitbox)",
-    "text": "10. Turtles as obstacles (hitbox)\nA turtle can opt in to being sensed and collided with by giving itself an invisible, circular hitbox(radius). It’s purely geometric — nothing is drawn — and it only affects how other turtles perceive this one; it has no effect on how this turtle senses or collides with ordinary obstacles, walls or its own trail.\n\nt1 = Turtle()\nt2 = t1.new_turtle(color=\"red\")\nt2.penup(); t2.goto(150, 60); t2.pendown()\nt2.hitbox(25)                  # invisible -- nothing is drawn for this\n\nfor d in t1.sense(draw=True, walls=False, trail=False):\n    print(d.kind, \"at distance\", round(d.distance, 1), \", bearing\", round(d.angle, 1))\n\nturtle at distance 136.6 , bearing 21.8\n\n\n\n\n\non_collision(..., turtles=True) treats other turtles’ hitboxes exactly like any other obstacle — the moving turtle stops right at the boundary and the handler fires, just like the obstacle-collision demo in section 8.\n\nt1 = Turtle()\nt1.speed(4)\nt2 = t1.new_turtle(color=\"red\")\nt2.penup(); t2.goto(200, 0); t2.pendown()\nt2.hitbox(30)                  # t1 will stop right at this invisible boundary\n\ndef on_hit(c):\n    t1.pencolor(\"green\"); t1.dot(20)\n    t1.write(\"  tagged!\", font=(\"sans-serif\", 14, \"normal\"))\n\nt1.on_collision(on_hit, walls=False, turtles=True)\nt1.forward(400)",
+    "section": "Turtles as obstacles (hitbox)",
+    "text": "Turtles as obstacles (hitbox)\nA turtle can opt in to being sensed and collided with by giving itself an invisible, circular hitbox(radius). It’s purely geometric — nothing is drawn — and it only affects how other turtles perceive this one; it has no effect on how this turtle senses or collides with ordinary obstacles, walls or its own trail.\n\nt1 = Turtle()\nt2 = t1.new_turtle(color=\"red\")\nt2.penup(); t2.goto(150, 60); t2.pendown()\nt2.hitbox(10)                  # invisible -- nothing is drawn for this\n\nfor d in t1.sense(draw=True, walls=False, trail=False):\n    print(d.kind, \"at distance\", round(d.distance, 1), \", bearing\", round(d.angle, 1))\n\nturtle at distance 151.6 , bearing 21.8\n\n\n\n\n\non_collision(..., turtles=True) treats other turtles’ hitboxes exactly like any other obstacle — the moving turtle stops right at the boundary and the handler fires, just like the obstacle-collision demo in section 8.\n\nt1 = Turtle()\nt1.speed(4)\nt2 = t1.new_turtle(color=\"red\")\nt2.penup(); t2.goto(100, 0); t2.pendown()\nt2.hitbox(30)                  # t1 will stop right at this invisible boundary\n\ndef on_hit(c):\n    t1.pencolor(\"green\"); t1.dot(20)\n    t1.write(\"Tagged!\", font=(\"sans-serif\", 30, \"normal\"))\n\nt1.on_collision(on_hit, walls=False, turtles=True)\nt1.forward(400)",
     "crumbs": [
       "Examples",
       "Showcase"
@@ -228,8 +326,41 @@
     "objectID": "pages/demo.html#self-test-headless",
     "href": "pages/demo.html#self-test-headless",
     "title": "Showcase",
-    "section": "11. Self-test (headless)",
-    "text": "11. Self-test (headless)\nGeometry is computed in Python, so it can be validated without a browser. This cell asserts a few invariants and checks the event stream is JSON-serializable (which is what gets sent to the frontend).\n\nimport json\nfrom turtle_widget import Turtle\n\n# movement + heading\nt = Turtle(autoshow=False)\nt.forward(100); t.left(90); t.forward(100)\nassert abs(t.xcor() - 100) &lt; 1e-9, t.xcor()\nassert abs(t.ycor() - 100) &lt; 1e-9, t.ycor()\nassert round(t.heading() % 360, 6) == 90\n\n# home returns to origin, heading 0\nt.home()\nassert abs(t.xcor()) &lt; 1e-9 and abs(t.ycor()) &lt; 1e-9\nassert round(t.heading() % 360, 6) == 0\n\n# circle returns (approximately) to its start\nc = Turtle(autoshow=False)\nc.begin_fill(); c.circle(60); c.end_fill()\nassert abs(c.xcor()) &lt; 1e-6 and abs(c.ycor()) &lt; 1e-6\nassert any(e[\"op\"] == \"fill\" for e in c._events)\n\n# every event is JSON-serializable and carries a source line + speed\npayload = json.dumps(t._events)\nassert all(\"line\" in e and \"speed\" in e for e in t._events)\n\nprint(\"All self-tests passed.\")\nprint(\"square+home events:\", len(t._events), \"| circle events:\", len(c._events))\n\nAll self-tests passed.\nsquare+home events: 5 | circle events: 23",
+    "section": "Self-test (headless)",
+    "text": "Self-test (headless)\nGeometry is computed in Python, so it can be validated without a browser. This cell asserts a few invariants and checks the event stream is JSON-serializable (which is what gets sent to the frontend).\n\nimport json\nfrom turtle_widget import Turtle\n\n# movement + heading\nt = Turtle(autoshow=False)\nt.forward(100); t.left(90); t.forward(100)\nassert abs(t.xcor() - 100) &lt; 1e-9, t.xcor()\nassert abs(t.ycor() - 100) &lt; 1e-9, t.ycor()\nassert round(t.heading() % 360, 6) == 90\n\n# home returns to origin, heading 0\nt.home()\nassert abs(t.xcor()) &lt; 1e-9 and abs(t.ycor()) &lt; 1e-9\nassert round(t.heading() % 360, 6) == 0\n\n# circle returns (approximately) to its start\nc = Turtle(autoshow=False)\nc.begin_fill(); c.circle(60); c.end_fill()\nassert abs(c.xcor()) &lt; 1e-6 and abs(c.ycor()) &lt; 1e-6\nassert any(e[\"op\"] == \"fill\" for e in c._events)\n\n# every event is JSON-serializable and carries a source line + speed\npayload = json.dumps(t._events)\nassert all(\"line\" in e and \"speed\" in e for e in t._events)\n\nprint(\"All self-tests passed.\")\nprint(\"square+home events:\", len(t._events), \"| circle events:\", len(c._events))\n\nAll self-tests passed.\nsquare+home events: 5 | circle events: 23",
+    "crumbs": [
+      "Examples",
+      "Showcase"
+    ]
+  },
+  {
+    "objectID": "pages/demo.html#reacting-to-a-single-collision",
+    "href": "pages/demo.html#reacting-to-a-single-collision",
+    "title": "Showcase",
+    "section": "Reacting to a single collision",
+    "text": "Reacting to a single collision\n\nfrom turtle_widget import Turtle\n\nt = Turtle()\nt.speed(3)\nt.add_circle(120, 0, 40)              # an obstacle dead ahead\n\ndef on_hit(c):                        # mark each contact; motion is unchanged\n    t.penup(); t.goto(c.point); t.pencolor(\"red\"); t.dot(30) \n    # t.left(160) ;\n    t.pencolor('none'); \n    t.forward(2000)\n    # t.goto(c.pos); t.pencolor(\"black\"); t.pendown()\n\nt.on_collision(on_hit)                # canvas edge included by default\nt.forward(4000)                        # zooms through the circle, then off the east edge\n#  The turtle drives straight across (unchanged), then red dots appear where it touched the\n#  circle and the canvas edge. Because you get .normal, a bounce handler is a few lines if\n#  you want one later.",
+    "crumbs": [
+      "Examples",
+      "Showcase"
+    ]
+  },
+  {
+    "objectID": "pages/demo.html#obstacles-course",
+    "href": "pages/demo.html#obstacles-course",
+    "title": "Showcase",
+    "section": "Obstacles course",
+    "text": "Obstacles course\nrun_obstacle_course is a ready-made game harness: it builds a maze of small square obstacles between a red start marker and a green end marker, spawns a turtle at start facing the exit, and hands control to a student-supplied strategy(turtle, move_budget) function. The turtle senses/bounces its way through; the harness ends the game the instant it reaches end (recording a score) or exceeds move_budget (a loss), and always returns an ObstacleCourseResult.\nThe baseline strategy below reacts only to whatever obstacle is directly ahead — it isn’t steering toward the exit at all, just avoiding whatever’s nearest. It happens to find its way out here, but it’s not a robust strategy (a different maze layout could easily strand it): it’s a starting point for a student to improve on, not a solution.\n\nfrom turtle_widget import run_obstacle_course\n\ndef hug_the_walls(t, move_budget):\n    while t.total_movement &lt;= move_budget:\n        d = t.distance_ahead(draw=True, trail=False)\n        if d and d.distance &lt; 60:\n            t.right(10) if d.angle &lt; 0 else t.left(10)\n        t.forward(5)\n\nresult = run_obstacle_course(hug_the_walls, move_budget=2000)\nresult.won, result.reason, result.score\n\n(True, 'reached_end', 893.1549771116245)",
+    "crumbs": [
+      "Examples",
+      "Showcase"
+    ]
+  },
+  {
+    "objectID": "pages/demo.html#gladiator-duel",
+    "href": "pages/demo.html#gladiator-duel",
+    "title": "Showcase",
+    "section": "Gladiator duel",
+    "text": "Gladiator duel\nrun_gladiator pits two student strategies against each other on one shared canvas. Each strategy(me, opponent) performs one bounded action per call — sense, maybe turn, move a step — and the harness alternates turns, calling A then B, round after round, checking after every call whether the mover’s hitbox rammed the other turtle. First to ram wins; running out of max_rounds first is a draw.\n\nfrom turtle_widget import run_gladiator\n\ndef charge(me, opponent):\n    d = me.distance_ahead(turtles=True, walls=False)\n    if d and d.angle:\n        (me.left if d.angle &gt; 0 else me.right)(min(abs(d.angle), 15))\n    me.forward(10)\n\ndef hold_still(me, opponent):\n    pass\n\nresult = run_gladiator(charge, hold_still)\nresult.winner, result.reason, result.rounds\n\n('a', 'ram', 37)",
     "crumbs": [
       "Examples",
       "Showcase"

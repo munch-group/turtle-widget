@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>index – turtle-widget</title>
+<title>run_obstacle_course – turtle-widget</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -26,6 +26,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -36,7 +71,8 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../api/Turtle.html" rel="next">
+<link href="../api/run_gladiator.html" rel="next">
+<link href="../api/Turtle.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -119,7 +155,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api/index.html">Function reference</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api/run_obstacle_course.html">Games</a></li><li class="breadcrumb-item"><a href="../api/run_obstacle_course.html">run_obstacle_course</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -133,7 +169,7 @@ ul.task-list li input[type="checkbox"] {
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../api/index.html" class="sidebar-item-text sidebar-link active">
+  <a href="../api/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Function reference</span></a>
   </div>
 </li>
@@ -165,7 +201,7 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../api/run_obstacle_course.html" class="sidebar-item-text sidebar-link">
+  <a href="../api/run_obstacle_course.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">run_obstacle_course</span></a>
   </div>
 </li>
@@ -187,49 +223,105 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#function-reference" id="toc-function-reference" class="nav-link active" data-scroll-target="#function-reference">Function reference</a>
+  <li><a href="#turtle_widget.run_obstacle_course" id="toc-turtle_widget.run_obstacle_course" class="nav-link active" data-scroll-target="#turtle_widget.run_obstacle_course">run_obstacle_course</a>
   <ul class="collapse">
-  <li><a href="#widget" id="toc-widget" class="nav-link" data-scroll-target="#widget">Widget</a></li>
-  <li><a href="#games" id="toc-games" class="nav-link" data-scroll-target="#games">Games</a></li>
+  <li><a href="#parameters" id="toc-parameters" class="nav-link" data-scroll-target="#parameters">Parameters</a></li>
+  <li><a href="#returns" id="toc-returns" class="nav-link" data-scroll-target="#returns">Returns</a></li>
+  <li><a href="#notes" id="toc-notes" class="nav-link" data-scroll-target="#notes">Notes</a></li>
   </ul></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api/run_obstacle_course.html">Games</a></li><li class="breadcrumb-item"><a href="../api/run_obstacle_course.html">run_obstacle_course</a></li></ol></nav></header>
 
 
 
 
-<section id="function-reference" class="level1 doc doc-index">
-<h1 class="doc doc-index">Function reference</h1>
-<section id="widget" class="level2">
-<h2 class="anchored" data-anchor-id="widget">Widget</h2>
-<p>The animated turtle-graphics drawing widget.</p>
-<table class="caption-top table">
-<tbody>
-<tr class="odd">
-<td><a href="../api/Turtle.html#turtle_widget.Turtle">Turtle</a></td>
-<td>An animated, turtle-compatible drawing widget for Jupyter notebooks.</td>
-</tr>
-</tbody>
-</table>
+<section id="turtle_widget.run_obstacle_course" class="level1">
+<h1>run_obstacle_course</h1>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>turtle_widget.run_obstacle_course(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    strategy,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    move_budget<span class="op">=</span><span class="dv">2000</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    canvas_size<span class="op">=</span><span class="dv">500</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    obstacle_size<span class="op">=</span><span class="dv">30</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    obstacle_sep<span class="op">=</span><span class="dv">30</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    maze<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    start<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    end<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    home<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    speed<span class="op">=</span><span class="dv">5</span>,</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    show_scoreboard<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    autoshow<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Run a maze-navigation game and return the outcome.</p>
+<p>Builds a canvas with a red <strong>start</strong> marker, a green <strong>end</strong> marker, and (unless <code>maze=False</code>) a grid of small square obstacles between them, spawns a turtle at <code>start</code> facing <code>end</code>, and hands control to <code>strategy</code>. The game ends the instant the turtle reaches <code>end</code> (a win) or its total movement exceeds <code>move_budget</code> (a loss); either way <code>run_obstacle_course</code> returns a :class:<code>ObstacleCourseResult</code>.</p>
+<section id="parameters" class="level2 doc-section doc-section-parameters">
+<h2 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h2>
+<dl>
+<dt><code><span class="parameter-name"><strong>strategy</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#callable">callable</a></span></code></dt>
+<dd>
+<p>Called once as <code>strategy(turtle, move_budget)</code>. Typically a loop that drives the turtle with ordinary commands (<code>forward</code>, <code>left</code>/<code>right</code>, <code>distance_ahead</code>, <code>sense</code>, …) until it reaches <code>end</code> or gives up.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>move_budget</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">2000</span></code></dt>
+<dd>
+<p>Movement cap (turtle units), passed through to <code>strategy</code> as a hint and also enforced by the harness itself – so even a non-terminating strategy (e.g.&nbsp;<code>while True: ...</code>) is safely stopped once it crosses this cap. Default 2000.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>canvas_size</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#int">int</a></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">500</span></code></dt>
+<dd>
+<p>Side length of the (square) canvas. Default 500.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>obstacle_size</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">30</span></code></dt>
+<dd>
+<p>Size of each maze cell and the gap between cells. Default 30, 30.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>obstacle_sep</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">30</span></code></dt>
+<dd>
+<p>Size of each maze cell and the gap between cells. Default 30, 30.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>maze</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#bool">bool</a></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">True</span></code></dt>
+<dd>
+<p>If True (default), fill the arena with a grid of square obstacles between start and end. If False, only the start/end markers and the canvas edges are present – a gentle first exercise, and a deterministic setup for tests.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>start</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation">tuple of float</span> <span class="parameter-default-sep">=</span> <span class="parameter-default">None</span></code></dt>
+<dd>
+<p>Centres of the start/end markers. Default to opposite corners of the canvas.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>end</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation">tuple of float</span> <span class="parameter-default-sep">=</span> <span class="parameter-default">None</span></code></dt>
+<dd>
+<p>Centres of the start/end markers. Default to opposite corners of the canvas.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>home</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation">tuple of float</span> <span class="parameter-default-sep">=</span> <span class="parameter-default">None</span></code></dt>
+<dd>
+<p>Where the turtle spawns, as <code>(x, y, heading)</code>. Defaults to a point a short, fixed distance in from <code>start</code>, facing <code>end</code> – close enough that, with the default <code>obstacle_size</code>, it lands inside the start marker itself; the turtle’s first move harmlessly exits through it (see Notes).</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>speed</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#int">int</a></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">5</span></code></dt>
+<dd>
+<p>Turtle drawing speed. Default 5.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>show_scoreboard</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#bool">bool</a></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">True</span></code></dt>
+<dd>
+<p>If True (default), clear the drawn trail (the maze obstacles stay visible) and write a summary on the canvas when the game ends. Set False for silent/headless runs.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>autoshow</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#bool">bool</a></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">True</span></code></dt>
+<dd>
+<p>Passed straight through to the internal <code>Turtle</code>. Default True; pass False for headless use such as tests.</p>
+</dd>
+</dl>
 </section>
-<section id="games" class="level2">
-<h2 class="anchored" data-anchor-id="games">Games</h2>
-<p>Reusable game harnesses students drive with their own strategy functions.</p>
-<table class="caption-top table">
-<tbody>
-<tr class="odd">
-<td><a href="../api/run_obstacle_course.html#turtle_widget.run_obstacle_course">run_obstacle_course</a></td>
-<td>Run a maze-navigation game and return the outcome.</td>
-</tr>
-<tr class="even">
-<td><a href="../api/run_gladiator.html#turtle_widget.run_gladiator">run_gladiator</a></td>
-<td>Run a step-based, alternating gladiator duel and return the outcome.</td>
-</tr>
-</tbody>
-</table>
+<section id="returns" class="level2 doc-section doc-section-returns">
+<h2 class="doc-section doc-section-returns anchored" data-anchor-id="returns">Returns</h2>
+<dl>
+<dt><code><span class="parameter-name"></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><code>ObstacleCourseResult</code></span></code></dt>
+<dd>
+<p>The outcome – see its field descriptions for details.</p>
+</dd>
+</dl>
+</section>
+<section id="notes" class="level2 doc-section doc-section-notes">
+<h2 class="doc-section doc-section-notes anchored" data-anchor-id="notes">Notes</h2>
+<p>Start and end are registered with <code>sense=False</code> (invisible to <code>distance_ahead</code>/<code>sense</code>/<code>nearest</code>, so a strategy’s own sensing isn’t confused by the goal) but remain fully collidable – <code>on_collision</code> is never filtered by <code>sense</code>. The handler tells them apart from ordinary maze cells via <code>Collision.obstacle.label</code> (<code>"start"</code>/<code>"end"</code>/<code>None</code>); a <code>"start"</code> hit is ignored, so the turtle spawning inside it (the default <code>home</code>) is harmless. The score, set only on a win, is <code>total_movement + nr_collisions + nr_right + nr_left + nr_distance_ahead + nr_sense</code> – lower is better.</p>
 
 
 </section>
@@ -638,10 +730,13 @@ ul.task-list li input[type="checkbox"] {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
+      <a href="../api/Turtle.html" class="pagination-link" aria-label="Turtle">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Turtle</span>
+      </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../api/Turtle.html" class="pagination-link" aria-label="Turtle">
-        <span class="nav-page-text">Turtle</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../api/run_gladiator.html" class="pagination-link" aria-label="run_gladiator">
+        <span class="nav-page-text">run_gladiator</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

@@ -2,18 +2,26 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://munch-group.github.io/turtle-widget/pages/overview.html</loc>
-    <lastmod>2026-08-05T11:21:37.241Z</lastmod>
+    <lastmod>2026-08-08T12:48:25.953Z</lastmod>
   </url>
   <url>
     <loc>https://munch-group.github.io/turtle-widget/api/index.html</loc>
-    <lastmod>2026-08-05T11:21:37.235Z</lastmod>
+    <lastmod>2026-08-08T12:48:25.947Z</lastmod>
+  </url>
+  <url>
+    <loc>https://munch-group.github.io/turtle-widget/api/run_obstacle_course.html</loc>
+    <lastmod>2026-08-08T12:48:25.947Z</lastmod>
+  </url>
+  <url>
+    <loc>https://munch-group.github.io/turtle-widget/api/run_gladiator.html</loc>
+    <lastmod>2026-08-08T12:48:25.947Z</lastmod>
   </url>
   <url>
     <loc>https://munch-group.github.io/turtle-widget/api/Turtle.html</loc>
-    <lastmod>2026-08-05T11:21:37.234Z</lastmod>
+    <lastmod>2026-08-08T12:48:25.946Z</lastmod>
   </url>
   <url>
     <loc>https://munch-group.github.io/turtle-widget/pages/demo.html</loc>
-    <lastmod>2026-08-05T11:21:37.240Z</lastmod>
+    <lastmod>2026-08-08T12:48:25.953Z</lastmod>
   </url>
 </urlset>
