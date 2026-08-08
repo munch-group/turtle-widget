@@ -1,0 +1,86 @@
+# run_gladiator { #turtle_widget.run_gladiator }
+
+```python
+turtle_widget.run_gladiator(
+    strategy_a,
+    strategy_b,
+    *,
+    max_rounds=500,
+    canvas_size=500,
+    hitbox_radius=15,
+    arena_margin=60,
+    homes=None,
+    colors=('blue', 'red'),
+    speed=6,
+    show_scoreboard=True,
+    autoshow=True,
+)
+```
+
+Run a step-based, alternating gladiator duel and return the outcome.
+
+Two turtles share one canvas, spawned on opposite walls facing each other. Each
+round, ``strategy_a(a, b)`` is called, then ``strategy_b(b, a)`` -- each call
+should perform **one bounded action** (e.g. sense, maybe turn, move a short
+step), not loop to completion. After each call the harness checks whether that
+turtle's move rammed the other's ``hitbox``; the first to do so wins. Running out
+of ``max_rounds`` without a ram is a draw.
+
+## Parameters {.doc-section .doc-section-parameters}
+
+<code>[**strategy_a**]{.parameter-name} [:]{.parameter-annotation-sep} [[callable](`callable`)]{.parameter-annotation}</code>
+
+:   Each called as ``strategy(me, opponent)`` once per round.
+
+<code>[**strategy_b**]{.parameter-name} [:]{.parameter-annotation-sep} [[callable](`callable`)]{.parameter-annotation}</code>
+
+:   Each called as ``strategy(me, opponent)`` once per round.
+
+<code>[**max_rounds**]{.parameter-name} [:]{.parameter-annotation-sep} [[int](`int`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [500]{.parameter-default}</code>
+
+:   Round cap before a draw is declared. ``0`` ends immediately in a draw without calling either strategy -- useful for inspecting the initial arena. Default 500.
+
+<code>[**canvas_size**]{.parameter-name} [:]{.parameter-annotation-sep} [[int](`int`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [500]{.parameter-default}</code>
+
+:   Side length of the (square) shared canvas. Default 500.
+
+<code>[**hitbox_radius**]{.parameter-name} [:]{.parameter-annotation-sep} [[float](`float`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [15]{.parameter-default}</code>
+
+:   Collision radius for both turtles -- see :func:`Turtle.hitbox`. Default 15.
+
+<code>[**arena_margin**]{.parameter-name} [:]{.parameter-annotation-sep} [[float](`float`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [60]{.parameter-default}</code>
+
+:   Distance from each side wall to that turtle's default home, when ``homes`` is not given. Must satisfy ``0 < arena_margin < canvas_size / 2``. Default 60.
+
+<code>[**homes**]{.parameter-name} [:]{.parameter-annotation-sep} [tuple of two (x, y, heading) tuples]{.parameter-annotation} [ = ]{.parameter-default-sep} [None]{.parameter-default}</code>
+
+:   Explicit spawn points, overriding the auto-computed opposite-walls, facing-each-other default.
+
+<code>[**colors**]{.parameter-name} [:]{.parameter-annotation-sep} [tuple of two (str or None)]{.parameter-annotation} [ = ]{.parameter-default-sep} [(\'blue\', \'red\')]{.parameter-default}</code>
+
+:   Pen colours for A and B, for telling them apart. Default ``("blue", "red")``.
+
+<code>[**speed**]{.parameter-name} [:]{.parameter-annotation-sep} [[int](`int`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [6]{.parameter-default}</code>
+
+:   Turtle drawing speed. Default 6.
+
+<code>[**show_scoreboard**]{.parameter-name} [:]{.parameter-annotation-sep} [[bool](`bool`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [True]{.parameter-default}</code>
+
+:   If True (default), write the outcome on the canvas when the duel ends.
+
+<code>[**autoshow**]{.parameter-name} [:]{.parameter-annotation-sep} [[bool](`bool`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [True]{.parameter-default}</code>
+
+:   Passed straight through to the internal turtles. Default True; pass False for headless use such as tests.
+
+## Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[GladiatorResult](`turtle_widget.games.GladiatorResult`)]{.parameter-annotation}</code>
+
+:   The outcome -- see its field descriptions for details.
+
+## Notes {.doc-section .doc-section-notes}
+
+Both turtles get ``on_collision(handler, walls=True, turtles=True)``. A wall hit
+(``obstacle.kind == "wall"``) truncates that turtle's move to the arena boundary
+-- a wasted action -- but does **not** end the duel; only ``obstacle.kind ==
+"turtle"`` does. Neither turtle collides with drawn trail.

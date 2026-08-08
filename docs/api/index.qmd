@@ -8,3 +8,13 @@ The animated turtle-graphics drawing widget.
 | | |
 | --- | --- |
 | [Turtle](Turtle.qmd#turtle_widget.Turtle) | An animated, turtle-compatible drawing widget for Jupyter notebooks. |
+
+## Games
+
+Reusable game harnesses students drive with their own strategy functions.
+
+
+| | |
+| --- | --- |
+| [run_obstacle_course](run_obstacle_course.qmd#turtle_widget.run_obstacle_course) | Run a maze-navigation game and return the outcome. |
+| [run_gladiator](run_gladiator.qmd#turtle_widget.run_gladiator) | Run a step-based, alternating gladiator duel and return the outcome. |

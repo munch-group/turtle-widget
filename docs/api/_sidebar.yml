@@ -5,5 +5,9 @@ website:
     - contents:
       - api/Turtle.qmd
       section: Widget
+    - contents:
+      - api/run_obstacle_course.qmd
+      - api/run_gladiator.qmd
+      section: Games
     id: api
   - id: dummy-sidebar

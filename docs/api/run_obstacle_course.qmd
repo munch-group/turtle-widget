@@ -1,0 +1,95 @@
+# run_obstacle_course { #turtle_widget.run_obstacle_course }
+
+```python
+turtle_widget.run_obstacle_course(
+    strategy,
+    *,
+    move_budget=2000,
+    canvas_size=500,
+    obstacle_size=30,
+    obstacle_sep=30,
+    maze=True,
+    start=None,
+    end=None,
+    home=None,
+    speed=5,
+    show_scoreboard=True,
+    autoshow=True,
+)
+```
+
+Run a maze-navigation game and return the outcome.
+
+Builds a canvas with a red **start** marker, a green **end** marker, and (unless
+``maze=False``) a grid of small square obstacles between them, spawns a turtle at
+``start`` facing ``end``, and hands control to ``strategy``. The game ends the
+instant the turtle reaches ``end`` (a win) or its total movement exceeds
+``move_budget`` (a loss); either way ``run_obstacle_course`` returns a
+:class:`ObstacleCourseResult`.
+
+## Parameters {.doc-section .doc-section-parameters}
+
+<code>[**strategy**]{.parameter-name} [:]{.parameter-annotation-sep} [[callable](`callable`)]{.parameter-annotation}</code>
+
+:   Called once as ``strategy(turtle, move_budget)``. Typically a loop that drives the turtle with ordinary commands (``forward``, ``left``/``right``, ``distance_ahead``, ``sense``, ...) until it reaches ``end`` or gives up.
+
+<code>[**move_budget**]{.parameter-name} [:]{.parameter-annotation-sep} [[float](`float`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [2000]{.parameter-default}</code>
+
+:   Movement cap (turtle units), passed through to ``strategy`` as a hint and also enforced by the harness itself -- so even a non-terminating strategy (e.g. ``while True: ...``) is safely stopped once it crosses this cap. Default 2000.
+
+<code>[**canvas_size**]{.parameter-name} [:]{.parameter-annotation-sep} [[int](`int`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [500]{.parameter-default}</code>
+
+:   Side length of the (square) canvas. Default 500.
+
+<code>[**obstacle_size**]{.parameter-name} [:]{.parameter-annotation-sep} [[float](`float`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [30]{.parameter-default}</code>
+
+:   Size of each maze cell and the gap between cells. Default 30, 30.
+
+<code>[**obstacle_sep**]{.parameter-name} [:]{.parameter-annotation-sep} [[float](`float`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [30]{.parameter-default}</code>
+
+:   Size of each maze cell and the gap between cells. Default 30, 30.
+
+<code>[**maze**]{.parameter-name} [:]{.parameter-annotation-sep} [[bool](`bool`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [True]{.parameter-default}</code>
+
+:   If True (default), fill the arena with a grid of square obstacles between start and end. If False, only the start/end markers and the canvas edges are present -- a gentle first exercise, and a deterministic setup for tests.
+
+<code>[**start**]{.parameter-name} [:]{.parameter-annotation-sep} [tuple of float]{.parameter-annotation} [ = ]{.parameter-default-sep} [None]{.parameter-default}</code>
+
+:   Centres of the start/end markers. Default to opposite corners of the canvas.
+
+<code>[**end**]{.parameter-name} [:]{.parameter-annotation-sep} [tuple of float]{.parameter-annotation} [ = ]{.parameter-default-sep} [None]{.parameter-default}</code>
+
+:   Centres of the start/end markers. Default to opposite corners of the canvas.
+
+<code>[**home**]{.parameter-name} [:]{.parameter-annotation-sep} [tuple of float]{.parameter-annotation} [ = ]{.parameter-default-sep} [None]{.parameter-default}</code>
+
+:   Where the turtle spawns, as ``(x, y, heading)``. Defaults to a point a short, fixed distance in from ``start``, facing ``end`` -- close enough that, with the default ``obstacle_size``, it lands inside the start marker itself; the turtle's first move harmlessly exits through it (see Notes).
+
+<code>[**speed**]{.parameter-name} [:]{.parameter-annotation-sep} [[int](`int`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [5]{.parameter-default}</code>
+
+:   Turtle drawing speed. Default 5.
+
+<code>[**show_scoreboard**]{.parameter-name} [:]{.parameter-annotation-sep} [[bool](`bool`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [True]{.parameter-default}</code>
+
+:   If True (default), clear the drawn trail (the maze obstacles stay visible) and write a summary on the canvas when the game ends. Set False for silent/headless runs.
+
+<code>[**autoshow**]{.parameter-name} [:]{.parameter-annotation-sep} [[bool](`bool`)]{.parameter-annotation} [ = ]{.parameter-default-sep} [True]{.parameter-default}</code>
+
+:   Passed straight through to the internal ``Turtle``. Default True; pass False for headless use such as tests.
+
+## Returns {.doc-section .doc-section-returns}
+
+<code>[]{.parameter-name} [:]{.parameter-annotation-sep} [[ObstacleCourseResult](`turtle_widget.games.ObstacleCourseResult`)]{.parameter-annotation}</code>
+
+:   The outcome -- see its field descriptions for details.
+
+## Notes {.doc-section .doc-section-notes}
+
+Start and end are registered with ``sense=False`` (invisible to
+``distance_ahead``/``sense``/``nearest``, so a strategy's own sensing isn't
+confused by the goal) but remain fully collidable -- ``on_collision`` is never
+filtered by ``sense``. The handler tells them apart from ordinary maze cells via
+``Collision.obstacle.label`` (``"start"``/``"end"``/``None``); a ``"start"`` hit is
+ignored, so the turtle spawning inside it (the default ``home``) is harmless. The
+score, set only on a win, is ``total_movement + nr_collisions + nr_right +
+nr_left + nr_distance_ahead + nr_sense`` -- lower is better.

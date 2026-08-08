@@ -102,3 +102,7 @@ turtle_widget.Turtle.ycor py:function 1 api/Turtle.html#turtle_widget.Turtle.yco
 turtle_widget.widget.Turtle.ycor py:function 1 api/Turtle.html#turtle_widget.Turtle.ycor turtle_widget.Turtle.ycor
 turtle_widget.Turtle py:class 1 api/Turtle.html#turtle_widget.Turtle -
 turtle_widget.widget.Turtle py:class 1 api/Turtle.html#turtle_widget.Turtle turtle_widget.Turtle
+turtle_widget.run_obstacle_course py:function 1 api/run_obstacle_course.html#turtle_widget.run_obstacle_course -
+turtle_widget.games.run_obstacle_course py:function 1 api/run_obstacle_course.html#turtle_widget.run_obstacle_course turtle_widget.run_obstacle_course
+turtle_widget.run_gladiator py:function 1 api/run_gladiator.html#turtle_widget.run_gladiator -
+turtle_widget.games.run_gladiator py:function 1 api/run_gladiator.html#turtle_widget.run_gladiator turtle_widget.run_gladiator

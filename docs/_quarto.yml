@@ -151,3 +151,10 @@ quartodoc:
             - write
             - xcor
             - ycor
+
+    - title: Games
+      desc: |
+        Reusable game harnesses students drive with their own strategy functions.
+      contents:
+        - name: run_obstacle_course
+        - name: run_gladiator
